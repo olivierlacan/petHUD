@@ -433,7 +433,9 @@
     }
 
     if (k && k.sources && k.sources.length) html += sourcesRow(k.sources, "Learn more");
-    if (KB().disclaimer) html += '<div class="disclaimer">' + escapeHtml(KB().disclaimer) + "</div>";
+    // Only show the disclaimer when there's actual medical context above it,
+    // so metrics without context don't get an orphan notice before the chart.
+    if (k && KB().disclaimer) html += '<div class="disclaimer">' + escapeHtml(KB().disclaimer) + "</div>";
     return html;
   }
 
@@ -615,7 +617,7 @@
       side.appendChild(sc);
     }
     var dc = el("div", "sidecard");
-    dc.innerHTML = '<div class="disclaimer" style="margin:0;border:0;padding:0">' + escapeHtml(KB().disclaimer || "") + "</div>";
+    dc.innerHTML = '<div class="note-text">' + escapeHtml(KB().disclaimer || "") + "</div>";
     side.appendChild(dc);
     panels.appendChild(side);
     host.appendChild(panels);

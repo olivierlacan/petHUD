@@ -222,6 +222,40 @@
   function patientAnalytes() {
     return DATA.analytes.filter(function (a) { return a.patient_ids.indexOf(state.patientId) >= 0; });
   }
+  function lastNumeric(a) {
+    var n = numericSeries(seriesFor(a.id));
+    return n.length ? n[n.length - 1] : null;
+  }
+
+  // ---- knowledge base access ----------------------------------------------
+  // Rebuilt on every render so a live import refresh stays consistent.
+  var analyteByKey = {};
+  function buildIndexes() {
+    analyteByKey = {};
+    DATA.analytes.forEach(function (a) { analyteByKey[a.section + " / " + a.name] = a; });
+  }
+  function KB() { return DATA.knowledge || {}; }
+  function aKey(a) { return a.section + " / " + a.name; }
+  function kbAnalyte(a) { return (KB().analytes || {})[aKey(a)]; }
+  function kbSource(id) { return (KB().sources || {})[id]; }
+  function relatedEdges(key) {
+    return (KB().relationships || []).filter(function (e) {
+      return e.between && e.between.indexOf(key) >= 0;
+    }).map(function (e) {
+      var other = e.between[0] === key ? e.between[1] : e.between[0];
+      return { key: other, reason: e.reason, source: e.source };
+    });
+  }
+  // Pick the staging band a value falls in (band with the greatest min ≤ v).
+  function stageFor(v, bands) {
+    if (v == null) return null;
+    var best = null;
+    bands.forEach(function (b) {
+      var lo = b.min != null ? b.min : -Infinity;
+      if (v >= lo) best = b;
+    });
+    return best;
+  }
 
   // ---- trends view --------------------------------------------------------
 
@@ -306,6 +340,7 @@
         '<div class="card-foot"><span>qualitative</span><span>' + qs.length + " obs</span></div>";
     }
 
+    if (kbAnalyte(a)) c.appendChild(el("span", "kbadge", "&#9432;")); // ⓘ: sourced context available
     c.addEventListener("click", function () { openDetail(a.id); });
     return c;
   }
@@ -342,10 +377,74 @@
       chartHtml = "";
     }
 
-    body.innerHTML = head + sub + chartHtml + detailTable(pts, a);
+    body.innerHTML = head + sub + contextPanel(a, num) + chartHtml + detailTable(pts, a);
     $("#detail").hidden = false;
 
+    // related-metric chips navigate to that metric's detail
+    body.querySelectorAll(".chip[data-go]").forEach(function (ch) {
+      ch.addEventListener("click", function () { openDetail(+ch.getAttribute("data-go")); });
+    });
+
     if (a.numeric && num.length) attachHover(body.querySelector("svg.bigchart"), num, a);
+  }
+
+  // Sourced clinical context shown above the chart. Conservative + cited; the
+  // "interpret in isolation" caveat is highlighted whenever the latest value is
+  // out of range, because that's exactly when over-reading one number is a risk.
+  function contextPanel(a, num) {
+    var k = kbAnalyte(a);
+    var latest = num && num.length ? num[num.length - 1] : null;
+    var fl = latest ? flagOf(latest) : "ok";
+    var html = "";
+
+    if (k) {
+      html += '<div class="context">';
+      if (k.summary) html += "<p>" + escapeHtml(k.summary) + "</p>";
+      var meaning = fl === "H" ? k.high : fl === "L" ? k.low : null;
+      if (meaning) {
+        html += '<p class="meaning"><b>' + (fl === "H" ? "Elevated" : "Low") + ":</b> " + escapeHtml(meaning) + "</p>";
+      }
+      if (k.isolation) {
+        if (fl !== "ok") {
+          html += '<div class="isolation"><span class="ic">⚠</span><span class="tx"><b>Read in context.</b> ' +
+            escapeHtml(k.isolation) + "</span></div>";
+        } else {
+          html += '<p class="meaning" style="font-size:12px">' + escapeHtml(k.isolation) + "</p>";
+        }
+      }
+      html += "</div>";
+    }
+
+    var rel = relatedEdges(aKey(a)).filter(function (r) {
+      var o = analyteByKey[r.key];
+      return o && o.patient_ids.indexOf(state.patientId) >= 0;
+    });
+    if (rel.length) {
+      html += '<div class="related"><div class="lbl">Related metrics — read together</div><div class="chips">';
+      rel.forEach(function (r) {
+        var o = analyteByKey[r.key];
+        var col = SECTION_COLOR[o.section] || "#8b949e";
+        var op = lastNumeric(o);
+        var ofl = op ? flagOf(op) : "ok";
+        html += '<span class="chip flag-' + ofl + '" data-go="' + o.id + '" title="' + escapeHtml(r.reason) + '">' +
+          '<span class="cdot" style="background:' + col + '"></span>' + escapeHtml(o.name) + "</span>";
+      });
+      html += "</div></div>";
+    }
+
+    if (k && k.sources && k.sources.length) html += sourcesRow(k.sources, "Learn more");
+    if (KB().disclaimer) html += '<div class="disclaimer">' + escapeHtml(KB().disclaimer) + "</div>";
+    return html;
+  }
+
+  function sourcesRow(ids, label) {
+    var links = ids.map(function (id) {
+      var s = kbSource(id);
+      if (!s) return "";
+      return '<a class="src-link" href="' + s.url + '" target="_blank" rel="noopener">' +
+        escapeHtml(s.name) + '<span class="tier">' + escapeHtml(s.tier || "") + "</span></a>";
+    }).join("");
+    return '<div class="sources-row"><div class="lbl">' + (label || "Sources") + '</div><div class="links">' + links + "</div></div>";
   }
 
   function detailTable(pts, a) {
@@ -458,6 +557,97 @@
     return c;
   }
 
+  // ---- conditions view ----------------------------------------------------
+
+  function renderConditions() {
+    var host = $("#conditions");
+    host.innerHTML = "";
+    var conds = KB().conditions || [];
+    if (!conds.length) { host.appendChild(el("div", "empty", "No condition data available.")); return; }
+    if (!state.conditionSlug || !conds.some(function (c) { return c.slug === state.conditionSlug; })) {
+      state.conditionSlug = conds[0].slug;
+    }
+
+    var tabs = el("div", "cond-tabs");
+    conds.forEach(function (c) {
+      var b = el("button", "cond-tab" + (c.slug === state.conditionSlug ? " active" : ""), escapeHtml(c.name));
+      b.addEventListener("click", function () { state.conditionSlug = c.slug; renderConditions(); });
+      tabs.appendChild(b);
+    });
+    host.appendChild(tabs);
+
+    var cond = conds.find(function (c) { return c.slug === state.conditionSlug; });
+    var head = el("div", "cond-head");
+    head.innerHTML = "<h2>" + escapeHtml(cond.name) + '</h2><div class="summary">' + escapeHtml(cond.summary || "") + "</div>";
+    host.appendChild(head);
+
+    var panels = el("div", "cond-panels");
+    var left = el("div", "");
+    if (cond.staging) left.appendChild(stagingBlock(cond));
+
+    var grid = el("div", "grid");
+    var shown = 0;
+    (cond.metrics || []).forEach(function (m) {
+      var a = analyteByKey[m.analyte];
+      if (!a || a.patient_ids.indexOf(state.patientId) < 0) return;
+      shown++;
+      var c = card({ a: a, pts: seriesFor(a.id), num: numericSeries(seriesFor(a.id)) });
+      if (m.role) c.appendChild(el("div", "role", escapeHtml(m.role)));
+      grid.appendChild(c);
+    });
+    if (!shown) grid.appendChild(el("div", "empty", "None of this panel's metrics are present for this patient."));
+    left.appendChild(grid);
+    panels.appendChild(left);
+
+    var side = el("div", "cond-side");
+    if (cond.missing_markers && cond.missing_markers.length) {
+      var mc = el("div", "sidecard");
+      mc.innerHTML = "<h4>Not in these reports</h4><ul>" +
+        cond.missing_markers.map(function (x) { return "<li>" + escapeHtml(x) + "</li>"; }).join("") + "</ul>";
+      side.appendChild(mc);
+    }
+    if (cond.sources && cond.sources.length) {
+      var sc = el("div", "sidecard");
+      sc.innerHTML = "<h4>Learn more</h4>" + cond.sources.map(function (id) {
+        var s = kbSource(id);
+        return s ? '<a class="src-link" href="' + s.url + '" target="_blank" rel="noopener">' + escapeHtml(s.name) + "</a>" : "";
+      }).join("");
+      side.appendChild(sc);
+    }
+    var dc = el("div", "sidecard");
+    dc.innerHTML = '<div class="disclaimer" style="margin:0;border:0;padding:0">' + escapeHtml(KB().disclaimer || "") + "</div>";
+    side.appendChild(dc);
+    panels.appendChild(side);
+    host.appendChild(panels);
+  }
+
+  // IRIS staging orientation strip for the CKD panel (creatinine + SDMA).
+  function stagingBlock(cond) {
+    var st = cond.staging;
+    var box = el("div", "sidecard");
+    var html = '<h4>IRIS staging orientation</h4><div class="staging">';
+    [["creatinine", "Chemistry / Creatinine", "Creat"], ["sdma", "Chemistry / IDEXX SDMA", "SDMA"]].forEach(function (row) {
+      var spec = st[row[0]];
+      if (!spec) return;
+      var a = analyteByKey[row[1]];
+      var latest = a ? lastNumeric(a) : null;
+      var here = latest ? stageFor(latest.value, spec.bands) : null;
+      html += '<div class="srow"><span class="name">' + row[2] + '</span><div class="stage-bar">';
+      spec.bands.forEach(function (b) {
+        var on = here && here.stage === b.stage;
+        html += '<div class="stage-seg' + (on ? " here" : "") + '" title="Stage ' + b.stage + (b.label ? " — " + b.label : "") + '">' + b.stage + "</div>";
+      });
+      html += "</div></div>";
+      if (latest) {
+        html += '<div class="note latest">Latest ' + fmtNum(latest.value) + " " + spec.unit +
+          (here ? " → Stage " + here.stage + (here.label ? " (" + here.label + ")" : "") : "") + "</div>";
+      }
+    });
+    html += '<div class="note">' + escapeHtml(st.note || "") + "</div></div>";
+    box.innerHTML = html;
+    return box;
+  }
+
   // ---- sidebar / chrome ---------------------------------------------------
 
   function renderSidebar() {
@@ -501,10 +691,13 @@
   }
 
   function renderAll() {
+    buildIndexes();
     renderPatientSelect();
     renderSidebar();
-    if (state.view === "trends") { $("#trends").hidden = false; $("#reports").hidden = true; renderTrends(); }
-    else { $("#trends").hidden = true; $("#reports").hidden = false; renderReports(); }
+    ["trends", "conditions", "reports"].forEach(function (v) { $("#" + v).hidden = v !== state.view; });
+    if (state.view === "trends") renderTrends();
+    else if (state.view === "conditions") renderConditions();
+    else renderReports();
   }
 
   // ---- events -------------------------------------------------------------
@@ -633,13 +826,19 @@
   function applyHash() {
     var h = (location.hash || "").replace(/^#/, "");
     if (!h) return;
-    if (h === "reports" || h === "trends") {
+    if (h === "reports" || h === "trends" || h === "conditions") {
       state.view = h;
       Array.prototype.forEach.call($("#view-toggle").children, function (b) {
         b.classList.toggle("active", b.getAttribute("data-view") === h);
       });
     } else if (/^a=(\d+)$/.test(h)) {
       state.openAnalyte = +RegExp.$1;
+    } else if (/^c=([a-z0-9-]+)$/.test(h)) {
+      state.view = "conditions";
+      state.conditionSlug = RegExp.$1;
+      Array.prototype.forEach.call($("#view-toggle").children, function (b) {
+        b.classList.toggle("active", b.getAttribute("data-view") === "conditions");
+      });
     }
   }
 

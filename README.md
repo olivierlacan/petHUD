@@ -25,6 +25,9 @@ where not every report contains every section.
 - **Visualizes** trends: a dense small-multiples grid of sparklines with
   reference bands, flag coloring, deltas, a detail chart with hover, and a
   per-report "out of range" summary.
+- **Explains** results: sourced, conservative clinical context above each
+  metric's chart, related-metric links, and disease-specific panels (see
+  [Medical context](#medical-context)).
 - **Imports** new reports by drag-and-drop in the browser (when served) or via
   the CLI.
 
@@ -52,6 +55,7 @@ bin/pethud export                          # rebuild all JSON + web/data.js
 bin/pethud list patients                   # corpus overview
 bin/pethud list reports
 bin/pethud list analytes
+bin/pethud knowledge                       # validate the medical-context config
 bin/pethud serve --port 8787 --open        # local viewer + drag-drop import
 bin/pethud reset --force                   # delete the database + exports
 ```
@@ -81,6 +85,55 @@ Viewer features:
 - **Reports** — one card per visit listing every out-of-range value.
 - Filters: section toggles (sidebar), analyte search, "out of range only",
   patient selector. Deep links: `#reports`, `#a=<analyteId>`.
+
+## Medical context
+
+The viewer can show educational context for disease-relevant metrics. **This is
+not veterinary advice or a diagnosis** — a disclaimer says so on every medical
+surface, and the goal is to help you read trends and ask better questions.
+
+What you get:
+
+- **Per-metric context** above the chart: a plain-language summary, what an
+  elevated/low result *may* mean, and — highlighted when the value is out of
+  range — an "interpret in isolation" caveat (many abnormals only matter
+  alongside related values). Each carries "Learn more" links to the cited
+  sources.
+- **Related metrics**: clickable chips for the values that should be read
+  together (color-coded by whether they're also out of range), built from an
+  explicit relationship graph.
+- **Conditions view**: focused panels for **Chronic Kidney Disease**,
+  **Hyperthyroidism**, **Heart Disease (HCM screening)**, and **IBD / Small
+  Cell Lymphoma**. Each shows only that condition's metrics, names the markers
+  *not* in your reports (e.g. cobalamin/folate, blood pressure), and — for CKD —
+  an IRIS staging orientation for the latest creatinine/SDMA.
+
+### Auditability
+
+All of this lives in flat, citation-bearing config under `config/knowledge/` —
+no medical logic is buried in code:
+
+| file               | contents                                                   |
+| ------------------ | ---------------------------------------------------------- |
+| `sources.yml`      | every cited source (name, publisher, tier, URL)            |
+| `analytes.yml`     | per-metric context, each line citing source ids            |
+| `relationships.yml`| explicit `between` edges with a reason + citation          |
+| `conditions.yml`   | disease panels: member metrics, roles, missing markers, IRIS staging |
+
+Every claim references a source id; nothing renders without provenance. Run:
+
+```sh
+bin/pethud knowledge
+```
+
+to validate the whole base — it fails loudly if any analyte key doesn't match a
+real metric or any citation id doesn't resolve. Sources span Cornell eClinpath,
+IRIS, AAFP/ACVIM guidelines, peer-reviewed JVIM, the Merck Veterinary Manual,
+and IDEXX reference material; each was verified reachable when added.
+
+To correct or extend the content, edit the YAML (ideally with your vet) and
+re-run `bin/pethud export`. Treat it as a starting point for discussion, not a
+clinical authority.
 
 ## Patient aliasing
 
@@ -142,11 +195,13 @@ lib/pethud/
   report_parser.rb      words -> structured report
   patient_resolver.rb   identity -> canonical patient (aliasing)
   database.rb           SQLite schema + idempotent import
+  knowledge.rb          loads + validates the medical-context config
   exporter.rb           per-report JSON + web/data.js
   importer.rb           parse -> resolve -> store orchestration
   server.rb             stdlib HTTP server (viewer + upload)
   cli.rb                subcommand dispatch
 config/patients.json    alias rules
+config/knowledge/       cited medical-context config (sources, analytes, relationships, conditions)
 web/                    zero-dependency viewer (index.html, style.css, app.js)
 exports/reports/        generated per-report JSON
 db/pethud.sqlite3       generated database

@@ -281,11 +281,15 @@
     if (!stage) return null;
 
     var watch = stage.watch || [];
-    var chips = watch.filter(function (w) { return w.condition; }).map(function (w) {
+    var conditionItems = watch.filter(function (w) { return w.condition; });
+    var chip = function (w) {
       var c = conditionBySlug(w.condition);
       return '<span class="ls-chip" data-cond="' + w.condition + '" title="' + escapeHtml(w.note || "") + '">' +
         escapeHtml(c ? c.name : w.condition) + "</span>";
-    }).join("");
+    };
+    // Split by whether the condition is screenable from the IDEXX report itself.
+    var screenable = conditionItems.filter(function (w) { var c = conditionBySlug(w.condition); return c && c.screenable; });
+    var clinical = conditionItems.filter(function (w) { var c = conditionBySlug(w.condition); return c && !c.screenable; });
     var textItems = watch.filter(function (w) { return !w.condition && w.text; })
       .map(function (w) { return escapeHtml(w.text); }).join(" ");
     var srcLinks = (stage.sources || []).map(function (id) {
@@ -299,7 +303,8 @@
         '<div class="ls-titlewrap"><div class="ls-title">' + escapeHtml(stage.name) + " cat · " +
           escapeHtml(p.age_text || (p.age_years + " yr")) + "</div>" +
           '<div class="ls-sub">' + escapeHtml(stage.summary || "") + "</div></div></div>" +
-      (chips ? '<div class="ls-watch"><span class="ls-lbl">Stay vigilant about</span><div class="ls-chips">' + chips + "</div></div>" : "") +
+      (screenable.length ? '<div class="ls-watch"><span class="ls-lbl">Screen for with the labs</span><div class="ls-chips">' + screenable.map(chip).join("") + "</div></div>" : "") +
+      (clinical.length ? '<div class="ls-watch"><span class="ls-lbl">Watch clinically (not on bloodwork)</span><div class="ls-chips">' + clinical.map(chip).join("") + "</div></div>" : "") +
       (textItems ? '<div class="ls-text">' + textItems + "</div>" : "") +
       (stage.screening ? '<div class="ls-screen"><b>Screening:</b> ' + escapeHtml(stage.screening) + "</div>" : "") +
       '<div class="ls-foot"><span class="src">' + srcLinks + '</span><span class="note">Educational vigilance, not a diagnosis or prediction.</span></div>';
@@ -482,6 +487,15 @@
       html += "</div>";
     }
 
+    // How this value moves and how fast — confounders + monitoring cadence.
+    if (k && k.dynamics) {
+      var d = k.dynamics;
+      html += '<div class="dynamics">';
+      if (d.confounders) html += '<div class="dyn"><span class="dyn-lbl">What moves this value</span><p>' + escapeHtml(d.confounders) + "</p></div>";
+      if (d.monitoring) html += '<div class="dyn"><span class="dyn-lbl">Pace &amp; monitoring</span><p>' + escapeHtml(d.monitoring) + "</p></div>";
+      html += "</div>";
+    }
+
     var rel = relatedEdges(aKey(a)).filter(function (r) {
       var o = analyteByKey[r.key];
       return o && o.patient_ids.indexOf(state.patientId) >= 0;
@@ -499,7 +513,22 @@
       html += "</div></div>";
     }
 
-    if (k && k.sources && k.sources.length) html += sourcesRow(k.sources, "Learn more");
+    // Global primer on why one value (or one dip) is often not meaningful.
+    var interp = KB().interpretation;
+    if (k && interp) {
+      html += '<details class="primer"><summary>' + escapeHtml(interp.title || "Reading changes over time") + "</summary>" +
+        "<p>" + escapeHtml(interp.text) + "</p>" +
+        (interp.sources ? sourcesRow(interp.sources, "Sources") : "") + "</details>";
+    }
+
+    if (k) {
+      // citations behind both the context and the dynamics, de-duplicated
+      var allSrc = (k.sources || []).slice();
+      if (k.dynamics && k.dynamics.sources) {
+        k.dynamics.sources.forEach(function (s) { if (allSrc.indexOf(s) < 0) allSrc.push(s); });
+      }
+      if (allSrc.length) html += sourcesRow(allSrc, "Learn more");
+    }
     // Only show the disclaimer when there's actual medical context above it,
     // so metrics without context don't get an orphan notice before the chart.
     if (k && KB().disclaimer) html += '<div class="disclaimer">' + escapeHtml(KB().disclaimer) + "</div>";

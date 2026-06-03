@@ -198,3 +198,25 @@ sources:
     publisher: "Merck Veterinary Manual"
     tier: reference
     url: "https://www.merckvetmanual.com/musculoskeletal-system/osteoarthritis-in-dogs-and-cats/osteoarthritis-in-dogs-and-cats"
+
+  # --- Variation / how to read serial results (academic) -------------------
+  eclinpath_interpretation:
+    name: "eClinpath — Test interpretation (reference intervals, biological variation, reference change value)"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/test-basics/test-interpretation/"
+  baral_biovariation:
+    name: "Biologic variation of SDMA and creatinine in clinically healthy cats (Baral et al., 2020)"
+    publisher: "Veterinary Clinical Pathology (PubMed)"
+    tier: academic
+    url: "https://pubmed.ncbi.nlm.nih.gov/32716076/"
+  baral_sdma_imprecision:
+    name: "Serum/plasma SDMA on point-of-care vs reference analysers: implications for interpretation in cats (Baral et al., 2021)"
+    publisher: "Journal of Feline Medicine and Surgery (PubMed Central)"
+    tier: academic
+    url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC11197123/"
+  mortier_upc_usg:
+    name: "Biological variation of urine protein:creatinine ratio and urine specific gravity in cats (Mortier et al., 2023)"
+    publisher: "Journal of Veterinary Internal Medicine"
+    tier: academic
+    url: "https://onlinelibrary.wiley.com/doi/10.1111/jvim.16881"

@@ -102,6 +102,13 @@ What you get:
   range — an "interpret in isolation" caveat (many abnormals only matter
   alongside related values). Each carries "Learn more" links to the cited
   sources.
+- **How values change over time**: each metric shows *what moves it*
+  (hydration, a recent meal, stress, sample handling, medication, IV fluids,
+  diet) and its typical *pace & monitoring* cadence, plus a collapsible primer
+  on why a single dip or spike is often just noise (analytical + biological
+  variation / the reference-change concept) — so trends, not one reading, drive
+  conclusions. All cited (Cornell eClinpath, Baral et al. biological-variation
+  studies, IRIS).
 - **Related metrics**: clickable chips for the values that should be read
   together (color-coded by whether they're also out of range), built from an
   explicit relationship graph.

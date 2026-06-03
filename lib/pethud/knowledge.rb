@@ -14,7 +14,7 @@ module PetHUD
   #     key that doesn't match any real metric, or a citation id with no source.
   #   - Analyte keys are the human-readable "Section / Name" used in the YAML.
   class Knowledge
-    attr_reader :sources, :analytes, :relationships, :conditions, :life_stages, :disclaimer
+    attr_reader :sources, :analytes, :relationships, :conditions, :life_stages, :disclaimer, :interpretation
 
     def self.key_for(section, name) = "#{section} / #{name}"
 
@@ -25,7 +25,9 @@ module PetHUD
 
     def load!
       @sources       = load_yaml("sources.yml").fetch("sources", {})
-      @analytes      = load_yaml("analytes.yml").fetch("analytes", {})
+      analytes_doc   = load_yaml("analytes.yml")
+      @interpretation = analytes_doc["interpretation"]
+      @analytes      = analytes_doc.fetch("analytes", {})
       @relationships = load_yaml("relationships.yml").fetch("relationships", [])
       conditions_doc = load_yaml("conditions.yml")
       @disclaimer    = conditions_doc["disclaimer"]
@@ -53,9 +55,14 @@ module PetHUD
         end
       end
 
+      check_sources.call(@interpretation&.dig("sources"), "analytes.yml interpretation")
+
       @analytes.each do |key, info|
         warnings << "analytes.yml: '#{key}' matches no imported analyte" unless known.include?(key)
         check_sources.call(info["sources"], "analytes.yml['#{key}']")
+        if (dyn = info["dynamics"])
+          check_sources.call(dyn["sources"], "analytes.yml['#{key}'].dynamics")
+        end
       end
 
       @relationships.each_with_index do |edge, i|
@@ -96,6 +103,7 @@ module PetHUD
     def payload
       {
         disclaimer: @disclaimer,
+        interpretation: @interpretation,
         sources: @sources,
         analytes: @analytes,
         relationships: @relationships,

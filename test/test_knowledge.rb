@@ -110,6 +110,37 @@ class TestKnowledge < Minitest::Test
     end
   end
 
+  def test_interpretation_primer_present_and_cited
+    interp = @kb.interpretation
+    refute_nil interp, "global interpretation primer is missing"
+    refute_nil interp["text"]
+    source_ids = @kb.sources.keys.to_set
+    Array(interp["sources"]).each { |s| assert source_ids.include?(s), "interpretation cites unknown source #{s}" }
+    refute_empty Array(interp["sources"]), "interpretation should be cited"
+  end
+
+  def test_analyte_dynamics_sources_resolve
+    source_ids = @kb.sources.keys.to_set
+    @kb.analytes.each do |key, info|
+      dyn = info["dynamics"]
+      next unless dyn
+      assert(dyn["confounders"] || dyn["monitoring"], "#{key} dynamics is empty")
+      Array(dyn["sources"]).each { |s| assert source_ids.include?(s), "#{key} dynamics cites unknown source #{s}" }
+      refute_empty Array(dyn["sources"]), "#{key} dynamics should be cited"
+    end
+  end
+
+  def test_every_condition_has_screenable_flag
+    @kb.conditions.each do |slug, c|
+      assert [true, false].include?(c["screenable"]), "condition #{slug} needs a boolean screenable flag"
+    end
+    # a "screenable" condition must actually carry at least one analyte
+    @kb.conditions.each do |slug, c|
+      next unless c["screenable"]
+      refute_empty Array(c["metrics"]), "screenable condition #{slug} must have at least one metric"
+    end
+  end
+
   def test_validate_reports_unknown_keys
     # A made-up key not present in the data should surface as a warning.
     warnings = @kb.validate(["Chemistry / Creatinine"])

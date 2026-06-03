@@ -19,6 +19,7 @@ disclaimer: >
 
 conditions:
   chronic-kidney-disease:
+    screenable: true
     name: "Chronic Kidney Disease (CKD)"
     summary: >
       A common, progressive loss of kidney function in older cats. Diagnosis and
@@ -68,6 +69,7 @@ conditions:
         severely_hypertensive_min: 180
 
   hyperthyroidism:
+    screenable: true
     name: "Hyperthyroidism"
     summary: >
       Overactive thyroid, common in older cats. Screened with Total T4. It speeds
@@ -85,6 +87,7 @@ conditions:
       - "Free T4 by equilibrium dialysis / T3 — for ambiguous high-normal T4 cases"
 
   heart-disease:
+    screenable: true
     name: "Heart Disease (HCM screening)"
     summary: >
       Feline heart disease — most often hypertrophic cardiomyopathy — is often
@@ -100,6 +103,7 @@ conditions:
       - "Blood pressure — hypertension contributes to cardiac changes"
 
   ibd-small-cell-lymphoma:
+    screenable: true
     name: "IBD / Small Cell Lymphoma"
     summary: >
       Chronic inflammatory bowel disease (IBD) and low-grade (small cell)
@@ -122,6 +126,7 @@ conditions:
   #     and the signs to watch for at home (the `signs` field). ----------------
 
   hypertension:
+    screenable: false
     name: "Systemic Hypertension"
     summary: >
       Persistently high blood pressure, common in senior cats and usually
@@ -143,6 +148,7 @@ conditions:
       - "Often none — hypertension is frequently silent until organ damage occurs"
 
   diabetes-mellitus:
+    screenable: true
     name: "Diabetes Mellitus"
     summary: >
       Inadequate insulin action causing persistently high blood sugar. In cats a
@@ -161,6 +167,7 @@ conditions:
       - "Walking on the hocks (plantigrade stance) in advanced cases"
 
   neoplasia:
+    screenable: false
     name: "Neoplasia (Cancer)"
     summary: >
       Cancer risk rises with age. Most cancers cannot be screened for with routine
@@ -179,6 +186,7 @@ conditions:
       - "Vomiting, diarrhea, difficulty breathing, or bleeding"
 
   osteoarthritis:
+    screenable: false
     name: "Osteoarthritis"
     summary: >
       Degenerative joint disease affects most older cats but is easily missed —
@@ -194,6 +202,7 @@ conditions:
       - "Reduced grooming (a matted or greasy coat), overgrown nails, irritability when handled"
 
   cognitive-dysfunction:
+    screenable: false
     name: "Cognitive Dysfunction"
     summary: >
       An age-related decline in brain function (feline dementia). There is no blood
@@ -210,6 +219,7 @@ conditions:
       - "Changes in activity, anxiety, or learning and memory (the 'DISHA-AL' signs)"
 
   dental-disease:
+    screenable: false
     name: "Dental Disease"
     summary: >
       Periodontal disease and painful tooth and gum conditions are very common in

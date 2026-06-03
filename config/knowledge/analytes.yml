@@ -14,8 +14,36 @@
 # Nothing here is a substitute for veterinary interpretation. See conditions.yml
 # for how these roll up into disease-specific panels.
 
+# Global primer shown on every analyte's detail page: why a single value (or a
+# single dip/spike) is often not meaningful. Cited; applies to all analytes.
+interpretation:
+  title: "Reading changes over time"
+  text: >
+    A single result is noisier than it looks. Values move from one sample to the
+    next for reasons that have nothing to do with disease: how the sample was
+    taken and handled (hydration, fasting, stress, time to the lab), the
+    analyzer's own imprecision, and your cat's normal day-to-day biological
+    variation. For a change between two tests to be real, it has to exceed this
+    combined "noise" — the reference change value. SDMA shows this well: a
+    reported 14 can genuinely represent anywhere from about 8 to 20. So trust a
+    trend across several consistent results, not one dip or spike, and the most
+    reliable comparison is against your own cat's healthy baseline rather than
+    the population reference range. Treatment, a recent meal, or IV fluids can
+    also shift values on their own — see each metric's notes below.
+  sources: [eclinpath_interpretation, baral_biovariation, baral_sdma_imprecision]
+
 analytes:
   "Chemistry / IDEXX SDMA":
+    dynamics:
+      confounders: >
+        Dominated by analytical imprecision — a reported value can swing roughly
+        ±40% (a 14 can represent ~8–20), so small moves are often just noise.
+        Less affected by muscle mass than creatinine; dehydration can nudge it up.
+      monitoring: >
+        Use persistent values, not a single reading, and compare against your
+        cat's own baseline. In stable CKD it is typically rechecked every
+        3–6 months.
+      sources: [baral_sdma_imprecision, iris_staging]
     summary: >
       SDMA (symmetric dimethylarginine) is a kidney-filtration marker. It tends
       to rise earlier than creatinine — when roughly 25–40% of kidney function
@@ -33,6 +61,16 @@ analytes:
     sources: [eclinpath_sdma, jvim_sdma_gfr, iris_staging]
 
   "Chemistry / Creatinine":
+    dynamics:
+      confounders: >
+        Rises with dehydration and higher muscle mass; falls with muscle loss.
+        IV fluids can transiently lower it, and a renal diet lowers it modestly.
+      monitoring: >
+        Creatinine has high individuality — judge it against your cat's own
+        healthy baseline rather than the reference range. Stable CKD is usually
+        rechecked every 3–6 months, sooner if appetite, thirst, weight, or
+        hydration change.
+      sources: [baral_biovariation, iris_staging]
     summary: >
       Creatinine is a waste product cleared by the kidneys; blood levels rise as
       filtration falls. With SDMA it is the basis of IRIS CKD staging.
@@ -49,6 +87,15 @@ analytes:
     sources: [eclinpath_creatinine, iris_staging]
 
   "Chemistry / BUN":
+    dynamics:
+      confounders: >
+        Swings with hydration, the most recent meal (high-protein raises it), and
+        GI bleeding; IV fluids and low-protein diets lower it. Less specific than
+        creatinine or SDMA.
+      monitoring: >
+        Interpret alongside creatinine and hydration; a fasted sample compares
+        better over time.
+      sources: [eclinpath_urea]
     summary: >
       Blood urea nitrogen (BUN) is a protein-breakdown waste product filtered by
       the kidneys. It is a less specific kidney marker than creatinine or SDMA.
@@ -76,6 +123,13 @@ analytes:
     sources: [eclinpath_urea]
 
   "Chemistry / Phosphorus":
+    dynamics:
+      confounders: >
+        A recent meal, young age, and a hemolyzed sample raise it; phosphate
+        binders and renal diets lower it.
+      monitoring: >
+        Tracked against IRIS stage-specific targets; fasting samples compare best.
+      sources: [eclinpath_phosphate, iris_staging]
     summary: >
       Phosphorus is regulated partly by the kidneys. It is central to CKD
       monitoring, where IRIS sets stage-specific target ranges.
@@ -90,6 +144,14 @@ analytes:
     sources: [eclinpath_phosphate, iris_staging]
 
   "Chemistry / Calcium":
+    dynamics:
+      confounders: >
+        Total calcium shifts with albumin and can be altered by lipemia; ionized
+        calcium is the more reliable measure.
+      monitoring: >
+        Confirm a persistent abnormal with ionized calcium, and read it with
+        phosphorus.
+      sources: [eclinpath_calcium]
     summary: >
       Total blood calcium, tightly hormone-regulated. Calcium and phosphorus are
       interpreted together.
@@ -105,6 +167,13 @@ analytes:
     sources: [eclinpath_calcium]
 
   "Chemistry / Potassium":
+    dynamics:
+      confounders: >
+        A hemolyzed or delayed sample can read falsely high; IV fluids, diuresis,
+        and poor appetite can lower it.
+      monitoring: >
+        Check the hemolysis index before trusting an unexpected change.
+      sources: [eclinpath_potassium]
     summary: >
       A key electrolyte for nerve and muscle function, regulated by the kidneys.
     high: >
@@ -144,6 +213,14 @@ analytes:
     sources: [eclinpath_chloride]
 
   "Chemistry / Glucose":
+    dynamics:
+      confounders: >
+        Stress at the visit and a recent meal raise it; a delayed or unseparated
+        sample can read falsely low. None of these mean diabetes.
+      monitoring: >
+        Fructosamine reflects ~2 weeks and is steadier than a single glucose;
+        at-home or fasted sampling reduces the stress effect.
+      sources: [eclinpath_glucose, merck_diabetes]
     summary: >
       Blood sugar. In cats this is strongly affected by stress at the visit.
     high: >
@@ -301,6 +378,15 @@ analytes:
     sources: [fox_ntprobnp, tvp_cardiac]
 
   "Endocrinology / Total T4":
+    dynamics:
+      confounders: >
+        Non-thyroidal illness can pull it down into the normal range; methimazole
+        (anti-thyroid medication) lowers it by design.
+      monitoring: >
+        After starting or changing methimazole, T4 is rechecked in ~2–3 weeks,
+        then periodically — and watch the kidney values, since treatment can
+        unmask CKD.
+      sources: [aafp_hyperthyroid, cornell_thyroid]
     summary: >
       Total thyroxine, the main screening test for feline hyperthyroidism — a
       common disease of older cats.
@@ -319,6 +405,14 @@ analytes:
     sources: [cornell_thyroid, aafp_hyperthyroid]
 
   "Hematology / Hematocrit":
+    dynamics:
+      confounders: >
+        Dehydration concentrates it (a falsely reassuring value); IV fluids
+        dilute it. Stress or excitement can transiently raise it in cats.
+      monitoring: >
+        Read with hydration status and reticulocytes; CKD-related anemia develops
+        slowly over months.
+      sources: [eclinpath_creatinine]
     summary: >
       The fraction of blood made up of red cells; a core measure of anemia or
       dehydration.
@@ -335,6 +429,13 @@ analytes:
     sources: [eclinpath_creatinine]
 
   "Urinalysis / Specific Gravity":
+    dynamics:
+      confounders: >
+        Drops after IV fluids, diuretics, or a big drink of water; a fresh,
+        pre-fluid sample is the most informative.
+      monitoring: >
+        Most meaningful paired with blood kidney values from the same visit.
+      sources: [iris_staging]
     summary: >
       Urine specific gravity (USG) measures how concentrated the urine is — a
       direct readout of the kidneys' concentrating ability.
@@ -367,6 +468,14 @@ analytes:
     sources: [eclinpath_glucose, merck_diabetes]
 
   "Urinalysis / Urine Protein":
+    dynamics:
+      confounders: >
+        Blood or infection in the sample, and normal day-to-day variation, move
+        it; the dipstick is only a screen.
+      monitoring: >
+        Quantify and trend with a UPC ratio on a clean sample — UPC itself has
+        notable biological variation, so rely on several measurements.
+      sources: [mortier_upc_usg, iris_staging]
     summary: >
       A dipstick estimate of protein in urine. Proteinuria is a risk factor for
       CKD progression; IRIS substages CKD by the urine protein:creatinine (UPC)

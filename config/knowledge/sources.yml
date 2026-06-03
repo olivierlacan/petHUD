@@ -171,3 +171,30 @@ sources:
     publisher: "Peer-reviewed prospective cohort study (PubMed Central)"
     tier: academic
     url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC11256131/"
+  aafp_senior_care:
+    name: "2021 AAFP Feline Senior Care Guidelines"
+    publisher: "AAFP — Journal of Feline Medicine and Surgery (PubMed Central)"
+    tier: guideline
+    url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC10812122/"
+
+  # --- Hypertension, diabetes, OA, dental (guideline + reference) ----------
+  acvim_hypertension:
+    name: "ACVIM consensus: identification, evaluation, and management of systemic hypertension in dogs and cats (Acierno et al., 2018)"
+    publisher: "Journal of Veterinary Internal Medicine (PubMed)"
+    tier: guideline
+    url: "https://pubmed.ncbi.nlm.nih.gov/30353952/"
+  icatcare_diabetes:
+    name: "2025 iCatCare consensus guidelines on the diagnosis and management of diabetes mellitus in cats"
+    publisher: "International Cat Care / ISFM — Journal of Feline Medicine and Surgery"
+    tier: guideline
+    url: "https://journals.sagepub.com/doi/10.1177/1098612X251399103"
+  aaha_dental:
+    name: "2019 AAHA Dental Care Guidelines for Dogs and Cats"
+    publisher: "American Animal Hospital Association (PubMed)"
+    tier: guideline
+    url: "https://pubmed.ncbi.nlm.nih.gov/30776257/"
+  merck_oa:
+    name: "Osteoarthritis in Dogs and Cats"
+    publisher: "Merck Veterinary Manual"
+    tier: reference
+    url: "https://www.merckvetmanual.com/musculoskeletal-system/osteoarthritis-in-dogs-and-cats/osteoarthritis-in-dogs-and-cats"

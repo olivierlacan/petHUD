@@ -58,13 +58,25 @@ class TestKnowledge < Minitest::Test
   end
 
   def test_condition_metrics_have_analyte_context
+    # Some conditions are intentionally bloodwork-less (osteoarthritis, dental,
+    # cognitive dysfunction) and carry no metrics. Any metric that IS listed must
+    # reference an analyte we have written context for, and must state a role.
     known = analyte_keys_in_yaml.to_set
     @kb.conditions.each do |slug, c|
-      refute_empty Array(c["metrics"]), "#{slug} has no metrics"
       Array(c["metrics"]).each do |m|
         assert known.include?(m["analyte"]), "cond[#{slug}] metric '#{m['analyte']}' has no analyte entry"
         refute_nil m["role"], "cond[#{slug}] metric '#{m['analyte']}' missing role"
       end
+    end
+  end
+
+  def test_bloodworkless_conditions_have_signs_and_diagnosis
+    # A condition with no metrics is only useful if it tells the owner what to
+    # watch for and how it's actually diagnosed.
+    @kb.conditions.each do |slug, c|
+      next unless Array(c["metrics"]).empty?
+      refute_empty Array(c["signs"]), "bloodwork-less condition #{slug} should list signs to watch"
+      refute_empty Array(c["missing_markers"]), "bloodwork-less condition #{slug} should say how it's diagnosed"
     end
   end
 

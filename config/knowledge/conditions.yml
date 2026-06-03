@@ -115,3 +115,111 @@ conditions:
     missing_markers:
       - "Cobalamin (vitamin B12) and folate — key GI markers, not on these panels"
       - "Intestinal biopsy with histopathology / clonality (PARR) — required to distinguish IBD from lymphoma"
+
+  # --- Senior conditions that are mostly or entirely NOT detected by routine
+  #     bloodwork. These panels are honest about that: they show whatever
+  #     relevant values exist, then emphasize how the condition is really found
+  #     and the signs to watch for at home (the `signs` field). ----------------
+
+  hypertension:
+    name: "Systemic Hypertension"
+    summary: >
+      Persistently high blood pressure, common in senior cats and usually
+      secondary to another disease — most often chronic kidney disease or
+      hyperthyroidism. It is diagnosed by measuring blood pressure, not by
+      bloodwork, but its common causes show up on these panels. Left untreated it
+      damages the eyes, kidneys, heart, and brain.
+    sources: [acvim_hypertension, iris_staging]
+    metrics:
+      - { analyte: "Chemistry / Creatinine", role: "CKD is a leading cause and consequence" }
+      - { analyte: "Chemistry / IDEXX SDMA", role: "Kidney involvement" }
+      - { analyte: "Endocrinology / Total T4", role: "Hyperthyroidism is a common cause" }
+    missing_markers:
+      - "Systolic blood pressure measurement — the actual diagnostic (>160 mmHg generally warrants treatment; <140 is ideal)"
+      - "Fundic (retinal) exam — to check for hypertensive damage to the eyes"
+    signs:
+      - "Sudden blindness, a cloudy or bloody eye, or persistently dilated pupils"
+      - "Disorientation, behavior change, or seizures"
+      - "Often none — hypertension is frequently silent until organ damage occurs"
+
+  diabetes-mellitus:
+    name: "Diabetes Mellitus"
+    summary: >
+      Inadequate insulin action causing persistently high blood sugar. In cats a
+      single high glucose is usually just stress; diabetes requires persistent
+      hyperglycemia with sugar spilling into the urine and clinical signs, often
+      confirmed with fructosamine.
+    sources: [icatcare_diabetes, merck_diabetes]
+    metrics:
+      - { analyte: "Chemistry / Glucose", role: "Persistent hyperglycemia — not one stressed reading" }
+      - { analyte: "Urinalysis / Glucose", role: "Glucosuria — sugar appears in urine above ~250-300 mg/dL" }
+    missing_markers:
+      - "Fructosamine — reflects ~2 weeks of glucose and separates true diabetes from stress hyperglycemia"
+    signs:
+      - "Increased thirst and urination"
+      - "Weight loss despite a normal or increased appetite"
+      - "Walking on the hocks (plantigrade stance) in advanced cases"
+
+  neoplasia:
+    name: "Neoplasia (Cancer)"
+    summary: >
+      Cancer risk rises with age. Most cancers cannot be screened for with routine
+      bloodwork — they are found by physical exam, imaging, and sampling tissue
+      (cytology or biopsy). Bloodwork is occasionally abnormal, but normal results
+      do NOT rule cancer out.
+    sources: [aafp_senior_care]
+    metrics:
+      - { analyte: "Chemistry / Calcium", role: "Occasionally high with some cancers (paraneoplastic) — not a screen" }
+      - { analyte: "Hematology / Hematocrit", role: "May be low (anemia) with some cancers — non-specific" }
+    missing_markers:
+      - "Physical exam, imaging (radiographs / ultrasound), and cytology or biopsy — how cancer is actually found and confirmed"
+    signs:
+      - "New or growing lumps, or sores that don't heal"
+      - "Unexplained weight loss, or persistent appetite/energy changes"
+      - "Vomiting, diarrhea, difficulty breathing, or bleeding"
+
+  osteoarthritis:
+    name: "Osteoarthritis"
+    summary: >
+      Degenerative joint disease affects most older cats but is easily missed —
+      cats rarely limp obviously; they slow down instead. There is no blood test
+      for it: diagnosis is by physical exam and joint radiographs.
+    sources: [aafp_senior_care, merck_oa]
+    metrics: []
+    missing_markers:
+      - "Orthopedic exam and joint radiographs — the basis of diagnosis; no bloodwork marker exists"
+    signs:
+      - "Reluctance to jump up or down, or not jumping as high as before"
+      - "Stiffness, hesitation on stairs, sleeping more"
+      - "Reduced grooming (a matted or greasy coat), overgrown nails, irritability when handled"
+
+  cognitive-dysfunction:
+    name: "Cognitive Dysfunction"
+    summary: >
+      An age-related decline in brain function (feline dementia). There is no blood
+      test; it is a diagnosis of exclusion after ruling out medical causes such as
+      hyperthyroidism, hypertension, or pain. Its signs are summarized by the
+      acronym DISHA-AL.
+    sources: [aafp_senior_care]
+    metrics: []
+    missing_markers:
+      - "Behavioral assessment plus a medical work-up to exclude other causes — there is no bloodwork marker"
+    signs:
+      - "Disorientation; changed interactions with people or other pets"
+      - "Altered sleep cycles; house-soiling; more (often night-time) vocalization"
+      - "Changes in activity, anxiety, or learning and memory (the 'DISHA-AL' signs)"
+
+  dental-disease:
+    name: "Dental Disease"
+    summary: >
+      Periodontal disease and painful tooth and gum conditions are very common in
+      older cats and largely hidden. Bloodwork doesn't detect it; a full
+      assessment needs an oral exam and dental radiographs under anesthesia.
+    sources: [aaha_dental, aafp_senior_care]
+    metrics: []
+    missing_markers:
+      - "Oral examination and dental radiographs under anesthesia — required to assess the teeth and gums"
+    signs:
+      - "Bad breath, drooling, or blood-tinged saliva"
+      - "Dropping food, chewing on one side, or pawing at the mouth"
+      - "Reduced appetite or reluctance to eat dry food"

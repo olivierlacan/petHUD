@@ -670,14 +670,26 @@
       if (m.role) c.appendChild(el("div", "role", escapeHtml(m.role)));
       grid.appendChild(c);
     });
-    if (!shown) grid.appendChild(el("div", "empty", "None of this panel's metrics are present for this patient."));
+    if (!shown) {
+      var hasMetrics = cond.metrics && cond.metrics.length;
+      grid.appendChild(el("div", "empty", hasMetrics
+        ? "None of this panel's metrics are present for this patient."
+        : "This condition isn't assessed by routine bloodwork — see the signs and how it's diagnosed."));
+    }
     left.appendChild(grid);
     panels.appendChild(left);
 
     var side = el("div", "cond-side");
+    if (cond.signs && cond.signs.length) {
+      var sg = el("div", "sidecard");
+      sg.innerHTML = "<h4>Signs to watch at home</h4><ul>" +
+        cond.signs.map(function (x) { return "<li>" + escapeHtml(x) + "</li>"; }).join("") + "</ul>";
+      side.appendChild(sg);
+    }
     if (cond.missing_markers && cond.missing_markers.length) {
       var mc = el("div", "sidecard");
-      mc.innerHTML = "<h4>Not in these reports</h4><ul>" +
+      var mcTitle = (cond.metrics && cond.metrics.length) ? "Not in these reports" : "How it's diagnosed";
+      mc.innerHTML = "<h4>" + mcTitle + "</h4><ul>" +
         cond.missing_markers.map(function (x) { return "<li>" + escapeHtml(x) + "</li>"; }).join("") + "</ul>";
       side.appendChild(mc);
     }

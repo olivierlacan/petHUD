@@ -105,11 +105,14 @@ What you get:
 - **Related metrics**: clickable chips for the values that should be read
   together (color-coded by whether they're also out of range), built from an
   explicit relationship graph.
-- **Conditions view**: focused panels for **Chronic Kidney Disease**,
-  **Hyperthyroidism**, **Heart Disease (HCM screening)**, and **IBD / Small
-  Cell Lymphoma**. Each shows only that condition's metrics, names the markers
-  *not* in your reports (e.g. cobalamin/folate, blood pressure), and — for CKD —
-  an IRIS staging orientation for the latest creatinine/SDMA.
+- **Conditions view**: focused panels for the diseases that matter in cats —
+  **CKD**, **Hyperthyroidism**, **Heart Disease**, **IBD / Small Cell
+  Lymphoma**, **Systemic Hypertension**, **Diabetes Mellitus**, **Neoplasia**,
+  **Osteoarthritis**, **Cognitive Dysfunction**, and **Dental Disease**. Each
+  shows that condition's metrics, names what's *not* in your reports, and — for
+  CKD — an IRIS staging orientation for the latest creatinine/SDMA. The ones
+  that bloodwork can't detect (arthritis, dental, cognitive dysfunction) say so
+  plainly and instead list **signs to watch at home** and how they're diagnosed.
 - **Age-aware vigilance**: a banner at the top of Trends shows the cat's current
   life stage (per the AAHA/AAFP Feline Life Stage Guidelines) and the conditions
   worth watching for at that age, linking to the relevant condition panels. Age-

@@ -351,6 +351,21 @@ analytes:
       dehydration. Always read them together.
     sources: [iris_staging, eclinpath_creatinine]
 
+  "Urinalysis / Glucose":
+    summary: >
+      Glucose (sugar) in the urine. Healthy cats have none; it appears only when
+      blood glucose climbs high enough to spill past the kidneys (~250–300 mg/dL).
+    high: >
+      Glucose in the urine (glucosuria) most often reflects persistently high
+      blood sugar — a key supporting finding for diabetes. Brief stress
+      hyperglycemia can occasionally cause transient glucosuria as well.
+    low: >
+      "Negative" is the normal, expected result.
+    isolation: >
+      Confirm with blood glucose and ideally fructosamine — a single positive,
+      especially in a stressed cat, is not a diabetes diagnosis on its own.
+    sources: [eclinpath_glucose, merck_diabetes]
+
   "Urinalysis / Urine Protein":
     summary: >
       A dipstick estimate of protein in urine. Proteinuria is a risk factor for

@@ -58,7 +58,11 @@ life_stages:
         note: "Watch for the earliest changes — SDMA plus urinalysis can flag CKD before creatinine rises."
       - condition: hyperthyroidism
         note: "Onset becomes more common; Total T4 screens for it."
-      - text: "Dental disease, weight changes and early diabetes risk, early neoplasia."
+      - condition: dental-disease
+        note: "Periodontal disease is common and hidden; needs an oral exam."
+      - condition: diabetes-mellitus
+        note: "Weight and appetite changes warrant glucose +/- fructosamine."
+      - text: "Also watch for weight gain / obesity and early neoplasia."
     screening: >
       Begin routine screening around age 7: at least annual exam with bloodwork
       (including SDMA and Total T4), urinalysis, and blood pressure.
@@ -83,7 +87,18 @@ life_stages:
         note: "Cardiac disease risk rises; NT-proBNP can screen, confirmed by echocardiogram."
       - condition: ibd-small-cell-lymphoma
         note: "Chronic enteropathy and low-grade intestinal lymphoma become more common."
-      - text: "Also be vigilant for: systemic hypertension (check blood pressure — >160 mmHg generally warrants treatment), diabetes mellitus, neoplasia, osteoarthritis, cognitive dysfunction, and dental disease."
+      - condition: hypertension
+        note: "Often secondary to CKD or hyperthyroidism; needs a blood pressure check."
+      - condition: diabetes-mellitus
+        note: "Persistent hyperglycemia with glucosuria and weight loss."
+      - condition: neoplasia
+        note: "Cancer risk rises; mostly found by exam/imaging, not bloodwork."
+      - condition: osteoarthritis
+        note: "Affects most older cats; they slow down rather than limp."
+      - condition: dental-disease
+        note: "Common, painful, and hidden; needs an oral exam."
+      - condition: cognitive-dysfunction
+        note: "Feline dementia — a diagnosis of exclusion."
     screening: >
       Twice-yearly exams with at least annual bloodwork, urinalysis, blood
       pressure, and Total T4. Re-test promptly if appetite, weight, thirst, or

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>pethud — pet bloodwork trends</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">pethud</span>
+      <span class="sub">pet bloodwork trends</span>
+    </div>
+
+    <div class="controls">
+      <label class="ctl">
+        <span>Patient</span>
+        <select id="patient"></select>
+      </label>
+
+      <div class="seg" id="view-toggle" role="tablist">
+        <button data-view="trends" class="active">Trends</button>
+        <button data-view="reports">Reports</button>
+      </div>
+
+      <label class="ctl search">
+        <span>Search</span>
+        <input id="search" type="search" placeholder="analyte name…" autocomplete="off">
+      </label>
+
+      <label class="check">
+        <input type="checkbox" id="abnormal-only">
+        <span>Out of range only</span>
+      </label>
+
+      <div class="meta" id="patient-meta"></div>
+    </div>
+  </header>
+
+  <main>
+    <aside class="sidebar">
+      <div class="side-title">Sections</div>
+      <ul id="section-filter" class="section-list"></ul>
+      <div class="side-foot" id="corpus-meta"></div>
+    </aside>
+
+    <section class="content">
+      <div id="trends" class="view"></div>
+      <div id="reports" class="view" hidden></div>
+    </section>
+  </main>
+
+  <!-- Detail overlay for a single analyte -->
+  <div id="detail" class="overlay" hidden>
+    <div class="overlay-card">
+      <button class="close" id="detail-close" aria-label="Close">&times;</button>
+      <div id="detail-body"></div>
+    </div>
+  </div>
+
+  <!-- Drag-and-drop import affordance -->
+  <div id="dropzone" class="dropzone" hidden>
+    <div class="drop-inner">
+      <div class="drop-icon">⤓</div>
+      <div class="drop-text">Drop IDEXX PDF report(s) to import</div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -14,7 +14,7 @@ module PetHUD
   #     key that doesn't match any real metric, or a citation id with no source.
   #   - Analyte keys are the human-readable "Section / Name" used in the YAML.
   class Knowledge
-    attr_reader :sources, :analytes, :relationships, :conditions, :disclaimer
+    attr_reader :sources, :analytes, :relationships, :conditions, :life_stages, :disclaimer
 
     def self.key_for(section, name) = "#{section} / #{name}"
 
@@ -30,6 +30,7 @@ module PetHUD
       conditions_doc = load_yaml("conditions.yml")
       @disclaimer    = conditions_doc["disclaimer"]
       @conditions    = conditions_doc.fetch("conditions", {})
+      @life_stages   = load_yaml("life_stages.yml").fetch("life_stages", [])
     end
 
     def load_yaml(file)
@@ -75,6 +76,17 @@ module PetHUD
         end
       end
 
+      condition_slugs = @conditions.keys.to_set
+      @life_stages.each do |stage|
+        slug = stage["slug"]
+        check_sources.call(stage["sources"], "life_stages.yml['#{slug}']")
+        Array(stage["watch"]).each do |w|
+          ref = w["condition"]
+          next if ref.nil? # free-text watch item
+          warnings << "life_stages.yml['#{slug}']: watch condition '#{ref}' is not a known condition" unless condition_slugs.include?(ref)
+        end
+      end
+
       warnings
     end
 
@@ -87,7 +99,8 @@ module PetHUD
         sources: @sources,
         analytes: @analytes,
         relationships: @relationships,
-        conditions: conditions_payload
+        conditions: conditions_payload,
+        life_stages: @life_stages
       }
     end
 

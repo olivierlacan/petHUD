@@ -182,6 +182,34 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 
 .empty { color: var(--text-mute); padding: 40px; text-align: center; }
 
+/* ---- life-stage vigilance banner (top of Trends) ---- */
+.lifestage {
+  background: var(--panel); border: 1px solid var(--line);
+  border-left: 3px solid var(--accent); border-radius: 8px;
+  padding: 12px 14px; margin-bottom: 18px;
+}
+.ls-head { display: flex; gap: 11px; align-items: flex-start; }
+.ls-icon { font-size: 20px; line-height: 1.1; }
+.ls-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.ls-sub { color: var(--text-dim); font-size: 12px; line-height: 1.5; margin-top: 2px; max-width: 95ch; }
+.ls-watch { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 11px; }
+.ls-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-mute); }
+.ls-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ls-chip {
+  cursor: pointer; background: var(--bg-3); border: 1px solid var(--line-2);
+  color: var(--text); border-radius: 20px; padding: 3px 11px; font-size: 12px;
+}
+.ls-chip:hover { border-color: var(--accent); color: var(--accent); }
+.ls-text, .ls-screen { color: var(--text-dim); font-size: 12px; line-height: 1.5; margin-top: 8px; max-width: 95ch; }
+.ls-screen b { color: var(--text); }
+.ls-foot { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 11px; padding-top: 8px; border-top: 1px solid var(--line); }
+.ls-foot .src { display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.ls-foot .note { color: var(--text-mute); font-size: 11px; font-style: italic; }
+
+/* age-relevant marker on condition tabs */
+.age-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); margin-right: 6px; vertical-align: middle; }
+.cond-tab.active .age-dot { background: var(--on-accent); }
+
 /* ---- reports view ---- */
 .report-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
 .report-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; }

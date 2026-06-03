@@ -121,10 +121,16 @@ module PetHUD
           "SELECT MIN(result_date) lo, MAX(result_date) hi, COUNT(*) n FROM reports WHERE patient_id = ?",
           p["id"]
         )
+        # Age from the most recent report that recorded one (for life-stage).
+        age = @db.get_first_row(
+          "SELECT age_years, age_text FROM reports WHERE patient_id = ? AND age_years IS NOT NULL " \
+          "ORDER BY result_date DESC, id DESC LIMIT 1", p["id"]
+        ) || {}
         {
           id: p["id"], slug: p["slug"], name: p["name"], species: p["species"],
           notes: p["notes"], identities: ids,
-          report_count: range["n"], date_range: [range["lo"], range["hi"]]
+          report_count: range["n"], date_range: [range["lo"], range["hi"]],
+          age_years: age["age_years"], age_text: age["age_text"]
         }
       end
     end

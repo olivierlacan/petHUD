@@ -1,0 +1,91 @@
+# Feline life stages and the conditions to stay vigilant about at each age,
+# per the 2021 AAHA/AAFP Feline Life Stage Guidelines.
+#
+# The viewer picks the stage from the patient's current age and surfaces these
+# as "things to watch for at this life stage" — educational vigilance, NOT a
+# prediction or diagnosis (the same disclaimer in conditions.yml applies).
+#
+# Age bands: a cat is placed in the stage with the greatest `min_years` that is
+# <= its age. So mature-adult covers 7–10 and senior covers >10 (11+), matching
+# the guideline (which also notes individual variation — a robust 10+ cat may be
+# managed as a mature adult at the vet's discretion).
+#
+# `watch` items either reference an existing condition slug (conditions.yml) so
+# the viewer can deep-link to that panel, or are free `text` for concerns we
+# don't track analytes for (hypertension, diabetes, arthritis, etc.). Keys/slugs
+# must match; the loader validates them.
+
+life_stages:
+  - slug: kitten
+    name: "Kitten"
+    range: "birth to 1 year"
+    min_years: 0
+    summary: >
+      Rapid growth and development. Care centers on vaccination, parasite
+      control, infectious-disease testing, and spay/neuter rather than the
+      chronic diseases of older cats.
+    watch:
+      - text: "Retrovirus testing (FeLV/FIV), intestinal parasites, vaccination series, congenital problems."
+    screening: >
+      Kitten visit series with deworming and core vaccinations; establish a
+      healthy baseline.
+    sources: [aafp_life_stage]
+
+  - slug: young-adult
+    name: "Young Adult"
+    range: "1 to 6 years"
+    min_years: 1
+    summary: >
+      Generally the healthiest stretch of life. The goal is prevention and
+      establishing baseline lab values to compare against later.
+    watch:
+      - text: "Weight gain / obesity, dental disease, retrovirus status; behavioral and environmental needs."
+    screening: >
+      Annual wellness exam; baseline bloodwork and urinalysis so future changes
+      have a reference point.
+    sources: [aafp_life_stage]
+
+  - slug: mature-adult
+    name: "Mature Adult"
+    range: "7 to 10 years"
+    min_years: 7
+    summary: >
+      The age when age-related disease starts to appear, often silently. Routine
+      screening becomes valuable: even apparently healthy cats in this group are
+      sometimes found to have early kidney disease or hyperthyroidism.
+    watch:
+      - condition: chronic-kidney-disease
+        note: "Watch for the earliest changes — SDMA plus urinalysis can flag CKD before creatinine rises."
+      - condition: hyperthyroidism
+        note: "Onset becomes more common; Total T4 screens for it."
+      - text: "Dental disease, weight changes and early diabetes risk, early neoplasia."
+    screening: >
+      Begin routine screening around age 7: at least annual exam with bloodwork
+      (including SDMA and Total T4), urinalysis, and blood pressure.
+    sources: [aafp_life_stage, senior_screening_study]
+
+  - slug: senior
+    name: "Senior"
+    range: "over 10 years"
+    min_years: 11
+    summary: >
+      The highest-risk stage. In one 2-year study, ~54% of senior cats that were
+      apparently healthy at the start developed a clinically relevant disease —
+      most often chronic kidney disease, hyperthyroidism, chronic GI/liver/
+      pancreas disease, or cancer. Many of these are silent early and best caught
+      by screening.
+    watch:
+      - condition: chronic-kidney-disease
+        note: "Most common senior disease; combine bloodwork with urinalysis to catch it early."
+      - condition: hyperthyroidism
+        note: "Common in seniors; Total T4 screens for it, and it can mask kidney disease."
+      - condition: heart-disease
+        note: "Cardiac disease risk rises; NT-proBNP can screen, confirmed by echocardiogram."
+      - condition: ibd-small-cell-lymphoma
+        note: "Chronic enteropathy and low-grade intestinal lymphoma become more common."
+      - text: "Also be vigilant for: systemic hypertension (check blood pressure — >160 mmHg generally warrants treatment), diabetes mellitus, neoplasia, osteoarthritis, cognitive dysfunction, and dental disease."
+    screening: >
+      Twice-yearly exams with at least annual bloodwork, urinalysis, blood
+      pressure, and Total T4. Re-test promptly if appetite, weight, thirst, or
+      activity change.
+    sources: [aafp_life_stage, senior_screening_study]

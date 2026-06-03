@@ -77,6 +77,27 @@ class TestKnowledge < Minitest::Test
     end
   end
 
+  def test_life_stages_present_and_ordered
+    stages = @kb.life_stages
+    refute_empty stages
+    mins = stages.map { |s| s["min_years"] }
+    assert_equal mins.sort, mins, "life stages must be ordered by ascending min_years"
+    assert(stages.all? { |s| s["name"] && s["range"] }, "each life stage needs a name and range")
+  end
+
+  def test_life_stage_watch_conditions_and_sources_resolve
+    condition_slugs = @kb.conditions.keys.to_set
+    source_ids = @kb.sources.keys.to_set
+    @kb.life_stages.each do |s|
+      Array(s["sources"]).each { |id| assert source_ids.include?(id), "life stage #{s['slug']} cites unknown source #{id}" }
+      Array(s["watch"]).each do |w|
+        next unless w["condition"]
+        assert condition_slugs.include?(w["condition"]),
+               "life stage #{s['slug']} watches unknown condition '#{w['condition']}'"
+      end
+    end
+  end
+
   def test_validate_reports_unknown_keys
     # A made-up key not present in the data should surface as a warning.
     warnings = @kb.validate(["Chemistry / Creatinine"])

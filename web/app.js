@@ -246,6 +246,20 @@
       return { key: other, reason: e.reason, source: e.source };
     });
   }
+  // Pick the life stage for an age (stage with the greatest min_years ≤ age).
+  function lifeStageFor(ageYears) {
+    if (ageYears == null) return null;
+    var stages = KB().life_stages || [];
+    var best = null;
+    stages.forEach(function (s) {
+      if (ageYears >= (s.min_years || 0)) best = s;
+    });
+    return best;
+  }
+  function conditionBySlug(slug) {
+    return (KB().conditions || []).find(function (c) { return c.slug === slug; });
+  }
+
   // Pick the staging band a value falls in (band with the greatest min ≤ v).
   function stageFor(v, bands) {
     if (v == null) return null;
@@ -259,9 +273,62 @@
 
   // ---- trends view --------------------------------------------------------
 
+  // Age-aware vigilance banner: the patient's current life stage and the
+  // conditions worth watching for at that age (linking to the condition panels).
+  function lifeStageBanner() {
+    var p = currentPatient();
+    var stage = lifeStageFor(p.age_years);
+    if (!stage) return null;
+
+    var watch = stage.watch || [];
+    var chips = watch.filter(function (w) { return w.condition; }).map(function (w) {
+      var c = conditionBySlug(w.condition);
+      return '<span class="ls-chip" data-cond="' + w.condition + '" title="' + escapeHtml(w.note || "") + '">' +
+        escapeHtml(c ? c.name : w.condition) + "</span>";
+    }).join("");
+    var textItems = watch.filter(function (w) { return !w.condition && w.text; })
+      .map(function (w) { return escapeHtml(w.text); }).join(" ");
+    var srcLinks = (stage.sources || []).map(function (id) {
+      var s = kbSource(id);
+      return s ? '<a class="src-link" href="' + s.url + '" target="_blank" rel="noopener">' + escapeHtml(s.name) + "</a>" : "";
+    }).filter(Boolean).join(" · ");
+
+    var box = el("div", "lifestage");
+    box.innerHTML =
+      '<div class="ls-head"><span class="ls-icon">' + stageIcon(stage.slug) + "</span>" +
+        '<div class="ls-titlewrap"><div class="ls-title">' + escapeHtml(stage.name) + " cat · " +
+          escapeHtml(p.age_text || (p.age_years + " yr")) + "</div>" +
+          '<div class="ls-sub">' + escapeHtml(stage.summary || "") + "</div></div></div>" +
+      (chips ? '<div class="ls-watch"><span class="ls-lbl">Stay vigilant about</span><div class="ls-chips">' + chips + "</div></div>" : "") +
+      (textItems ? '<div class="ls-text">' + textItems + "</div>" : "") +
+      (stage.screening ? '<div class="ls-screen"><b>Screening:</b> ' + escapeHtml(stage.screening) + "</div>" : "") +
+      '<div class="ls-foot"><span class="src">' + srcLinks + '</span><span class="note">Educational vigilance, not a diagnosis or prediction.</span></div>';
+
+    box.querySelectorAll(".ls-chip[data-cond]").forEach(function (ch) {
+      ch.addEventListener("click", function () { goToCondition(ch.getAttribute("data-cond")); });
+    });
+    return box;
+  }
+
+  function stageIcon(slug) {
+    // small inline glyphs; purely decorative
+    return { kitten: "🐱", "young-adult": "🐈", "mature-adult": "🐈", senior: "🐈‍⬛" }[slug] || "🐾";
+  }
+
+  function goToCondition(slug) {
+    state.view = "conditions";
+    state.conditionSlug = slug;
+    Array.prototype.forEach.call($("#view-toggle").children, function (b) {
+      b.classList.toggle("active", b.getAttribute("data-view") === "conditions");
+    });
+    renderAll();
+  }
+
   function renderTrends() {
     var host = $("#trends");
     host.innerHTML = "";
+    var banner = lifeStageBanner();
+    if (banner) host.appendChild(banner);
     var analytes = patientAnalytes();
     var q = state.search.toLowerCase();
 
@@ -570,9 +637,15 @@
       state.conditionSlug = conds[0].slug;
     }
 
+    var stage = lifeStageFor(currentPatient().age_years);
+    var ageSlugs = stage ? (stage.watch || []).filter(function (w) { return w.condition; })
+      .map(function (w) { return w.condition; }) : [];
+
     var tabs = el("div", "cond-tabs");
     conds.forEach(function (c) {
-      var b = el("button", "cond-tab" + (c.slug === state.conditionSlug ? " active" : ""), escapeHtml(c.name));
+      var relevant = ageSlugs.indexOf(c.slug) >= 0;
+      var dot = relevant ? '<span class="age-dot" title="Worth watching at this cat\'s life stage"></span>' : "";
+      var b = el("button", "cond-tab" + (c.slug === state.conditionSlug ? " active" : ""), dot + escapeHtml(c.name));
       b.addEventListener("click", function () { state.conditionSlug = c.slug; renderConditions(); });
       tabs.appendChild(b);
     });

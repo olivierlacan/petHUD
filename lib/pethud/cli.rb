@@ -125,7 +125,7 @@ module PetHUD
       warnings = kb.validate(known)
 
       puts "Knowledge base: #{kb.sources.size} sources, #{kb.analytes.size} analytes with context, " \
-           "#{kb.relationships.size} relationships, #{kb.conditions.size} conditions."
+           "#{kb.relationships.size} relationships, #{kb.conditions.size} conditions, #{kb.life_stages.size} life stages."
       covered = kb.analytes.keys.count { |k| known.include?(k) }
       puts "Analyte context covers #{covered}/#{known.size} imported analytes."
       if warnings.empty?

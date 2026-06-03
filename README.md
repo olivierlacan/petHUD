@@ -110,6 +110,10 @@ What you get:
   Cell Lymphoma**. Each shows only that condition's metrics, names the markers
   *not* in your reports (e.g. cobalamin/folate, blood pressure), and — for CKD —
   an IRIS staging orientation for the latest creatinine/SDMA.
+- **Age-aware vigilance**: a banner at the top of Trends shows the cat's current
+  life stage (per the AAHA/AAFP Feline Life Stage Guidelines) and the conditions
+  worth watching for at that age, linking to the relevant condition panels. Age-
+  relevant conditions are also dotted in the Conditions view.
 
 ### Auditability
 
@@ -122,6 +126,7 @@ no medical logic is buried in code:
 | `analytes.yml`     | per-metric context, each line citing source ids            |
 | `relationships.yml`| explicit `between` edges with a reason + citation          |
 | `conditions.yml`   | disease panels: member metrics, roles, missing markers, IRIS staging |
+| `life_stages.yml`  | age bands → life stage → conditions to watch (linking to the panels above) + screening, cited |
 
 Every claim references a source id; nothing renders without provenance. Run:
 

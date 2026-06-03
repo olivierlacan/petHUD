@@ -1,0 +1,19 @@
+# OS / editor
+.DS_Store
+
+# Generated database
+/db/*.sqlite3
+/db/*.sqlite3-journal
+/db/*.sqlite3-wal
+/db/*.sqlite3-shm
+
+# Generated exports + viewer data
+/exports/reports/*.json
+/web/data.js
+
+# Upload inbox (PDFs dropped via the web UI)
+/inbox/*.pdf
+
+# Ruby
+/.bundle/
+/vendor/bundle/

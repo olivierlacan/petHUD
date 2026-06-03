@@ -626,7 +626,7 @@
   // IRIS staging orientation strip for the CKD panel (creatinine + SDMA).
   function stagingBlock(cond) {
     var st = cond.staging;
-    var box = el("div", "sidecard");
+    var box = el("div", "sidecard staging-card");
     var html = '<h4>IRIS staging orientation</h4><div class="staging">';
     [["creatinine", "Chemistry / Creatinine", "Creat"], ["sdma", "Chemistry / IDEXX SDMA", "SDMA"]].forEach(function (row) {
       var spec = st[row[0]];

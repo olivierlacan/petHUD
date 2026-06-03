@@ -304,6 +304,8 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 .cond-side { display: flex; flex-direction: column; gap: 14px; }
 .sidecard { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
 .sidecard h4 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-mute); }
+/* staging card sits above the metric grid in the left column — give it room */
+.staging-card { margin-bottom: 18px; }
 .sidecard ul { margin: 0; padding-left: 16px; color: var(--text-dim); font-size: 12px; line-height: 1.6; }
 .sidecard .src-link { display: block; margin-bottom: 5px; }
 

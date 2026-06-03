@@ -1,24 +1,40 @@
 /* pethud viewer — dense, dark, zero-dependency. */
+/* Each token is defined once as light-dark(<light>, <dark>). The active side is
+   chosen by `color-scheme`, which the data-theme attribute sets below:
+     data-theme="auto"  -> light dark  (follows the OS / browser preference)
+     data-theme="light" -> light
+     data-theme="dark"  -> dark
+   So system mode is respected by default and the toggle just overrides it. */
 :root {
-  --bg: #0e1116;
-  --bg-2: #151a21;
-  --bg-3: #1b222b;
-  --panel: #11161d;
-  --line: #232c37;
-  --line-2: #2d3744;
-  --text: #d7dee7;
-  --text-dim: #8b97a6;
-  --text-mute: #5d6675;
-  --accent: #4aa8ff;
-  --normal: #3fb950;
-  --high: #f85149;
-  --low: #d29922;
-  --band: rgba(63, 185, 80, 0.10);
-  --band-line: rgba(63, 185, 80, 0.35);
+  color-scheme: light dark;
+
+  --bg:        light-dark(#f4f6f9, #0e1116);
+  --bg-2:      light-dark(#ffffff, #151a21);
+  --bg-3:      light-dark(#e9edf2, #1b222b);
+  --panel:     light-dark(#ffffff, #11161d);
+  --line:      light-dark(#dde2e9, #232c37);
+  --line-2:    light-dark(#c3ccd6, #2d3744);
+  --text:      light-dark(#171c24, #d7dee7);
+  --text-dim:  light-dark(#4d586a, #8b97a6);
+  --text-mute: light-dark(#76808f, #5d6675);
+  --accent:    light-dark(#1f6feb, #4aa8ff);
+  --on-accent: light-dark(#ffffff, #04121f);
+  --normal:    light-dark(#1a7f37, #3fb950);
+  --high:      light-dark(#cf222e, #f85149);
+  --low:       light-dark(#9a6700, #d29922);
+  --band:      light-dark(rgba(26, 127, 55, 0.10), rgba(63, 185, 80, 0.10));
+  --band-line: light-dark(rgba(26, 127, 55, 0.40), rgba(63, 185, 80, 0.35));
+  --scrim:     light-dark(rgba(20, 28, 38, 0.45), rgba(4, 7, 11, 0.74));
+  --drop-bg:   light-dark(rgba(255, 255, 255, 0.92), rgba(14, 17, 22, 0.85));
+  --shadow:    light-dark(rgba(20, 30, 50, 0.16), rgba(0, 0, 0, 0.5));
+
   --radius: 7px;
   --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"]  { color-scheme: dark; }
+:root[data-theme="auto"]  { color-scheme: light dark; }
 
 * { box-sizing: border-box; }
 /* class/id selectors with display:* otherwise beat the UA [hidden] rule */
@@ -48,7 +64,7 @@ html, body {
   flex-wrap: wrap;
 }
 .brand { display: flex; align-items: baseline; gap: 8px; }
-.logo { font-weight: 700; font-size: 17px; letter-spacing: -0.02em; color: #fff; }
+.logo { font-weight: 700; font-size: 17px; letter-spacing: -0.02em; color: var(--text); }
 .logo::first-letter { color: var(--accent); }
 .sub { color: var(--text-mute); font-size: 12px; }
 
@@ -72,7 +88,7 @@ html, body {
   background: transparent; color: var(--text-dim); border: 0;
   padding: 6px 14px; font-size: 12px; cursor: pointer; font-family: var(--sans);
 }
-.seg button.active { background: var(--accent); color: #04121f; font-weight: 600; }
+.seg button.active { background: var(--accent); color: var(--on-accent); font-weight: 600; }
 
 .check { display: flex; align-items: center; gap: 6px; color: var(--text-dim); cursor: pointer; align-self: flex-end; }
 .check input { accent-color: var(--accent); }
@@ -187,7 +203,7 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 
 /* ---- detail overlay ---- */
 .overlay {
-  position: fixed; inset: 0; background: rgba(4,7,11,0.74);
+  position: fixed; inset: 0; background: var(--scrim);
   display: flex; align-items: center; justify-content: center; z-index: 50; padding: 24px;
 }
 .overlay-card {
@@ -278,7 +294,7 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
   border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: 13px; font-family: var(--sans);
 }
 .cond-tab:hover { border-color: var(--line-2); color: var(--text); }
-.cond-tab.active { background: var(--accent); color: #04121f; font-weight: 600; border-color: var(--accent); }
+.cond-tab.active { background: var(--accent); color: var(--on-accent); font-weight: 600; border-color: var(--accent); }
 
 .cond-head { margin-bottom: 14px; }
 .cond-head h2 { margin: 0 0 6px; font-size: 18px; }
@@ -300,20 +316,20 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 .stage-bar { display: flex; flex: 1; height: 22px; border-radius: 4px; overflow: hidden; border: 1px solid var(--line); }
 .stage-seg { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 9px; font-family: var(--mono); color: var(--text-mute); position: relative; border-right: 1px solid var(--line); }
 .stage-seg:last-child { border-right: 0; }
-.stage-seg.here { background: var(--accent); color: #04121f; font-weight: 700; }
+.stage-seg.here { background: var(--accent); color: var(--on-accent); font-weight: 700; }
 .staging .note { color: var(--text-mute); font-size: 11px; font-style: italic; line-height: 1.5; margin-top: 6px; }
 .staging .latest { font-family: var(--mono); color: var(--text); }
 
 /* ---- dropzone + toast ---- */
 .dropzone { position: fixed; inset: 0; background: rgba(74,168,255,0.10); backdrop-filter: blur(2px); z-index: 60; display: flex; align-items: center; justify-content: center; }
-.drop-inner { border: 2px dashed var(--accent); border-radius: 14px; padding: 50px 70px; text-align: center; background: rgba(14,17,22,0.85); }
+.drop-inner { border: 2px dashed var(--accent); border-radius: 14px; padding: 50px 70px; text-align: center; background: var(--drop-bg); }
 .drop-icon { font-size: 40px; color: var(--accent); }
 .drop-text { margin-top: 10px; font-size: 15px; color: var(--text); }
 
 .toast {
   position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
   background: var(--bg-3); border: 1px solid var(--line-2); color: var(--text);
-  padding: 10px 16px; border-radius: 8px; font-size: 13px; z-index: 70; box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  padding: 10px 16px; border-radius: 8px; font-size: 13px; z-index: 70; box-shadow: 0 8px 30px var(--shadow);
   max-width: 80vw;
 }
 .toast.err { border-color: var(--high); }
@@ -322,5 +338,21 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 .tooltip {
   position: fixed; pointer-events: none; background: var(--bg-3); border: 1px solid var(--line-2);
   border-radius: 6px; padding: 6px 9px; font-size: 11px; font-family: var(--mono); z-index: 80;
-  color: var(--text); white-space: nowrap; box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  color: var(--text); white-space: nowrap; box-shadow: 0 6px 20px var(--shadow);
 }
+
+/* ---- theme toggle (bottom-left) ---- */
+.theme-toggle {
+  position: fixed; bottom: 14px; left: 12px; z-index: 45;
+  display: inline-flex; gap: 2px; padding: 3px;
+  background: var(--bg-2); border: 1px solid var(--line-2);
+  border-radius: 9px; box-shadow: 0 2px 12px var(--shadow);
+}
+.theme-toggle button {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; padding: 0; border: 0; border-radius: 7px;
+  background: transparent; color: var(--text-mute); cursor: pointer;
+}
+.theme-toggle button:hover { color: var(--text); background: var(--bg-3); }
+.theme-toggle button.active { color: var(--on-accent); background: var(--accent); }
+.theme-toggle svg { width: 16px; height: 16px; display: block; }

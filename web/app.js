@@ -810,7 +810,30 @@
 
   // ---- boot ---------------------------------------------------------------
 
+  // ---- theme (auto / light / dark) ---------------------------------------
+
+  function setupTheme() {
+    var tt = $("#theme-toggle");
+    if (!tt) return;
+    var current = document.documentElement.getAttribute("data-theme") || "auto";
+    paintTheme(current);
+    tt.addEventListener("click", function (e) {
+      var btn = e.target.closest("button[data-theme-set]");
+      if (!btn) return;
+      var mode = btn.getAttribute("data-theme-set");
+      document.documentElement.setAttribute("data-theme", mode);
+      try { localStorage.setItem("pethud-theme", mode); } catch (err) { /* private mode */ }
+      paintTheme(mode);
+    });
+  }
+  function paintTheme(mode) {
+    Array.prototype.forEach.call($("#theme-toggle").querySelectorAll("button"), function (b) {
+      b.classList.toggle("active", b.getAttribute("data-theme-set") === mode);
+    });
+  }
+
   function boot() {
+    setupTheme();
     if (!DATA.patients || !DATA.patients.length) {
       $("#trends").innerHTML = '<div class="empty">No data yet. Import reports with <code>bin/pethud import samples/</code> ' +
         "or drop a PDF here while running <code>bin/pethud serve</code>.</div>";

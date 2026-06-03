@@ -84,7 +84,10 @@ Viewer features:
   hover tooltip, and a date-by-date table.
 - **Reports** — one card per visit listing every out-of-range value.
 - Filters: section toggles (sidebar), analyte search, "out of range only",
-  patient selector. Deep links: `#reports`, `#a=<analyteId>`.
+  patient selector. Deep links: `#reports`, `#a=<analyteId>`, `#c=<condition>`.
+- Theme: follows your system light/dark setting by default, with a manual
+  override (auto / light / dark) in the bottom-left corner. The choice is
+  remembered; `?theme=light|dark|auto` forces it for a given link.
 
 ## Medical context
 

@@ -131,7 +131,7 @@ module PetHUD
     # --- Sections & measurements -----------------------------------------
 
     NAME_ANCHOR_SLACK = 48  # a row's leftmost word must start within this of name_x
-    CONT_GAP = 13.0         # max vertical gap (pts) for a wrapped name fragment
+    CONT_GAP = 16.0         # max vertical gap (pts) for a wrapped name fragment
 
     def parse_sections(meta)
       sections = []
@@ -189,9 +189,12 @@ module PetHUD
         next if row[:type] == :noise
 
         # A row with its own value is always a new measurement. A value-less row
-        # hugging the previous line (small gap) is a wrapped name fragment;
-        # otherwise it is a distinct (often qualitative/empty) measurement.
-        continuation = !row[:has_value] && last_measurement &&
+        # is a wrapped name fragment only when it hugs the previous line AND that
+        # previous line actually carried a value (the value never wraps). That
+        # distinguishes "Bilirubin -" + "Conjugated" (a wrap) from value-less
+        # urinalysis rows like "Color"/"Clarity" (distinct qualitative tests).
+        prev_valued = last_measurement && !last_measurement[:result_text].to_s.strip.empty?
+        continuation = !row[:has_value] && prev_valued &&
                        last_y && (line.y - last_y) <= CONT_GAP
 
         if continuation

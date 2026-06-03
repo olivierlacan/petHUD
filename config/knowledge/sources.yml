@@ -1,0 +1,159 @@
+# Citation registry for the medical-context knowledge base.
+#
+# Every claim in analytes.yml / relationships.yml / conditions.yml references
+# one or more of these source ids. Keeping the actual URLs in one place makes
+# the provenance auditable at a glance and easy to re-verify.
+#
+# All URLs below were verified reachable on 2026-06-03. If a link rots, update
+# it here once and every claim that cites it is fixed.
+#
+# Source tiers (per project decision: "broadest reputable set"):
+#   academic  — university clinical-pathology references, peer-reviewed journals
+#   guideline — professional-association consensus statements / guidelines
+#   reference — established veterinary reference works
+#   industry  — diagnostic-lab reference material (clearly labeled)
+
+sources:
+  # --- Cornell eClinpath (academic; per-analyte clinical pathology) ---------
+  eclinpath_creatinine:
+    name: "eClinpath — Creatinine"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/kidney/creatinine/"
+  eclinpath_urea:
+    name: "eClinpath — Urea Nitrogen (BUN)"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/kidney/urea-nitrogen/"
+  eclinpath_sdma:
+    name: "eClinpath — SDMA"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/kidney/sdma/"
+  eclinpath_phosphate:
+    name: "eClinpath — Phosphate"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/minerals/phosphate/"
+  eclinpath_calcium:
+    name: "eClinpath — Calcium"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/minerals/calcium/"
+  eclinpath_potassium:
+    name: "eClinpath — Potassium"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/electrolytes/potassium/"
+  eclinpath_sodium:
+    name: "eClinpath — Sodium"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/electrolytes/sodium/"
+  eclinpath_chloride:
+    name: "eClinpath — Chloride"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/electrolytes/chloride/"
+  eclinpath_total_protein:
+    name: "eClinpath — Total Protein"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/proteins/total-protein/"
+  eclinpath_albumin:
+    name: "eClinpath — Albumin"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/proteins/albumin/"
+  eclinpath_globulins:
+    name: "eClinpath — Globulins"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/proteins/globulins/"
+  eclinpath_ag_ratio:
+    name: "eClinpath — Albumin:Globulin Ratio"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/proteins/albuminglobulin/"
+  eclinpath_glucose:
+    name: "eClinpath — Glucose"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/energy-metabolism/glucose/"
+  eclinpath_fructosamine:
+    name: "eClinpath — Fructosamine"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/energy-metabolism/fructosamine/"
+  eclinpath_alt:
+    name: "eClinpath — Alanine Aminotransferase (ALT)"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/liver/liver-injury/alanine-aminotransferase/"
+  eclinpath_alp:
+    name: "eClinpath — Alkaline Phosphatase (ALP)"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/liver/cholestasis/alkaline-phosphatase/"
+  eclinpath_ggt:
+    name: "eClinpath — Gamma-Glutamyl Transferase (GGT)"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/liver/cholestasis/gamma-glutamyl-transferase/"
+
+  # --- IRIS (guideline; CKD staging authority) -----------------------------
+  iris_staging:
+    name: "IRIS Staging of CKD"
+    publisher: "International Renal Interest Society"
+    tier: guideline
+    url: "https://www.iris-kidney.com/iris-staging-system"
+  idexx_iris_guide:
+    name: "IRIS CKD Diagnosing, Staging & Treating — pocket guide (PDF)"
+    publisher: "IDEXX Laboratories (reproducing IRIS guidelines)"
+    tier: industry
+    url: "https://www.idexx.com/files/iris-pocket-guide-2.pdf"
+
+  # --- Thyroid (guideline + academic) --------------------------------------
+  cornell_thyroid:
+    name: "Feline Thyroid Tests — testing protocols & interpretation"
+    publisher: "Cornell University Animal Health Diagnostic Center"
+    tier: academic
+    url: "https://www.vet.cornell.edu/animal-health-diagnostic-center/testing/testing-protocols-interpretations/feline-thyroid-tests"
+  aafp_hyperthyroid:
+    name: "2016 AAFP Guidelines for the Management of Feline Hyperthyroidism"
+    publisher: "American Association of Feline Practitioners (J Feline Med Surg)"
+    tier: guideline
+    url: "https://journals.sagepub.com/doi/10.1177/1098612X16643252"
+
+  # --- Cardiac (academic + reference) --------------------------------------
+  fox_ntprobnp:
+    name: "Plasma NT-proBNP to screen for feline hypertrophic cardiomyopathy (Fox et al., 2009)"
+    publisher: "Journal of Veterinary Cardiology (PubMed)"
+    tier: academic
+    url: "https://pubmed.ncbi.nlm.nih.gov/19395334/"
+  tvp_cardiac:
+    name: "Cardiac Blood Tests in Cats"
+    publisher: "Today's Veterinary Practice"
+    tier: reference
+    url: "https://todaysveterinarypractice.com/cardiology/cardiac-blood-tests-in-cats/"
+
+  # --- Chronic enteropathy / IBD vs small cell lymphoma (guideline) --------
+  acvim_enteropathy:
+    name: "ACVIM consensus: distinguishing low-grade neoplastic from inflammatory lymphocytic chronic enteropathies in cats (Marsilio et al., 2023)"
+    publisher: "Journal of Veterinary Internal Medicine"
+    tier: guideline
+    url: "https://onlinelibrary.wiley.com/doi/10.1111/jvim.16690"
+
+  # --- Diabetes / glucose (reference + academic) ---------------------------
+  merck_diabetes:
+    name: "Diabetes Mellitus in Dogs and Cats"
+    publisher: "Merck Veterinary Manual"
+    tier: reference
+    url: "https://www.merckvetmanual.com/endocrine-system/the-pancreas/diabetes-mellitus-in-dogs-and-cats"
+
+  # --- SDMA / GFR (academic, peer-reviewed) --------------------------------
+  jvim_sdma_gfr:
+    name: "Plasma SDMA and creatinine and GFR in cats with normal and decreased renal function (Brans et al., 2021)"
+    publisher: "Journal of Veterinary Internal Medicine"
+    tier: academic
+    url: "https://onlinelibrary.wiley.com/doi/10.1111/jvim.15975"

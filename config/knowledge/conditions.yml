@@ -1,0 +1,117 @@
+# Disease / disorder views.
+#
+# Each condition lists the metrics genuinely linked to it in current veterinary
+# science (with a role and citation), so the viewer can show a focused panel of
+# just those trends. `missing_markers` names tests that matter for the condition
+# but aren't present in the imported reports — surfaced honestly so the panel
+# doesn't imply more coverage than the data supports.
+#
+# `staging` (CKD only) carries the verified IRIS feline cutoffs. The viewer
+# renders these as orientation for the latest value, NOT a diagnosis: real IRIS
+# staging needs persistent values in a hydrated, stable cat plus substaging.
+#
+# Analyte keys must match analytes.yml / the parsed data exactly.
+
+disclaimer: >
+  This is educational context to help you read trends and ask better questions —
+  not veterinary advice, and not a diagnosis. Lab values must be interpreted by
+  your veterinarian in the context of your cat's history and exam.
+
+conditions:
+  chronic-kidney-disease:
+    name: "Chronic Kidney Disease (CKD)"
+    summary: >
+      A common, progressive loss of kidney function in older cats. Diagnosis and
+      monitoring center on filtration markers (creatinine, SDMA), the kidneys'
+      ability to concentrate urine, proteinuria, phosphorus, potassium, blood
+      pressure, and anemia.
+    sources: [iris_staging, idexx_iris_guide, eclinpath_creatinine]
+    metrics:
+      - { analyte: "Chemistry / IDEXX SDMA", role: "Early filtration marker / IRIS staging" }
+      - { analyte: "Chemistry / Creatinine", role: "Primary filtration marker / IRIS staging" }
+      - { analyte: "Chemistry / BUN", role: "Supporting (less specific) waste marker" }
+      - { analyte: "Urinalysis / Specific Gravity", role: "Urine-concentrating ability" }
+      - { analyte: "Urinalysis / Urine Protein", role: "Proteinuria (confirm with UPC) — substaging" }
+      - { analyte: "Chemistry / Phosphorus", role: "Mineral control; rises with progression" }
+      - { analyte: "Chemistry / Calcium", role: "Calcium-phosphorus balance" }
+      - { analyte: "Chemistry / Potassium", role: "Often low in CKD cats" }
+      - { analyte: "Hematology / Hematocrit", role: "CKD-related non-regenerative anemia" }
+    missing_markers:
+      - "Urine protein:creatinine ratio (UPC) — needed for IRIS proteinuria substaging"
+      - "Systolic blood pressure — needed for IRIS hypertension substaging"
+    staging:
+      note: >
+        IRIS stages CKD on persistent fasting creatinine and/or SDMA in a
+        hydrated, stable cat, then substages by proteinuria (UPC) and blood
+        pressure. The bands below orient a single value; they are not a stage.
+      source: idexx_iris_guide
+      creatinine:
+        unit: "mg/dL"
+        bands:
+          - { stage: 1, label: "No azotemia", max: 1.6 }
+          - { stage: 2, label: "Mild azotemia", min: 1.6, max: 2.8 }
+          - { stage: 3, label: "Moderate azotemia", min: 2.9, max: 5.0 }
+          - { stage: 4, label: "Severe azotemia", min: 5.0 }
+      sdma:
+        unit: "µg/dL"
+        bands:
+          - { stage: 1, max: 18 }
+          - { stage: 2, min: 18, max: 25 }
+          - { stage: 3, min: 26, max: 38 }
+          - { stage: 4, min: 38 }
+      proteinuria_upc:
+        cat: { non_proteinuric_max: 0.2, borderline: [0.2, 0.4], proteinuric_min: 0.4 }
+      blood_pressure_mmhg:
+        normotensive_max: 140
+        prehypertensive: [140, 159]
+        hypertensive: [160, 179]
+        severely_hypertensive_min: 180
+
+  hyperthyroidism:
+    name: "Hyperthyroidism"
+    summary: >
+      Overactive thyroid, common in older cats. Screened with Total T4. It speeds
+      metabolism, can mildly raise liver enzymes, and — importantly — increases
+      kidney blood flow, which can mask underlying CKD until the thyroid is
+      treated.
+    sources: [cornell_thyroid, aafp_hyperthyroid]
+    metrics:
+      - { analyte: "Endocrinology / Total T4", role: "Primary screening test" }
+      - { analyte: "Chemistry / ALT", role: "Often mildly elevated" }
+      - { analyte: "Chemistry / ALP", role: "Often mildly elevated" }
+      - { analyte: "Chemistry / Creatinine", role: "May be masked low; watch after treatment" }
+      - { analyte: "Chemistry / IDEXX SDMA", role: "May be masked low; watch after treatment" }
+    missing_markers:
+      - "Free T4 by equilibrium dialysis / T3 — for ambiguous high-normal T4 cases"
+
+  heart-disease:
+    name: "Heart Disease (HCM screening)"
+    summary: >
+      Feline heart disease — most often hypertrophic cardiomyopathy — is often
+      silent on routine bloodwork. The NT-proBNP (Cardiopet) biomarker screens
+      for cardiac strain; abnormal results are confirmed with an echocardiogram.
+    sources: [fox_ntprobnp, tvp_cardiac]
+    metrics:
+      - { analyte: "Chemistry / Cardiopet proBNP (Feline)", role: "Cardiac strain biomarker (screen)" }
+      - { analyte: "Chemistry / Creatinine", role: "Kidney function affects NT-proBNP clearance" }
+      - { analyte: "Endocrinology / Total T4", role: "Hyperthyroidism can stress the heart" }
+    missing_markers:
+      - "Echocardiogram — the confirmatory test; bloodwork alone cannot diagnose HCM"
+      - "Blood pressure — hypertension contributes to cardiac changes"
+
+  ibd-small-cell-lymphoma:
+    name: "IBD / Small Cell Lymphoma"
+    summary: >
+      Chronic inflammatory bowel disease (IBD) and low-grade (small cell)
+      intestinal lymphoma sit on an overlapping spectrum and cannot be told apart
+      by blood tests alone — distinguishing them requires intestinal biopsy with
+      special testing. Bloodwork plays only a supporting role.
+    sources: [acvim_enteropathy]
+    metrics:
+      - { analyte: "Chemistry / Albumin", role: "May be mildly low with chronic GI loss/inflammation" }
+      - { analyte: "Chemistry / Total Protein", role: "Supporting protein status" }
+      - { analyte: "Chemistry / Globulin", role: "Inflammation marker" }
+      - { analyte: "Chemistry / Albumin: Globulin Ratio", role: "Protein-loss / inflammation pattern" }
+    missing_markers:
+      - "Cobalamin (vitamin B12) and folate — key GI markers, not on these panels"
+      - "Intestinal biopsy with histopathology / clonality (PARR) — required to distinguish IBD from lymphoma"

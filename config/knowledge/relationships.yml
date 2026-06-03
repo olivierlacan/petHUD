@@ -1,0 +1,100 @@
+# Relationship graph: pairs of metrics that should be read together.
+#
+# Each edge is undirected ("between" two analytes) and carries a plain-language
+# reason and a citation. The viewer turns these into "related metrics" links on
+# a metric's page, and uses them to express the core idea that an abnormal value
+# is often only meaningful when its partners move too.
+#
+# This list is deliberately verbose and flat so it can be audited line by line.
+# Analyte keys must match analytes.yml / the parsed data exactly.
+
+relationships:
+  # --- Kidney / GFR cluster ------------------------------------------------
+  - between: ["Chemistry / Creatinine", "Chemistry / IDEXX SDMA"]
+    reason: "Both estimate kidney filtration (GFR); SDMA usually rises earlier. IRIS stages CKD on the two together."
+    source: iris_staging
+  - between: ["Chemistry / Creatinine", "Chemistry / BUN"]
+    reason: "Both are nitrogenous wastes cleared by the kidneys; BUN is the less specific of the two."
+    source: eclinpath_urea
+  - between: ["Chemistry / BUN", "Chemistry / BUN: Creatinine Ratio"]
+    reason: "The ratio is computed from BUN and creatinine to separate pre-renal causes from kidney disease."
+    source: eclinpath_urea
+  - between: ["Chemistry / Creatinine", "Chemistry / BUN: Creatinine Ratio"]
+    reason: "The ratio is computed from BUN and creatinine to separate pre-renal causes from kidney disease."
+    source: eclinpath_urea
+  - between: ["Chemistry / Creatinine", "Urinalysis / Specific Gravity"]
+    reason: "Azotemia with dilute urine points to kidney disease; azotemia with concentrated urine suggests dehydration."
+    source: iris_staging
+  - between: ["Chemistry / IDEXX SDMA", "Urinalysis / Specific Gravity"]
+    reason: "Reduced filtration is far more convincing when the kidneys also can't concentrate urine."
+    source: iris_staging
+  - between: ["Chemistry / Creatinine", "Chemistry / Phosphorus"]
+    reason: "Phosphorus rises as CKD advances and is managed by IRIS stage."
+    source: iris_staging
+  - between: ["Chemistry / Phosphorus", "Chemistry / Calcium"]
+    reason: "Calcium and phosphorus are hormonally co-regulated; the balance is read together."
+    source: eclinpath_calcium
+  - between: ["Chemistry / Creatinine", "Chemistry / Potassium"]
+    reason: "Hypokalemia is common in cats with CKD."
+    source: eclinpath_potassium
+  - between: ["Chemistry / Creatinine", "Hematology / Hematocrit"]
+    reason: "Advanced CKD often causes a mild non-regenerative anemia (low hematocrit)."
+    source: eclinpath_creatinine
+  - between: ["Chemistry / Creatinine", "Urinalysis / Urine Protein"]
+    reason: "Proteinuria substages CKD (via UPC) and predicts progression."
+    source: iris_staging
+
+  # --- Protein pattern -----------------------------------------------------
+  - between: ["Chemistry / Total Protein", "Chemistry / Albumin"]
+    reason: "Total protein is the sum of albumin and globulins; interpret by its components."
+    source: eclinpath_total_protein
+  - between: ["Chemistry / Total Protein", "Chemistry / Globulin"]
+    reason: "Total protein is the sum of albumin and globulins; interpret by its components."
+    source: eclinpath_total_protein
+  - between: ["Chemistry / Albumin", "Chemistry / Globulin"]
+    reason: "The albumin-vs-globulin pattern distinguishes loss, inflammation, and dehydration."
+    source: eclinpath_ag_ratio
+  - between: ["Chemistry / Albumin", "Chemistry / Albumin: Globulin Ratio"]
+    reason: "The ratio is derived from albumin and globulin."
+    source: eclinpath_ag_ratio
+  - between: ["Chemistry / Globulin", "Chemistry / Albumin: Globulin Ratio"]
+    reason: "The ratio is derived from albumin and globulin."
+    source: eclinpath_ag_ratio
+
+  # --- Electrolytes & sample artifacts ------------------------------------
+  - between: ["Chemistry / Sodium", "Chemistry / Chloride"]
+    reason: "Chloride normally tracks sodium; divergence flags acid-base shifts."
+    source: eclinpath_chloride
+  - between: ["Chemistry / Sodium", "Chemistry / Potassium"]
+    reason: "Read as an electrolyte panel reflecting hydration and renal/adrenal function."
+    source: eclinpath_sodium
+  - between: ["Chemistry / Potassium", "Chemistry / Hemolysis Index"]
+    reason: "A hemolyzed sample can make potassium read falsely high — check the index first."
+    source: eclinpath_potassium
+
+  # --- Liver pattern -------------------------------------------------------
+  - between: ["Chemistry / ALT", "Chemistry / ALP"]
+    reason: "Hepatocellular injury (ALT) vs cholestasis (ALP) — the pattern guides interpretation."
+    source: eclinpath_alt
+  - between: ["Chemistry / ALP", "Chemistry / GGT"]
+    reason: "ALP and GGT together describe a cholestatic (bile-flow) pattern."
+    source: eclinpath_ggt
+
+  # --- Thyroid <-> kidney / liver (clinically important crosstalk) ---------
+  - between: ["Endocrinology / Total T4", "Chemistry / Creatinine"]
+    reason: "Hyperthyroidism raises kidney blood flow and can mask CKD; treating it may unmask azotemia."
+    source: cornell_thyroid
+  - between: ["Endocrinology / Total T4", "Chemistry / IDEXX SDMA"]
+    reason: "Hyperthyroidism increases GFR and can keep kidney markers deceptively low."
+    source: aafp_hyperthyroid
+  - between: ["Endocrinology / Total T4", "Chemistry / ALT"]
+    reason: "Hyperthyroidism commonly causes mild elevations in liver enzymes."
+    source: aafp_hyperthyroid
+  - between: ["Endocrinology / Total T4", "Chemistry / ALP"]
+    reason: "Hyperthyroidism commonly causes mild elevations in liver enzymes."
+    source: aafp_hyperthyroid
+
+  # --- Cardiac <-> kidney ---------------------------------------------------
+  - between: ["Chemistry / Cardiopet proBNP (Feline)", "Chemistry / Creatinine"]
+    reason: "Reduced kidney clearance can modestly raise NT-proBNP, so interpret cardiac biomarker with renal function."
+    source: tvp_cardiac

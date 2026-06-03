@@ -21,6 +21,7 @@ module PetHUD
       when "reimport" then cmd_reimport(argv)
       when "export"   then cmd_export(argv)
       when "list"     then cmd_list(argv)
+      when "knowledge" then cmd_knowledge(argv)
       when "serve"    then cmd_serve(argv)
       when "reset"    then cmd_reset(argv)
       when nil, "-h", "--help", "help" then usage
@@ -40,6 +41,7 @@ module PetHUD
           bin/pethud reimport [--force]                     Re-import samples/ + inbox/
           bin/pethud export                                 Rebuild JSON + web/data.js
           bin/pethud list [patients|reports|analytes]       Inspect the corpus
+          bin/pethud knowledge                              Audit the medical-context config
           bin/pethud serve [--port N] [--open]              Run the local viewer
           bin/pethud reset [--force]                        Delete the database
 
@@ -109,6 +111,29 @@ module PetHUD
         end
       else
         abort "list: expected patients|reports|analytes"
+      end
+    end
+
+    # --- knowledge --------------------------------------------------------
+
+    # Audit the medical-context config: validate every analyte key and citation
+    # id against the imported data, and summarize coverage.
+    def cmd_knowledge(_argv)
+      db = Database.new(PetHUD.db_path).db
+      known = db.execute("SELECT section, name FROM analytes").map { |a| Knowledge.key_for(a["section"], a["name"]) }
+      kb = Knowledge.new
+      warnings = kb.validate(known)
+
+      puts "Knowledge base: #{kb.sources.size} sources, #{kb.analytes.size} analytes with context, " \
+           "#{kb.relationships.size} relationships, #{kb.conditions.size} conditions."
+      covered = kb.analytes.keys.count { |k| known.include?(k) }
+      puts "Analyte context covers #{covered}/#{known.size} imported analytes."
+      if warnings.empty?
+        puts "Validation: OK — every analyte key matches and every citation resolves."
+      else
+        puts "Validation: #{warnings.size} warning(s):"
+        warnings.each { |w| puts "  - #{w}" }
+        exit 1
       end
     end
 

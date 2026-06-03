@@ -1,0 +1,369 @@
+# Per-analyte educational context, shown above the trend chart.
+#
+# Keys are "Section / Name" and must match the parsed analyte exactly (the
+# importer validates this and warns on any mismatch).
+#
+# Every entry is intentionally conservative and non-diagnostic. Fields:
+#   summary        what the test measures, in plain language
+#   high / low     what an out-of-range result *may* suggest (not a diagnosis)
+#   isolation      the "don't over-read one value" caveat — shown prominently
+#                  when this value is flagged, because many abnormals are only
+#                  meaningful alongside related values
+#   sources        ids from sources.yml backing the statements above
+#
+# Nothing here is a substitute for veterinary interpretation. See conditions.yml
+# for how these roll up into disease-specific panels.
+
+analytes:
+  "Chemistry / IDEXX SDMA":
+    summary: >
+      SDMA (symmetric dimethylarginine) is a kidney-filtration marker. It tends
+      to rise earlier than creatinine — when roughly 25–40% of kidney function
+      is lost — so it can flag chronic kidney disease before creatinine does.
+    high: >
+      A persistent SDMA above the reference interval suggests reduced kidney
+      filtration. IRIS uses it (with creatinine) to stage CKD. A single mildly
+      high value can be a false positive, so it should be rechecked.
+    low: >
+      Low SDMA is not clinically significant.
+    isolation: >
+      One high SDMA isn't a diagnosis. It's most meaningful when persistent
+      (repeated, in a hydrated cat) and read together with creatinine, urine
+      specific gravity, and phosphorus.
+    sources: [eclinpath_sdma, jvim_sdma_gfr, iris_staging]
+
+  "Chemistry / Creatinine":
+    summary: >
+      Creatinine is a waste product cleared by the kidneys; blood levels rise as
+      filtration falls. With SDMA it is the basis of IRIS CKD staging.
+    high: >
+      Elevated creatinine (azotemia) suggests reduced kidney filtration, but can
+      also be pre-renal (dehydration) or, rarely, post-renal (obstruction).
+      Higher muscle mass nudges it up; muscle loss lowers it.
+    low: >
+      Low creatinine is usually unimportant and can reflect low muscle mass.
+    isolation: >
+      Interpret with hydration status and urine specific gravity: a hydrated cat
+      that still can't concentrate urine while azotemic points to kidney disease,
+      whereas dehydration alone can raise creatinine transiently.
+    sources: [eclinpath_creatinine, iris_staging]
+
+  "Chemistry / BUN":
+    summary: >
+      Blood urea nitrogen (BUN) is a protein-breakdown waste product filtered by
+      the kidneys. It is a less specific kidney marker than creatinine or SDMA.
+    high: >
+      High BUN can reflect reduced kidney filtration, but is frequently raised by
+      dehydration, a recent high-protein meal, or gastrointestinal bleeding.
+    low: >
+      Low BUN can follow a low-protein diet or liver dysfunction.
+    isolation: >
+      High BUN with normal creatinine and SDMA is often dehydration, diet, or GI
+      bleeding rather than kidney disease — don't read it alone.
+    sources: [eclinpath_urea]
+
+  "Chemistry / BUN: Creatinine Ratio":
+    summary: >
+      The ratio of BUN to creatinine, used to help separate pre-renal causes
+      (e.g. dehydration, GI bleeding) from intrinsic kidney disease.
+    high: >
+      A high ratio can suggest dehydration or gastrointestinal bleeding.
+    low: >
+      A low ratio can follow a low-protein diet or liver dysfunction.
+    isolation: >
+      A derived ratio — only meaningful alongside the BUN and creatinine values
+      it's computed from, plus hydration status.
+    sources: [eclinpath_urea]
+
+  "Chemistry / Phosphorus":
+    summary: >
+      Phosphorus is regulated partly by the kidneys. It is central to CKD
+      monitoring, where IRIS sets stage-specific target ranges.
+    high: >
+      High phosphorus (hyperphosphatemia) is common as CKD advances and is a
+      target of treatment (diet, binders). Young growing animals run higher.
+    low: >
+      Low phosphorus has several causes including some endocrine disorders.
+    isolation: >
+      Most informative in the context of kidney values and calcium — the
+      calcium-phosphorus balance matters more than phosphorus alone.
+    sources: [eclinpath_phosphate, iris_staging]
+
+  "Chemistry / Calcium":
+    summary: >
+      Total blood calcium, tightly hormone-regulated. Calcium and phosphorus are
+      interpreted together.
+    high: >
+      High calcium has many causes (some hormonal or neoplastic) and warrants
+      follow-up, ideally with ionized calcium.
+    low: >
+      Low total calcium is often tied to low albumin and may not reflect true
+      (ionized) calcium.
+    isolation: >
+      Total calcium is affected by albumin; an abnormal value is best confirmed
+      with ionized calcium and read alongside phosphorus.
+    sources: [eclinpath_calcium]
+
+  "Chemistry / Potassium":
+    summary: >
+      A key electrolyte for nerve and muscle function, regulated by the kidneys.
+    high: >
+      High potassium can occur with urinary obstruction or severe kidney/adrenal
+      disease and can affect the heart. Hemolyzed samples can read falsely high.
+    low: >
+      Low potassium (hypokalemia) is common in cats with CKD and can cause
+      weakness.
+    isolation: >
+      Check the Hemolysis Index — a hemolyzed sample can spuriously change
+      potassium. Otherwise interpret with kidney values.
+    sources: [eclinpath_potassium]
+
+  "Chemistry / Sodium":
+    summary: >
+      The major extracellular electrolyte, reflecting water balance more than
+      salt intake.
+    high: >
+      High sodium usually reflects water deficit (dehydration).
+    low: >
+      Low sodium can reflect fluid shifts or losses.
+    isolation: >
+      Read with chloride, hydration status, and the other electrolytes — sodium
+      alone rarely tells the story.
+    sources: [eclinpath_sodium]
+
+  "Chemistry / Chloride":
+    summary: >
+      An electrolyte that tracks closely with sodium and contributes to
+      acid-base balance.
+    high: >
+      High chloride often parallels high sodium (dehydration) or acid-base shifts.
+    low: >
+      Low chloride can follow vomiting or acid-base disturbances.
+    isolation: >
+      Interpreted alongside sodium and the acid-base picture, not on its own.
+    sources: [eclinpath_chloride]
+
+  "Chemistry / Glucose":
+    summary: >
+      Blood sugar. In cats this is strongly affected by stress at the visit.
+    high: >
+      A high glucose in cats is frequently stress hyperglycemia rather than
+      diabetes; fructosamine reflects the prior ~2 weeks and helps tell them
+      apart. Persistent high glucose with clinical signs suggests diabetes.
+    low: >
+      Low glucose has several causes and, if real, can be serious; a delayed or
+      mishandled sample can also read falsely low.
+    isolation: >
+      One high glucose in a stressed cat usually isn't diabetes — confirm with
+      fructosamine (or repeat at home) before drawing conclusions.
+    sources: [eclinpath_glucose, eclinpath_fructosamine, merck_diabetes]
+
+  "Chemistry / Total Protein":
+    summary: >
+      The sum of albumin and globulins in blood; a broad screen interpreted via
+      its two components.
+    high: >
+      High total protein can reflect dehydration or increased globulins
+      (inflammation/immune stimulation).
+    low: >
+      Low total protein can follow loss (gut, kidney, blood) or reduced
+      production.
+    isolation: >
+      Always break down into albumin vs globulin — the components, and their
+      ratio, carry the meaning.
+    sources: [eclinpath_total_protein]
+
+  "Chemistry / Albumin":
+    summary: >
+      The main blood protein made by the liver; helps hold fluid in vessels.
+    high: >
+      High albumin essentially means dehydration (concentration).
+    low: >
+      Low albumin can reflect gastrointestinal loss, kidney loss, liver
+      underproduction, or chronic inflammation. In chronic enteropathy it is
+      usually only mildly low.
+    isolation: >
+      Read with globulin and total protein. In suspected gut disease, low
+      albumin is a supportive — not specific — finding.
+    sources: [eclinpath_albumin, acvim_enteropathy]
+
+  "Chemistry / Globulin":
+    summary: >
+      A mixed group of blood proteins including antibodies; reflects immune and
+      inflammatory activity.
+    high: >
+      High globulin suggests inflammation, chronic infection, or immune
+      stimulation.
+    low: >
+      Low globulin can follow blood or gut loss, or immune deficiency.
+    isolation: >
+      Interpreted with albumin (and the A:G ratio); the pattern matters more than
+      the single number.
+    sources: [eclinpath_globulins]
+
+  "Chemistry / Albumin: Globulin Ratio":
+    summary: >
+      The ratio of albumin to globulin, a pattern marker for inflammation and
+      protein loss.
+    high: >
+      A high ratio is rarely a concern on its own.
+    low: >
+      A low ratio can reflect low albumin, high globulin, or both — seen with
+      inflammation and some protein-losing conditions.
+    isolation: >
+      A derived value — interpret with the albumin and globulin it comes from.
+    sources: [eclinpath_ag_ratio]
+
+  "Chemistry / ALT":
+    summary: >
+      Alanine aminotransferase, an enzyme that leaks from liver cells when they
+      are injured. A fairly liver-specific marker.
+    high: >
+      Elevated ALT indicates liver-cell injury, but the magnitude doesn't equal
+      severity and many causes are mild or secondary (including hyperthyroidism
+      in cats).
+    low: >
+      Low ALT is not clinically significant.
+    isolation: >
+      A modest ALT rise alone is non-specific. Read with ALP, GGT, bilirubin, and
+      — in older cats — thyroid status.
+    sources: [eclinpath_alt]
+
+  "Chemistry / ALP":
+    summary: >
+      Alkaline phosphatase. In cats ALP has a short half-life, so even small
+      elevations can be meaningful.
+    high: >
+      High ALP in cats can accompany cholestasis (impaired bile flow),
+      hyperthyroidism, or other conditions and warrants follow-up.
+    low: >
+      Low ALP is not clinically significant.
+    isolation: >
+      Interpret with the other liver markers and thyroid status rather than alone.
+    sources: [eclinpath_alp, aafp_hyperthyroid]
+
+  "Chemistry / GGT":
+    summary: >
+      Gamma-glutamyl transferase, a liver/biliary enzyme that complements ALP for
+      cholestasis.
+    high: >
+      High GGT supports a cholestatic (bile-flow) pattern of liver disease.
+    low: >
+      Low GGT is not clinically significant.
+    isolation: >
+      Best read alongside ALP and bilirubin as part of the cholestasis pattern.
+    sources: [eclinpath_ggt]
+
+  "Chemistry / Hemolysis Index":
+    summary: >
+      A sample-quality flag indicating red-cell breakdown (hemolysis) in the
+      tube. It is about the specimen, not the patient.
+    high: >
+      A raised hemolysis index means some chemistry results on the same panel may
+      be artifactually altered (e.g. potassium can read falsely high).
+    low: >
+      A normal index means hemolysis is unlikely to be skewing results.
+    isolation: >
+      This value exists precisely to caution interpretation of *other* results —
+      check it before trusting an unexpected abnormal on the same panel.
+    sources: [eclinpath_potassium]
+
+  "Chemistry / Lipemia Index":
+    summary: >
+      A sample-quality flag indicating fat (lipemia) in the sample, often from a
+      non-fasted draw. It is about the specimen, not the patient.
+    high: >
+      A raised lipemia index means some results on the same panel may be
+      artifactually altered.
+    low: >
+      A normal index means lipemia is unlikely to be skewing results.
+    isolation: >
+      Like the hemolysis index, this is a caution flag for *other* values on the
+      same panel — not a finding in itself.
+    sources: [eclinpath_total_protein]
+
+  "Chemistry / Cardiopet proBNP (Feline)":
+    summary: >
+      NT-proBNP is a hormone released when heart muscle is stretched or stressed.
+      The Cardiopet proBNP test screens for heart disease (commonly hypertrophic
+      cardiomyopathy) before symptoms appear.
+    high: >
+      An elevated NT-proBNP raises concern for cardiac disease and typically
+      prompts an echocardiogram to confirm. It is sensitive for severe disease
+      but can miss mild-to-moderate HCM, so a normal result doesn't fully exclude
+      it. Reduced kidney function can also modestly raise it.
+    low: >
+      A low/normal result makes clinically significant heart strain less likely
+      at that moment, but doesn't rule out early disease.
+    isolation: >
+      A blood biomarker, not a diagnosis — abnormal results are confirmed with
+      imaging (echocardiogram), and the value is influenced by kidney function.
+    sources: [fox_ntprobnp, tvp_cardiac]
+
+  "Endocrinology / Total T4":
+    summary: >
+      Total thyroxine, the main screening test for feline hyperthyroidism — a
+      common disease of older cats.
+    high: >
+      A high Total T4 with compatible signs supports hyperthyroidism. Early or
+      concurrently-ill cats can sit high-normal, sometimes needing additional
+      thyroid tests.
+    low: >
+      Low T4 can occur with non-thyroidal illness; primary hypothyroidism is rare
+      in cats.
+    isolation: >
+      Importantly, hyperthyroidism increases kidney blood flow and can mask
+      underlying CKD — kidney values may look better than they truly are and can
+      worsen once thyroid levels are controlled. Interpret T4 and kidney values
+      together.
+    sources: [cornell_thyroid, aafp_hyperthyroid]
+
+  "Hematology / Hematocrit":
+    summary: >
+      The fraction of blood made up of red cells; a core measure of anemia or
+      dehydration.
+    high: >
+      A high hematocrit usually reflects dehydration (concentration) rather than
+      true excess red cells.
+    low: >
+      A low hematocrit means anemia. Cats with advanced CKD often develop a mild,
+      slowly-progressive non-regenerative anemia.
+    isolation: >
+      Read with hydration status (a dehydrated anemic cat can look deceptively
+      normal) and the reticulocyte count to judge whether the marrow is
+      responding.
+    sources: [eclinpath_creatinine]
+
+  "Urinalysis / Specific Gravity":
+    summary: >
+      Urine specific gravity (USG) measures how concentrated the urine is — a
+      direct readout of the kidneys' concentrating ability.
+    high: >
+      Well-concentrated urine (cats typically concentrate above ~1.035) suggests
+      the kidneys are conserving water effectively.
+    low: >
+      Dilute urine, especially alongside elevated kidney values, is a hallmark of
+      reduced concentrating ability in CKD. It can also follow other causes of
+      increased drinking.
+    isolation: >
+      USG is the key partner to blood kidney values: azotemia *with* dilute urine
+      points to kidney disease, whereas azotemia with concentrated urine suggests
+      dehydration. Always read them together.
+    sources: [iris_staging, eclinpath_creatinine]
+
+  "Urinalysis / Urine Protein":
+    summary: >
+      A dipstick estimate of protein in urine. Proteinuria is a risk factor for
+      CKD progression; IRIS substages CKD by the urine protein:creatinine (UPC)
+      ratio.
+    high: >
+      Protein in urine can indicate kidney involvement, but the dipstick is only a
+      screen — it must be confirmed and quantified with a UPC ratio on a sample
+      without blood or infection.
+    low: >
+      Absence of dipstick protein is reassuring but doesn't fully exclude
+      low-level proteinuria.
+    isolation: >
+      A positive dipstick alone isn't meaningful — it needs a UPC ratio and an
+      inactive sediment (no blood/infection) to interpret for CKD substaging.
+    sources: [iris_staging]

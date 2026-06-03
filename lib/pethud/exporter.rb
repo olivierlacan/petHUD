@@ -83,13 +83,32 @@ module PetHUD
     end
 
     def build_payload(generated_at: nil)
+      analytes = analytes_payload
       {
         generated_at: generated_at,
         patients: patients_payload,
         reports: reports_payload,
-        analytes: analytes_payload,
-        series: series_payload
+        analytes: analytes,
+        series: series_payload,
+        knowledge: knowledge_payload(analytes)
       }
+    end
+
+    # Loads the medical-context knowledge base, validates it against the analytes
+    # actually present, prints any warnings, and returns its payload (or nil if
+    # the config is absent).
+    def knowledge_payload(analytes)
+      kb = Knowledge.new
+      known_keys = analytes.map { |a| Knowledge.key_for(a[:section], a[:name]) }
+      warnings = kb.validate(known_keys)
+      unless warnings.empty?
+        warn "knowledge: #{warnings.size} validation warning(s):"
+        warnings.each { |w| warn "  - #{w}" }
+      end
+      kb.payload
+    rescue => e
+      warn "knowledge: skipped (#{e.class}: #{e.message})"
+      nil
     end
 
     def patients_payload

@@ -767,6 +767,27 @@ import { givenName } from "./lib/resolver.js";
     });
   }
 
+  // Re-parse every stored PDF with the current parser (e.g. after a parser fix),
+  // updating the stored report docs in place. Uses the originals retained in
+  // IndexedDB, so no re-dropping is needed.
+  function reprocessAll() {
+    return db.getAllPdfs().then(function (pdfs) {
+      if (!pdfs.length) { toast("No stored PDFs to reprocess.", null, 2500); return; }
+      toast("Reprocessing " + pdfs.length + " report(s)…", null, 60000);
+      var chain = Promise.resolve();
+      pdfs.forEach(function (rec) {
+        chain = chain.then(function () {
+          return rec.blob.arrayBuffer()
+            .then(function (buf) { return processPdf(buf, rec.filename); })
+            .then(function (res) { return db.putReport({ sha256: res.sha, reportDoc: res.reportDoc, patientSlug: null }); });
+        });
+      });
+      return chain.then(rebuildFromDb).then(function () {
+        ensurePatient(); renderAll(); toast("Reprocessed " + pdfs.length + " report(s).", "ok", 3000);
+      });
+    });
+  }
+
   // ---- pets & aliases manager --------------------------------------------
 
   // A patient's identifying keys (external ids + given names) for matching.
@@ -995,7 +1016,10 @@ import { givenName } from "./lib/resolver.js";
 
     var p = currentPatient();
     $("#corpus-meta").innerHTML = DATA.reports.length + " reports · " + DATA.analytes.length + " analytes" +
+      '<br><button id="reprocess" class="linkbtn">Reprocess all</button>' +
       '<br><button id="clear-all" class="linkbtn">Clear all data…</button>';
+    var reBtn = $("#reprocess");
+    if (reBtn) reBtn.addEventListener("click", reprocessAll);
     var clearBtn = $("#clear-all");
     if (clearBtn) clearBtn.addEventListener("click", clearAllData);
     var ids = (p.identities || []).map(function (i) { return escapeHtml(i.pet_name + " / " + i.owner); });
@@ -1098,9 +1122,12 @@ import { givenName } from "./lib/resolver.js";
       toast("Importing " + f.name + "…", null, 60000);
       f.arrayBuffer().then(function (buf) {
         if (!looksLikePdf(buf)) throw new Error("not a PDF");
+        // Store the original File directly: pdf.js transfers (detaches) the
+        // ArrayBuffer to its worker during processPdf, so a Blob made from `buf`
+        // afterward would be empty. The File is independent of that.
         return processPdf(buf, f.name).then(function (res) {
           return Promise.all([
-            db.putPdf({ sha256: res.sha, filename: f.name, blob: new Blob([buf], { type: "application/pdf" }), importedAt: new Date().toISOString() }),
+            db.putPdf({ sha256: res.sha, filename: f.name, blob: f, importedAt: new Date().toISOString() }),
             db.putReport({ sha256: res.sha, reportDoc: res.reportDoc, patientSlug: null }),
           ]);
         });

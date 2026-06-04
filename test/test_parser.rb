@@ -114,4 +114,26 @@ class TestPatientResolver < Minitest::Test
     refute_equal "iris", p.slug
     assert p.notes =~ /Auto-created/
   end
+
+  def test_name_matches_as_leading_word_not_exact
+    # pet_name is "<NAME> <OWNER SURNAME>"; the rule name "IRIS" must still match.
+    a = @resolver.resolve(pet_name: "IRIS REED", pet_owner: "REED", patient_external_id: "x", species: "Feline")
+    assert_equal "iris", a.slug
+  end
+
+  def test_same_owner_different_pet_is_isolated
+    # The bug: a different cat in the same household (owner REED) must NOT be
+    # merged into Iris just because the owner matches.
+    p = @resolver.resolve(pet_name: "P'TIT LOUP REED", pet_owner: "REED", patient_external_id: "900903", species: "Feline")
+    refute_equal "iris", p.slug
+    assert_equal "p-tit-loup", p.slug
+    assert_equal "P'tit Loup", p.name # owner surname stripped from the auto name
+  end
+
+  def test_owner_alone_does_not_match
+    # A pet whose name doesn't match but whose owner is in a (legacy) rule must
+    # not match on owner.
+    p = @resolver.resolve(pet_name: "MITTENS PARK", pet_owner: "PARK", patient_external_id: "0", species: "Feline")
+    refute_equal "iris", p.slug
+  end
 end

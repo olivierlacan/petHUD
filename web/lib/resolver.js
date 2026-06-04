@@ -23,37 +23,54 @@ export class PatientResolver {
     this.auto = new Map();
   }
 
+  // A report matches a configured patient by external id, or by the pet's given
+  // name (the leading word of pet_name, which reads "<NAME> <OWNER SURNAME>").
+  // Owner is NOT a match key on its own — one household has multiple pets, so
+  // owner-matching would merge different animals (Iris and P'tit Loup, both REED).
   resolve(meta) {
     const name = String(meta.pet_name ?? "").toUpperCase().trim();
-    const owner = String(meta.pet_owner ?? "").toUpperCase().trim();
     const ext = String(meta.patient_external_id ?? "").trim();
 
     const rule = this.rules.find((r) =>
       (ext !== "" && r.external_ids.includes(ext)) ||
-      (name !== "" && r.names.includes(name)) ||
-      (owner !== "" && r.owners.includes(owner)));
+      (name !== "" && r.names.some((n) => name === n || name.startsWith(n + " "))));
 
     if (rule) {
       return { slug: rule.slug, name: rule.name, species: rule.species ?? meta.species, notes: rule.notes };
     }
-    return this.autoPatient(meta, name, owner, ext);
+    return this.autoPatient(meta, name, ext);
   }
 
-  autoPatient(meta, name, owner, ext) {
+  autoPatient(meta, name, ext) {
+    const owner = String(meta.pet_owner ?? "").toUpperCase().trim();
     const key = ext === "" ? `${name}-${owner}` : ext;
     if (this.auto.has(key)) return this.auto.get(key);
 
-    let slug = slugify(meta.pet_name || meta.pet_owner || key);
+    const given = givenName(meta.pet_name, meta.pet_owner);
+    let slug = slugify(given || meta.pet_owner || key);
     if ([...this.auto.values()].some((p) => p.slug === slug)) slug = `${slug}-${key}`;
     const patient = {
       slug,
-      name: titleCase(meta.pet_name || meta.pet_owner || "Unknown"),
+      name: titleCase(given || meta.pet_owner || "Unknown"),
       species: meta.species,
-      notes: "Auto-created (no alias rule matched).",
+      notes: "Auto-created (no alias rule matched). Edit config/patients.json to alias.",
     };
     this.auto.set(key, patient);
     return patient;
   }
+}
+
+// Given name = pet_name minus a trailing owner surname ("P'TIT LOUP REED" +
+// owner "REED" -> "P'TIT LOUP").
+function givenName(petName, owner) {
+  const n = String(petName ?? "").trim();
+  if (!n) return null;
+  const o = String(owner ?? "").trim();
+  if (o && n.toUpperCase().endsWith(" " + o.toUpperCase())) {
+    const stripped = n.slice(0, n.length - o.length - 1).trim();
+    return stripped || n;
+  }
+  return n;
 }
 
 function slugify(str) {

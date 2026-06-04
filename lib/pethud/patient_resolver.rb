@@ -42,39 +42,61 @@ module PetHUD
     end
 
     # Returns a Patient for the given report meta hash.
+    #
+    # A report matches a configured patient when its external id is listed, OR
+    # the pet's given name matches (as the leading word of pet_name, which on
+    # IDEXX reports reads "<NAME> <OWNER SURNAME>"). Owner is deliberately NOT a
+    # match key on its own — one household has multiple pets, so matching by
+    # owner would merge different animals (e.g. Iris and P'tit Loup, both REED).
     def resolve(meta)
       name = meta[:pet_name].to_s.upcase.strip
-      owner = meta[:pet_owner].to_s.upcase.strip
       ext = meta[:patient_external_id].to_s.strip
 
       rule = @rules.find do |r|
         (!ext.empty? && r[:external_ids].include?(ext)) ||
-          (!name.empty? && r[:names].include?(name)) ||
-          (!owner.empty? && r[:owners].include?(owner))
+          (!name.empty? && r[:names].any? { |n| name_matches?(name, n) })
       end
 
       if rule
         Patient.new(slug: rule[:slug], name: rule[:name],
                     species: rule[:species] || meta[:species], notes: rule[:notes])
       else
-        auto_patient(meta, name, owner, ext)
+        auto_patient(meta, name, ext)
       end
+    end
+
+    # pet_name equals the configured name, or starts with it as a whole word.
+    def name_matches?(pet_name, configured)
+      pet_name == configured || pet_name.start_with?("#{configured} ")
     end
 
     private
 
-    def auto_patient(meta, name, owner, ext)
+    def auto_patient(meta, name, ext)
+      owner = meta[:pet_owner].to_s.upcase.strip
       key = ext.empty? ? "#{name}-#{owner}" : ext
       @auto[key] ||= begin
-        slug = slugify(meta[:pet_name] || meta[:pet_owner] || key)
+        given = given_name(meta[:pet_name], meta[:pet_owner])
+        slug = slugify(given || meta[:pet_owner] || key)
         slug = "#{slug}-#{key}" if @auto.values.any? { |p| p.slug == slug }
         Patient.new(
           slug: slug,
-          name: title_case(meta[:pet_name] || meta[:pet_owner] || "Unknown"),
+          name: title_case(given || meta[:pet_owner] || "Unknown"),
           species: meta[:species],
-          notes: "Auto-created (no alias rule matched)."
+          notes: "Auto-created (no alias rule matched). Edit config/patients.json to alias."
         )
       end
+    end
+
+    # The pet's given name = pet_name with a trailing owner surname removed
+    # ("P'TIT LOUP REED" + owner "REED" -> "P'TIT LOUP").
+    def given_name(pet_name, owner)
+      return nil if pet_name.nil? || pet_name.strip.empty?
+
+      n = pet_name.strip
+      o = owner.to_s.strip
+      n = n[0...-(o.length + 1)].strip if !o.empty? && n.upcase.end_with?(" #{o.upcase}")
+      n.empty? ? pet_name.strip : n
     end
 
     def slugify(str)

@@ -1,0 +1,12 @@
+{
+  "name": "pethud-web",
+  "private": true,
+  "type": "module",
+  "description": "Browser-side pipeline + tooling for pethud (parser parity test, build).",
+  "scripts": {
+    "parity": "node test/parity.mjs"
+  },
+  "devDependencies": {
+    "pdfjs-dist": "^6.0.0"
+  }
+}

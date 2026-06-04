@@ -17,3 +17,6 @@
 # Ruby
 /.bundle/
 /vendor/bundle/
+
+# Node (JS tooling / browser build)
+node_modules/

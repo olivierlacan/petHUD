@@ -82,6 +82,11 @@ Viewer features:
   history of past results.
 - **Detail** — click any card for a full chart with axes, reference band,
   hover tooltip, and a date-by-date table.
+- **Missing / stale data** — charts mark report dates where a test *wasn't*
+  run (dashed gaps), and the time axis extends to your latest report so a
+  trailing gap is visible. When a metric wasn't included in the last couple of
+  reports, its card and detail page say so ("last measured …; treat as
+  historical") — so an older value isn't mistaken for a current one.
 - **Reports** — one card per visit listing every out-of-range value.
 - Filters: section toggles (sidebar), analyte search, "out of range only",
   patient selector. Deep links: `#reports`, `#a=<analyteId>`, `#c=<condition>`.

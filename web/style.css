@@ -176,6 +176,16 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
   display: flex; justify-content: space-between;
   font-family: var(--mono); font-size: 10px; color: var(--text-mute); margin-top: 3px;
 }
+/* stale = latest report didn't re-check this analyte; its last value is old.
+   Kept subtle (footer tag + chart gap) since many cards can be stale at once. */
+.stale-tag { color: var(--low); cursor: help; }
+.stale-note {
+  display: flex; gap: 9px; align-items: flex-start; margin: 4px 0 12px;
+  background: rgba(210, 153, 34, 0.08); border: 1px solid rgba(210, 153, 34, 0.3);
+  border-radius: 8px; padding: 9px 11px; line-height: 1.5; color: var(--text); font-size: 12px;
+}
+.stale-note .ic { color: var(--low); font-size: 14px; flex: 0 0 auto; }
+.stale-note b { color: var(--low); }
 
 .qual-badges { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
 .qual-badges .b { font-family: var(--mono); font-size: 10px; padding: 1px 5px; border-radius: 3px; background: var(--bg-3); color: var(--text-dim); }
@@ -263,6 +273,10 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 .pt.L { fill: var(--low); }
 .pt.ok { fill: var(--normal); }
 .hoverline { stroke: var(--line-2); stroke-width: 1; }
+/* missing-data gaps: a report existed at this date but didn't include the test */
+.gap-line { stroke: var(--low); stroke-width: 1; stroke-dasharray: 2 3; opacity: 0.45; }
+.gap-pt { fill: var(--low); opacity: 0.6; }
+.gap-label { fill: var(--low); opacity: 0.85; font-size: 9px; }
 
 /* ---- metric context panel (detail overlay) ---- */
 .context { margin: 6px 0 14px; }

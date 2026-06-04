@@ -87,8 +87,9 @@
 
   // ---- scales -------------------------------------------------------------
 
-  function scales(pts, box, refLow, refHigh) {
+  function scales(pts, box, refLow, refHigh, extraX) {
     var xs = pts.map(function (p) { return ms(p.date); });
+    (extraX || []).forEach(function (t) { if (t != null) xs.push(t); });
     var vs = pts.map(function (p) { return p.value; });
     if (refLow != null) vs.push(refLow);
     if (refHigh != null) vs.push(refHigh);
@@ -119,12 +120,16 @@
 
   // ---- sparkline ----------------------------------------------------------
 
-  function sparkline(pts) {
+  function sparkline(pts, ctx) {
     var W = 208, H = 46;
     if (pts.length === 0) return svgEl(W, H, "spark") + "</svg>";
     var ref = latestRef(pts);
     var box = { l: 2, t: 4, w: W - 4, h: H - 8 };
-    var s = scales(pts, box, ref.low, ref.high);
+    var firstMs = ms(pts[0].date), lastMs = ms(pts[pts.length - 1].date);
+    // Extend the time axis to the latest report so a trailing gap is visible.
+    var domainMax = ctx ? Math.max(lastMs, ctx.latestMs || lastMs) : lastMs;
+    var gaps = ctx ? ctx.missingDates.filter(function (d) { return d >= firstMs && d <= domainMax; }) : [];
+    var s = scales(pts, box, ref.low, ref.high, gaps.concat([domainMax]));
     var out = svgEl(W, H, "spark");
 
     if (ref.low != null && ref.high != null) {
@@ -132,6 +137,11 @@
       out += '<rect class="ref-band" x="' + box.l + '" y="' + yTop.toFixed(1) +
         '" width="' + box.w + '" height="' + Math.max(0, yBot - yTop).toFixed(1) + '"/>';
     }
+    // gaps: reports where this analyte wasn't measured
+    gaps.forEach(function (d) {
+      var gx = s.X(d).toFixed(1);
+      out += '<line class="gap-line" x1="' + gx + '" y1="' + box.t + '" x2="' + gx + '" y2="' + (box.t + box.h) + '"/>';
+    });
     if (pts.length > 1) {
       var d = pts.map(function (p, i) {
         return (i ? "L" : "M") + s.X(ms(p.date)).toFixed(1) + " " + s.Y(p.value).toFixed(1);
@@ -148,11 +158,14 @@
 
   // ---- big detail chart with axes + hover --------------------------------
 
-  function bigChart(pts) {
+  function bigChart(pts, ctx) {
     var W = 820, H = 280;
     var box = { l: 52, t: 16, w: W - 70, h: H - 52 };
     var ref = latestRef(pts);
-    var s = scales(pts, box, ref.low, ref.high);
+    var firstMs = ms(pts[0].date), lastMs = ms(pts[pts.length - 1].date);
+    var domainMax = ctx ? Math.max(lastMs, ctx.latestMs || lastMs) : lastMs;
+    var gaps = ctx ? ctx.missingDates.filter(function (d) { return d >= firstMs && d <= domainMax; }) : [];
+    var s = scales(pts, box, ref.low, ref.high, gaps.concat([domainMax]));
     var out = svgEl(W, H, "bigchart");
 
     // y gridlines + labels
@@ -171,6 +184,19 @@
       out += '<line class="ref-edge" x1="' + box.l + '" y1="' + yBot.toFixed(1) + '" x2="' + (box.l + box.w) + '" y2="' + yBot.toFixed(1) + '"/>';
     }
 
+    // gaps: dashed verticals where a report exists but didn't include this
+    // analyte (with a hollow tick at the baseline).
+    gaps.forEach(function (gd) {
+      var gx = s.X(gd).toFixed(1);
+      out += '<line class="gap-line" x1="' + gx + '" y1="' + box.t + '" x2="' + gx + '" y2="' + (box.t + box.h) + '"/>';
+      out += '<circle class="gap-pt" cx="' + gx + '" cy="' + (box.t + box.h) + '" r="2.5"/>';
+    });
+    // when meaningfully stale, label the latest report so the trailing gap reads
+    if (ctx && ctx.staleFlag && ctx.latestMs > lastMs) {
+      out += '<text class="axis-label gap-label" x="' + s.X(ctx.latestMs).toFixed(1) + '" y="' + (box.t - 5) +
+        '" text-anchor="end">latest report · not tested</text>';
+    }
+
     // x labels — thinned so clustered dates don't overlap. Anchor on the most
     // recent point (walk right-to-left) so the latest date always reads clean.
     var label = {}, prevX = 1e9;
@@ -184,6 +210,10 @@
       out += '<text class="axis-label" x="' + s.X(ms(p.date)).toFixed(1) + '" y="' + (box.t + box.h + 16) +
         '" text-anchor="' + anchor + '">' + fmtDateShort(p.date) + "</text>";
     });
+    if (ctx && ctx.staleFlag && ctx.latestMs > lastMs) {
+      out += '<text class="axis-label gap-label" x="' + s.X(ctx.latestMs).toFixed(1) + '" y="' + (box.t + box.h + 16) +
+        '" text-anchor="end">' + fmtDateShort(ctx.latestDate) + "</text>";
+    }
 
     if (pts.length > 1) {
       var d = pts.map(function (p, i) {
@@ -225,6 +255,36 @@
   function lastNumeric(a) {
     var n = numericSeries(seriesFor(a.id));
     return n.length ? n[n.length - 1] : null;
+  }
+
+  // Which of the patient's reports did/didn't include this analyte. Used to draw
+  // gaps on charts and to flag a metric whose latest value predates the most
+  // recent report (i.e. it wasn't re-checked and may be outdated).
+  function reportContext(analyteId) {
+    var reports = DATA.reports.filter(function (r) { return r.patient_id === state.patientId; })
+      .slice().sort(function (a, b) { return a.date.localeCompare(b.date) || a.id - b.id; });
+    var present = {};
+    var measured = [];
+    seriesFor(analyteId).forEach(function (p) { present[p.report_id] = true; measured.push(p.date); });
+    measured.sort();
+    var lastMeasured = measured.length ? measured[measured.length - 1] : null;
+    var missing = reports.filter(function (r) { return !present[r.id]; });
+    var latest = reports[reports.length - 1];
+    // how many reports are newer than the last time this analyte was measured
+    var newerCount = lastMeasured ? reports.filter(function (r) { return r.date > lastMeasured; }).length : 0;
+    return {
+      reports: reports,
+      missingDates: missing.map(function (r) { return ms(r.date); }),
+      latestDate: latest ? latest.date : null,
+      latestMs: latest ? ms(latest.date) : null,
+      lastMeasured: lastMeasured,
+      newerCount: newerCount,
+      // chart gaps always show; the prominent "stale" flag (card tag, detail note,
+      // chart trailing label) fires only when the value is meaningfully behind —
+      // ≥2 newer reports skipped it, so it's not just a one-off partial recheck.
+      stale: latest ? !present[latest.id] : false,
+      staleFlag: newerCount >= 2
+    };
   }
 
   // ---- knowledge base access ----------------------------------------------
@@ -375,6 +435,18 @@
     var a = item.a, num = item.num;
     var c = el("div", "card");
     c.setAttribute("data-analyte", a.id);
+    var ctx = reportContext(a.id);
+    if (ctx.staleFlag) c.classList.add("stale");
+
+    // footer right cell: point/obs count + date, or a stale "not re-checked" tag
+    var footMeta = function (countText, lastDate) {
+      if (ctx.staleFlag && lastDate) {
+        var title = "Last measured " + fmtDate(lastDate) + "; the most recent report (" +
+          fmtDate(ctx.latestDate) + ") did not include this test";
+        return '<span class="stale-tag" title="' + title + '">&#8635; last ' + fmtDate(lastDate) + "</span>";
+      }
+      return "<span>" + countText + "</span>";
+    };
 
     if (a.numeric && num.length) {
       var last = num[num.length - 1];
@@ -394,8 +466,8 @@
         '<div class="card-top"><span class="card-name">' + a.name + '</span>' +
         '<span class="card-unit">' + (a.unit || "") + "</span></div>" +
         '<div class="card-value"><span class="v ' + fl + '">' + fmtNum(last.value) + "</span>" + deltaHtml + "</div>" +
-        sparkline(num) +
-        '<div class="card-foot"><span>' + refTxt + '</span><span>' + num.length + " pts · " + fmtDate(last.date) + "</span></div>";
+        sparkline(num, ctx) +
+        '<div class="card-foot"><span>' + refTxt + "</span>" + footMeta(num.length + " pts · " + fmtDate(last.date), last.date) + "</div>";
     } else {
       // qualitative timeline
       var qs = qualSeries(item.pts);
@@ -409,7 +481,7 @@
         '<div class="card-value"><span class="v ok" style="font-size:14px">' +
           (lastq ? escapeHtml(lastq.result_text) : "—") + "</span></div>" +
         '<div class="qual-badges">' + badges + "</div>" +
-        '<div class="card-foot"><span>qualitative</span><span>' + qs.length + " obs</span></div>";
+        '<div class="card-foot"><span>qualitative</span>' + footMeta(qs.length + " obs", lastq ? lastq.date : null) + "</div>";
     }
 
     if (kbAnalyte(a)) c.appendChild(el("span", "kbadge", "&#9432;")); // ⓘ: sourced context available
@@ -436,6 +508,15 @@
       (a.unit ? " · " + a.unit : "") + "</span></div>";
 
     var num = numericSeries(pts);
+    var ctx = reportContext(analyteId);
+    var staleNote = "";
+    if (ctx.staleFlag && (num.length || qualSeries(pts).length)) {
+      var lastDate = num.length ? num[num.length - 1].date : qualSeries(pts).slice(-1)[0].date;
+      staleNote = '<div class="stale-note"><span class="ic">&#8635;</span><span>Last measured <b>' +
+        fmtDate(lastDate) + "</b> — the " + ctx.newerCount + " most recent report(s) didn't include this test (latest: " +
+        fmtDate(ctx.latestDate) + "). Treat the latest point as historical and recheck if it matters.</span></div>";
+    }
+
     var chartHtml, sub;
     if (a.numeric && num.length) {
       var ref = latestRef(num);
@@ -443,13 +524,13 @@
       sub = '<div class="detail-sub">' + num.length + " points · range " +
         fmtNum(Math.min.apply(null, vals)) + "–" + fmtNum(Math.max.apply(null, vals)) +
         (ref.low != null ? " · reference " + fmtNum(ref.low) + "–" + fmtNum(ref.high) : "") + "</div>";
-      chartHtml = bigChart(num);
+      chartHtml = bigChart(num, ctx);
     } else {
       sub = '<div class="detail-sub">qualitative observations</div>';
       chartHtml = "";
     }
 
-    body.innerHTML = head + sub + contextPanel(a, num) + chartHtml + detailTable(pts, a);
+    body.innerHTML = head + sub + staleNote + contextPanel(a, num) + chartHtml + detailTable(pts, a);
     $("#detail").hidden = false;
 
     // related-metric chips navigate to that metric's detail

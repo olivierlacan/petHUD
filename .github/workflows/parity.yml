@@ -1,0 +1,23 @@
+name: parity
+
+# Proves the in-browser JS parser still reproduces the canonical Ruby output on
+# all sample reports. Gates pdf.js (and other) dependency bumps.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm ci
+      # vendored pdf.js must match the pinned npm version it's tested against
+      - run: npm run vendor-pdfjs
+      - run: git diff --exit-code web/vendor
+        # if this fails: run `npm run vendor-pdfjs` and commit the result
+      - run: npm run parity

@@ -4,7 +4,11 @@
   "type": "module",
   "description": "Browser-side pipeline + tooling for pethud (parser parity test, build).",
   "scripts": {
-    "parity": "node test/parity.mjs"
+    "parity": "node test/parity.mjs",
+    "vendor-pdfjs": "node scripts/vendor-pdfjs.mjs"
+  },
+  "engines": {
+    "node": ">=22.13"
   },
   "devDependencies": {
     "pdfjs-dist": "^6.0.0"

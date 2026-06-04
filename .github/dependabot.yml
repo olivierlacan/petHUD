@@ -1,0 +1,16 @@
+version: 2
+updates:
+  # Surface pdf.js (and any other npm tooling) updates as PRs. The parity
+  # workflow runs on each PR and proves the new pdf.js still parses the sample
+  # reports identically before you merge — the safety net for staying current
+  # without a floating runtime dependency.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"

@@ -22,6 +22,7 @@ module PetHUD
       when "export"   then cmd_export(argv)
       when "list"     then cmd_list(argv)
       when "knowledge" then cmd_knowledge(argv)
+      when "build-web" then cmd_build_web(argv)
       when "serve"    then cmd_serve(argv)
       when "reset"    then cmd_reset(argv)
       when nil, "-h", "--help", "help" then usage
@@ -42,6 +43,7 @@ module PetHUD
           bin/pethud export                                 Rebuild JSON + web/data.js
           bin/pethud list [patients|reports|analytes]       Inspect the corpus
           bin/pethud knowledge                              Audit the medical-context config
+          bin/pethud build-web                              Generate web/{knowledge,patients}.json for the static build
           bin/pethud serve [--port N] [--open]              Run the local viewer
           bin/pethud reset [--force]                        Delete the database
 
@@ -135,6 +137,36 @@ module PetHUD
         warnings.each { |w| puts "  - #{w}" }
         exit 1
       end
+    end
+
+    # --- build-web --------------------------------------------------------
+
+    # Emit the static config the browser build fetches at runtime: the medical
+    # knowledge (from config/knowledge/*.yml) and the patient alias rules. Run
+    # this after editing either, then redeploy web/.
+    def cmd_build_web(_argv)
+      require "json"
+      kb = Knowledge.new
+      warnings = kb.validate(corpus_analyte_keys)
+      warnings.each { |w| warn "  knowledge warning: #{w}" } unless warnings.empty?
+
+      knowledge_path = File.join(PetHUD.web_dir, "knowledge.json")
+      patients_path = File.join(PetHUD.web_dir, "patients.json")
+      File.write(knowledge_path, JSON.pretty_generate(kb.payload) + "\n")
+      FileUtils.cp(PetHUD.config_path, patients_path)
+      puts "Wrote #{knowledge_path}"
+      puts "Wrote #{patients_path}"
+    end
+
+    # Analyte keys from the DB if it exists, for validation; empty otherwise.
+    def corpus_analyte_keys
+      return [] unless File.exist?(PetHUD.db_path)
+
+      Database.new(PetHUD.db_path).db
+        .execute("SELECT section, name FROM analytes")
+        .map { |a| Knowledge.key_for(a["section"], a["name"]) }
+    rescue StandardError
+      []
     end
 
     # --- serve ------------------------------------------------------------

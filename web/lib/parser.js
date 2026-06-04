@@ -49,7 +49,7 @@ function parseHeader(lines) {
   const text = layoutLines.join("\n");
 
   const meta = {};
-  meta.pet_name = (layoutLines.find((l) => /^[A-Z][A-Z .'-]+$/.test(l.trim())) || "").trim() || null;
+  meta.pet_name = petNameFromLines(layoutLines);
   meta.pet_owner = field(text, "PET OWNER");
   meta.species = field(text, "SPECIES");
   meta.breed = field(text, "BREED");
@@ -82,6 +82,20 @@ function reconstructLine(line) {
     prevRight = w.x + w.w;
   }
   return s;
+}
+
+// Pet name = the header title (line just above "PET OWNER:"). Apostrophe- and
+// graph-label-proof, unlike regex-hunting an all-caps line.
+function petNameFromLines(layoutLines) {
+  const ownerIdx = layoutLines.findIndex((l) => /PET OWNER:/.test(l));
+  if (ownerIdx > 0) {
+    for (let i = ownerIdx - 1; i >= 0; i--) {
+      const t = layoutLines[i].trim();
+      if (t && /[A-Za-z]/.test(t) && !/^[\d(]/.test(t)) return t;
+    }
+  }
+  const m = layoutLines.find((l) => /^[A-Z][A-Z .'’-]+$/.test(l.trim()));
+  return m ? m.trim() : null;
 }
 
 function field(text, label) {

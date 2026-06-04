@@ -136,4 +136,10 @@ class TestPatientResolver < Minitest::Test
     p = @resolver.resolve(pet_name: "MITTENS PARK", pet_owner: "PARK", patient_external_id: "0", species: "Feline")
     refute_equal "iris", p.slug
   end
+
+  def test_auto_name_strips_owner_surname_last_word
+    # pet_name "<NAME> <SURNAME>" where surname is the owner's last word.
+    p = @resolver.resolve(pet_name: "P'TIT LOUP PARK", pet_owner: "MAYA PARK", patient_external_id: "900904", species: "Feline")
+    assert_equal "P'tit Loup", p.name
+  end
 end

@@ -60,14 +60,15 @@ export class PatientResolver {
   }
 }
 
-// Given name = pet_name minus a trailing owner surname ("P'TIT LOUP REED" +
-// owner "REED" -> "P'TIT LOUP").
+// Given name = pet_name minus the trailing owner surname (the last word of the
+// owner field): "P'TIT LOUP PARK" + owner "MAYA PARK" -> "P'TIT LOUP".
 export function givenName(petName, owner) {
   const n = String(petName ?? "").trim();
   if (!n) return null;
-  const o = String(owner ?? "").trim();
-  if (o && n.toUpperCase().endsWith(" " + o.toUpperCase())) {
-    const stripped = n.slice(0, n.length - o.length - 1).trim();
+  const parts = String(owner ?? "").trim().split(/\s+/);
+  const surname = parts[parts.length - 1] || "";
+  if (surname && n.toUpperCase().endsWith(" " + surname.toUpperCase())) {
+    const stripped = n.slice(0, n.length - surname.length - 1).trim();
     return stripped || n;
   }
   return n;

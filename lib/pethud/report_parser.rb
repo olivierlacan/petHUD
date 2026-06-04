@@ -61,7 +61,7 @@ module PetHUD
       lines = text.lines.map(&:rstrip)
 
       meta = {}
-      meta[:pet_name]      = lines.find { |l| l.strip =~ /\A[A-Z][A-Z .'-]+\z/ }&.strip
+      meta[:pet_name]      = pet_name_from(lines)
       meta[:pet_owner]     = field(text, "PET OWNER")
       meta[:species]       = field(text, "SPECIES")
       meta[:breed]         = field(text, "BREED")
@@ -79,6 +79,20 @@ module PetHUD
       meta[:clinic]        = parse_clinic(lines)
       meta[:idexx_services] = parse_services(text)
       meta
+    end
+
+    # The pet name is the header title — the line immediately above "PET OWNER:".
+    # (Regex-hunting an all-caps line is fragile: it skips names with a curly
+    # apostrophe and then matches a page-1 graph label like "BUN" instead.)
+    def pet_name_from(lines)
+      owner_idx = lines.find_index { |l| l =~ /PET OWNER:/ }
+      if owner_idx
+        (owner_idx - 1).downto(0) do |i|
+          t = lines[i].strip
+          return t if !t.empty? && t =~ /[A-Za-z]/ && t !~ /\A[\d(]/
+        end
+      end
+      lines.find { |l| l.strip =~ /\A[A-Z][A-Z .'’-]+\z/ }&.strip
     end
 
     # Value of a labelled field, captured up to a 2+ space gap (column break).

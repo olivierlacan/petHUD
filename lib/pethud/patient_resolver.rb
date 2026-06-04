@@ -88,14 +88,15 @@ module PetHUD
       end
     end
 
-    # The pet's given name = pet_name with a trailing owner surname removed
-    # ("P'TIT LOUP REED" + owner "REED" -> "P'TIT LOUP").
+    # The pet's given name = pet_name with the trailing owner surname removed.
+    # IDEXX appends the owner's surname (the last word of the owner field):
+    # "P'TIT LOUP PARK" + owner "MAYA PARK" -> "P'TIT LOUP".
     def given_name(pet_name, owner)
       return nil if pet_name.nil? || pet_name.strip.empty?
 
       n = pet_name.strip
-      o = owner.to_s.strip
-      n = n[0...-(o.length + 1)].strip if !o.empty? && n.upcase.end_with?(" #{o.upcase}")
+      surname = owner.to_s.strip.split(/\s+/).last
+      n = n[0...-(surname.length + 1)].strip if surname && !surname.empty? && n.upcase.end_with?(" #{surname.upcase}")
       n.empty? ? pet_name.strip : n
     end
 

@@ -732,6 +732,7 @@ import { buildPayload } from "./lib/aggregate.js";
     }).join("");
 
     c.innerHTML =
+      '<button class="report-del" title="Delete this report from your browser" aria-label="Delete report">&times;</button>' +
       "<h3>" + fmtDate(r.date) + "</h3>" +
       '<div class="rmeta"><span class="k">clinic</span> ' + escapeHtml(r.clinic_name || "—") +
       ' · <span class="k">age</span> ' + escapeHtml(r.age_text || "—") +
@@ -740,7 +741,28 @@ import { buildPayload } from "./lib/aggregate.js";
       (flagged.length
         ? '<div class="section-tag">' + flagged.length + ' out of range</div><table class="flag-table"><tbody>' + rows + "</tbody></table>"
         : '<div class="section-tag" style="color:var(--normal)">all values within range</div>');
+    if (r.sha256) {
+      c.querySelector(".report-del").addEventListener("click", function () {
+        deleteReport(r.sha256, r.source_file || fmtDate(r.date));
+      });
+    }
     return c;
+  }
+
+  // ---- local data management (browser build) ------------------------------
+
+  function deleteReport(sha, label) {
+    if (!window.confirm("Delete the report “" + label + "” from this browser?")) return;
+    db.deleteReport(sha).then(rebuildFromDb).then(function () {
+      ensurePatient(); renderAll(); toast("Report deleted.", null, 2500);
+    });
+  }
+
+  function clearAllData() {
+    if (!window.confirm("Delete ALL imported reports from this browser? This can't be undone (your original PDF files are untouched).")) return;
+    db.clearAll().then(rebuildFromDb).then(function () {
+      ensurePatient(); renderAll(); toast("All local data cleared.", null, 3000);
+    });
   }
 
   // ---- conditions view ----------------------------------------------------
@@ -874,8 +896,10 @@ import { buildPayload } from "./lib/aggregate.js";
     });
 
     var p = currentPatient();
-    $("#corpus-meta").innerHTML = "Generated<br>" + (DATA.generated_at ? DATA.generated_at.replace("T", " ").slice(0, 16) + " UTC" : "—") +
-      "<br><br>" + DATA.reports.length + " reports · " + DATA.analytes.length + " analytes";
+    $("#corpus-meta").innerHTML = DATA.reports.length + " reports · " + DATA.analytes.length + " analytes" +
+      '<br><button id="clear-all" class="linkbtn">Clear all data…</button>';
+    var clearBtn = $("#clear-all");
+    if (clearBtn) clearBtn.addEventListener("click", clearAllData);
     var ids = (p.identities || []).map(function (i) { return escapeHtml(i.pet_name + " / " + i.owner); });
     $("#patient-meta").innerHTML = p.report_count + " reports · " +
       fmtDate(p.date_range[0]) + " → " + fmtDate(p.date_range[1]) +

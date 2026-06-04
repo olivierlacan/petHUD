@@ -222,7 +222,11 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 
 /* ---- reports view ---- */
 .report-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
-.report-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; }
+.report-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; position: relative; }
+.report-del { position: absolute; top: 7px; right: 9px; background: transparent; border: 0; color: var(--text-mute); font-size: 18px; line-height: 1; cursor: pointer; padding: 1px 5px; border-radius: 4px; }
+.report-del:hover { color: var(--high); background: var(--bg-3); }
+.linkbtn { background: none; border: 0; color: var(--accent); cursor: pointer; font: inherit; font-size: 11px; padding: 6px 0 0; }
+.linkbtn:hover { text-decoration: underline; }
 .report-card h3 { margin: 0 0 2px; font-size: 14px; }
 .report-card .rmeta { color: var(--text-dim); font-size: 11px; line-height: 1.6; margin-bottom: 8px; }
 .report-card .rmeta .k { color: var(--text-mute); }

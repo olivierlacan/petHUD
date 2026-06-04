@@ -1,0 +1,9 @@
+{
+  "name": "pethud-spike",
+  "private": true,
+  "type": "module",
+  "description": "Throwaway: validate pdf.js text extraction vs pdftotext",
+  "dependencies": {
+    "pdfjs-dist": "^6.0.227"
+  }
+}

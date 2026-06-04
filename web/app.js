@@ -980,7 +980,11 @@ import { buildPayload } from "./lib/aggregate.js";
           ]);
         });
       }).then(function () { imported++; next(); })
-        .catch(function (err) { toast("Failed: " + f.name + " (" + err.message + ")", "err", 5000); next(); });
+        .catch(function (err) {
+          console.error("pethud import failed for " + f.name, err); // full stack in the console
+          toast("Failed: " + f.name + " (" + err.message + ")", "err", 5000);
+          next();
+        });
     }
     next();
   }

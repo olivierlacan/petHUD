@@ -45,8 +45,6 @@
         <input type="checkbox" id="abnormal-only">
         <span>Out of range only</span>
       </label>
-
-      <div class="meta" id="patient-meta"></div>
     </div>
   </header>
 
@@ -63,6 +61,20 @@
       <div id="reports" class="view" hidden></div>
     </section>
   </main>
+
+  <footer class="footer">
+    <span id="patient-meta"></span>
+    <button id="manage-pets" class="linkbtn">Manage pets &amp; aliases…</button>
+  </footer>
+
+  <!-- Pets & aliases manager -->
+  <div id="pets" class="overlay" hidden>
+    <div class="overlay-card">
+      <button class="close" id="pets-close" aria-label="Close">&times;</button>
+      <h2 style="margin:0 0 4px">Pets &amp; aliases</h2>
+      <div id="pets-body"></div>
+    </div>
+  </div>
 
   <!-- Detail overlay for a single analyte -->
   <div id="detail" class="overlay" hidden>

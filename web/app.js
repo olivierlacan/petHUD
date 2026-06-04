@@ -5,12 +5,14 @@
 import * as db from "./lib/db.js";
 import { processPdf, looksLikePdf } from "./lib/process.js";
 import { buildPayload } from "./lib/aggregate.js";
+import { givenName } from "./lib/resolver.js";
 
 (function () {
   "use strict";
 
   var DATA = window.PETHUD_DATA || { patients: [], reports: [], analytes: [], series: {} };
-  var patientsConfig = { patients: [] }; // aliasing rules (fetched from patients.json)
+  var patientsConfig = { patients: [] }; // static aliasing rules (patients.json)
+  var userConfig = { patients: [] };     // user overrides (renames/merges, in IndexedDB)
   var knowledge = null;                  // medical-context payload (knowledge.json)
 
   var SECTION_ORDER = ["Hematology", "Chemistry", "Urinalysis", "Urine Chemistry",
@@ -765,6 +767,102 @@ import { buildPayload } from "./lib/aggregate.js";
     });
   }
 
+  // ---- pets & aliases manager --------------------------------------------
+
+  // A patient's identifying keys (external ids + given names) for matching.
+  function patientMatchData(patient) {
+    var ext = new Set(), names = new Set();
+    (patient.identities || []).forEach(function (i) {
+      if (i.external_id) ext.add(String(i.external_id));
+      var gn = givenName(i.pet_name, i.owner);
+      if (gn) names.add(gn.toUpperCase());
+    });
+    return { external_ids: Array.from(ext), names: Array.from(names) };
+  }
+
+  function upsertUserRule(slug, mutate) {
+    userConfig.patients = userConfig.patients || [];
+    var rule = userConfig.patients.find(function (p) { return p.slug === slug; });
+    if (!rule) { rule = { slug: slug, match: { names: [], external_ids: [] } }; userConfig.patients.push(rule); }
+    rule.match = rule.match || { names: [], external_ids: [] };
+    mutate(rule);
+  }
+
+  function applyRename(patient, newName) {
+    var md = patientMatchData(patient);
+    upsertUserRule(patient.slug, function (rule) {
+      rule.name = newName;
+      rule.species = rule.species || patient.species;
+      rule.match.names = unionArr(rule.match.names, md.names);
+      rule.match.external_ids = unionArr(rule.match.external_ids, md.external_ids);
+    });
+    saveUserConfig().then(rebuildAndRerenderPets);
+  }
+
+  // Make target's rule also match source's identities, so source's reports move
+  // under target (source patient then disappears).
+  function applyMerge(source, target) {
+    var sm = patientMatchData(source), tm = patientMatchData(target);
+    upsertUserRule(target.slug, function (rule) {
+      rule.name = rule.name || target.name;
+      rule.species = rule.species || target.species;
+      rule.match.names = unionArr(unionArr(rule.match.names, tm.names), sm.names);
+      rule.match.external_ids = unionArr(unionArr(rule.match.external_ids, tm.external_ids), sm.external_ids);
+    });
+    saveUserConfig().then(rebuildAndRerenderPets);
+  }
+
+  function resetOverrides() {
+    if (!window.confirm("Reset all pet renames and merges to the defaults?")) return;
+    userConfig = { patients: [] };
+    saveUserConfig().then(rebuildAndRerenderPets);
+  }
+
+  function rebuildAndRerenderPets() {
+    return rebuildFromDb().then(function () { ensurePatient(); renderAll(); renderPetsManager(); });
+  }
+
+  function openPetsManager() { $("#pets").hidden = false; renderPetsManager(); }
+  function closePetsManager() { $("#pets").hidden = true; }
+
+  function renderPetsManager() {
+    var body = $("#pets-body");
+    if (!DATA.patients.length) { body.innerHTML = '<div class="empty">No pets yet — import a report first.</div>'; return; }
+    var rows = DATA.patients.map(function (p) {
+      var others = DATA.patients.filter(function (q) { return q.slug !== p.slug; });
+      var mergeOpts = others.map(function (q) { return '<option value="' + q.slug + '">' + escapeHtml(q.name) + "</option>"; }).join("");
+      var idsTxt = Array.from(new Set((p.identities || []).map(function (i) {
+        return i.pet_name + (i.external_id ? " #" + i.external_id : "");
+      }))).map(escapeHtml).join(" · ");
+      return '<div class="pet-row" data-slug="' + escapeHtml(p.slug) + '">' +
+        '<div class="pet-main"><div><span class="pet-name">' + escapeHtml(p.name) + '</span> ' +
+          '<span class="pet-sub">' + p.report_count + " reports · " + escapeHtml(p.species || "") + "</span></div>" +
+          '<div class="pet-ids">' + idsTxt + "</div></div>" +
+        '<div class="pet-actions"><button class="pet-rename linkbtn">Rename</button>' +
+          (others.length ? '<select class="pet-merge"><option value="">Merge into…</option>' + mergeOpts + "</select>" : "") +
+        "</div></div>";
+    }).join("");
+    body.innerHTML = '<p class="pets-intro">Reports are grouped into pets automatically. Rename a pet, or merge one into another if they\'re the same animal. Changes are saved in this browser.</p>' +
+      '<div class="pets-list">' + rows + "</div>" +
+      '<div class="pets-foot"><button id="pets-reset" class="linkbtn">Reset all customizations</button></div>';
+
+    body.querySelectorAll(".pet-row").forEach(function (row) {
+      var patient = DATA.patients.find(function (p) { return p.slug === row.getAttribute("data-slug"); });
+      row.querySelector(".pet-rename").addEventListener("click", function () {
+        var nn = window.prompt("New name for this pet:", patient.name);
+        if (nn && nn.trim() && nn.trim() !== patient.name) applyRename(patient, nn.trim());
+      });
+      var sel = row.querySelector(".pet-merge");
+      if (sel) sel.addEventListener("change", function () {
+        if (!sel.value) return;
+        var target = DATA.patients.find(function (p) { return p.slug === sel.value; });
+        if (window.confirm("Merge “" + patient.name + "” into “" + target.name + "”? Its reports will move under " + target.name + ".")) applyMerge(patient, target);
+        else sel.value = "";
+      });
+    });
+    $("#pets-reset").addEventListener("click", resetOverrides);
+  }
+
   // ---- conditions view ----------------------------------------------------
 
   function renderConditions() {
@@ -901,9 +999,9 @@ import { buildPayload } from "./lib/aggregate.js";
     var clearBtn = $("#clear-all");
     if (clearBtn) clearBtn.addEventListener("click", clearAllData);
     var ids = (p.identities || []).map(function (i) { return escapeHtml(i.pet_name + " / " + i.owner); });
-    $("#patient-meta").innerHTML = p.report_count + " reports · " +
+    $("#patient-meta").innerHTML = "<b>" + escapeHtml(p.name) + "</b> · " + p.report_count + " reports · " +
       fmtDate(p.date_range[0]) + " → " + fmtDate(p.date_range[1]) +
-      (ids.length > 1 ? "<br>aliases: " + Array.from(new Set(ids)).join(", ") : "");
+      (ids.length > 1 ? " · aliases: " + Array.from(new Set(ids)).join(", ") : "");
   }
 
   function renderPatientSelect() {
@@ -951,7 +1049,10 @@ import { buildPayload } from "./lib/aggregate.js";
     });
     $("#detail-close").addEventListener("click", closeDetail);
     $("#detail").addEventListener("click", function (e) { if (e.target === this) closeDetail(); });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeDetail(); });
+    $("#manage-pets").addEventListener("click", openPetsManager);
+    $("#pets-close").addEventListener("click", closePetsManager);
+    $("#pets").addEventListener("click", function (e) { if (e.target === this) closePetsManager(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") { closeDetail(); closePetsManager(); } });
 
     setupDropzone();
   }
@@ -1013,11 +1114,12 @@ import { buildPayload } from "./lib/aggregate.js";
     next();
   }
 
-  // Read every stored report doc and rebuild the in-memory payload.
+  // Read every stored report doc and rebuild the in-memory payload, applying the
+  // static rules plus the user's renames/merges.
   function rebuildFromDb() {
     return db.getAllReports().then(function (records) {
       var docs = records.map(function (r) { return r.reportDoc; });
-      DATA = buildPayload(docs, { patientsConfig: patientsConfig, knowledge: knowledge, generatedAt: new Date().toISOString() });
+      DATA = buildPayload(docs, { patientsConfig: mergedPatientsConfig(), knowledge: knowledge, generatedAt: new Date().toISOString() });
       window.PETHUD_DATA = DATA;
     });
   }
@@ -1029,6 +1131,32 @@ import { buildPayload } from "./lib/aggregate.js";
       fetch("knowledge.json").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
     ]).then(function (res) { patientsConfig = res[0]; knowledge = res[1]; });
   }
+
+  function loadUserConfig() {
+    return db.getSetting("patientConfig").then(function (v) { userConfig = v || { patients: [] }; });
+  }
+  function saveUserConfig() { return db.putSetting("patientConfig", userConfig); }
+
+  // Combine static rules with user overrides: same slug -> union match arrays and
+  // override name/species; new slug -> appended.
+  function mergedPatientsConfig() {
+    var bySlug = {};
+    (patientsConfig.patients || []).forEach(function (p) { bySlug[p.slug] = clone(p); });
+    (userConfig.patients || []).forEach(function (u) {
+      var s = bySlug[u.slug];
+      if (!s) { bySlug[u.slug] = clone(u); return; }
+      if (u.name) s.name = u.name;
+      if (u.species) s.species = u.species;
+      if (u.notes) s.notes = u.notes;
+      s.match = s.match || {}; u.match = u.match || {};
+      s.match.names = unionArr(s.match.names, u.match.names);
+      s.match.external_ids = unionArr(s.match.external_ids, u.match.external_ids);
+    });
+    return { patients: Object.keys(bySlug).map(function (k) { return bySlug[k]; }) };
+  }
+
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function unionArr(a, b) { return Array.from(new Set([].concat(a || [], b || []))); }
 
   var toastTimer;
   function toast(msg, kind, ttl) {
@@ -1075,6 +1203,7 @@ import { buildPayload } from "./lib/aggregate.js";
     setupTheme();
     wire(); // includes the dropzone, needed even before any data exists
     loadStaticConfig()
+      .then(loadUserConfig)
       .then(rebuildFromDb)
       .then(function () {
         if (!DATA.patients || !DATA.patients.length) {

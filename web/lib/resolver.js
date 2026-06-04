@@ -62,7 +62,7 @@ export class PatientResolver {
 
 // Given name = pet_name minus a trailing owner surname ("P'TIT LOUP REED" +
 // owner "REED" -> "P'TIT LOUP").
-function givenName(petName, owner) {
+export function givenName(petName, owner) {
   const n = String(petName ?? "").trim();
   if (!n) return null;
   const o = String(owner ?? "").trim();

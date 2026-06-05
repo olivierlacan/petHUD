@@ -1074,17 +1074,77 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
       reportSummary(r, flagged) +
       (flagged.length
         ? '<div class="section-tag">' + flagged.length + ' out of range</div><table class="flag-table"><tbody>' + rows + "</tbody></table>"
-        : '<div class="section-tag" style="color:var(--normal)">all values within range</div>');
+        : '<div class="section-tag" style="color:var(--normal)">all values within range</div>') +
+      '<button class="report-open" type="button">View full report →</button>';
     if (r.sha256) {
       c.querySelector(".report-del").addEventListener("click", function () {
         deleteReport(r.sha256, r.source_file || fmtDate(r.date));
       });
     }
+    c.querySelector(".report-open").addEventListener("click", function () { openReportDetail(r); });
     c.querySelectorAll(".rs-cond[data-cond]").forEach(function (el) {
       el.addEventListener("click", function () { goToCondition(el.getAttribute("data-cond")); });
     });
     return c;
   }
+
+  // ---- full per-report detail (every value from one visit) ----------------
+
+  // All measurements from a single report, grouped by section (display order).
+  function pointsForReport(r) {
+    var smap = DATA.series[String(state.patientId)] || {};
+    var bySection = {};
+    DATA.analytes.forEach(function (a) {
+      (smap[String(a.id)] || []).forEach(function (p) {
+        if (p.report_id !== r.id) return;
+        (bySection[a.section] || (bySection[a.section] = [])).push({ a: a, p: p });
+      });
+    });
+    Object.keys(bySection).forEach(function (sec) {
+      bySection[sec].sort(function (x, y) { return x.a.order - y.a.order; });
+    });
+    return bySection;
+  }
+
+  // Render a single point's value: numeric (with any "<"/">" qualifier + unit)
+  // or a qualitative result.
+  function ptValue(p) {
+    return p.value != null
+      ? (p.qualifier ? escapeHtml(p.qualifier) + " " : "") + fmtNum(p.value) + (p.unit ? ' <span class="rd-unit">' + escapeHtml(p.unit) + "</span>" : "")
+      : escapeHtml(qualDisplay(p.result_text || "—"));
+  }
+
+  function openReportDetail(r) {
+    var bySection = pointsForReport(r);
+    var total = 0;
+    var secHtml = SECTION_ORDER.filter(function (s) { return bySection[s]; })
+      .concat(Object.keys(bySection).filter(function (s) { return SECTION_ORDER.indexOf(s) < 0; }))
+      .map(function (sec) {
+        var color = SECTION_COLOR[sec] || "#8b949e";
+        var rows = bySection[sec].map(function (e) {
+          total++;
+          var fl = flagOf(e.p);
+          var ref = (e.p.ref_low != null) ? fmtNum(e.p.ref_low) + "–" + fmtNum(e.p.ref_high) : "";
+          return '<tr class="' + (fl !== "ok" ? fl : "") + '"><td class="rd-name">' + escapeHtml(e.a.name) +
+            '</td><td class="rd-val">' + ptValue(e.p) + '</td><td class="rd-ref">' + ref +
+            '</td><td class="rd-flag">' + (fl !== "ok" ? '<span class="pill ' + fl + '">' + fl + "</span>" : "") + "</td></tr>";
+        }).join("");
+        return '<div class="rd-section"><h4><span class="dot" style="background:' + color + '"></span>' +
+          escapeHtml(sec) + ' <span class="rd-n">' + bySection[sec].length + "</span></h4>" +
+          '<table class="rd-table"><tbody>' + rows + "</tbody></table></div>";
+      }).join("");
+
+    $("#report-detail-body").innerHTML =
+      '<h2>Report · ' + fmtDate(r.date) + "</h2>" +
+      '<div class="rmeta"><span class="k">clinic</span> ' + escapeHtml(r.clinic_name || "—") +
+      ' · <span class="k">age</span> ' + escapeHtml(r.age_text || "—") +
+      (r.lab_id ? ' · <span class="k">lab</span> ' + escapeHtml(String(r.lab_id)) : "") + "</div>" +
+      (r.idexx_services ? '<div class="svc">' + escapeHtml(r.idexx_services) + "</div>" : "") +
+      '<div class="rd-count">' + total + " result" + (total === 1 ? "" : "s") + " in this report</div>" +
+      (secHtml || '<div class="empty">No measurements parsed from this report.</div>');
+    $("#report-detail").hidden = false;
+  }
+  function closeReportDetail() { $("#report-detail").hidden = true; }
 
   // ---- local data management (browser build) ------------------------------
 
@@ -1542,6 +1602,8 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     });
     $("#detail-close").addEventListener("click", closeDetail);
     $("#detail").addEventListener("click", function (e) { if (e.target === this) closeDetail(); });
+    $("#report-detail-close").addEventListener("click", closeReportDetail);
+    $("#report-detail").addEventListener("click", function (e) { if (e.target === this) closeReportDetail(); });
     // #manage-pets / #open-journal / #import-reports live in the sidebar foot and
     // are (re)wired in renderSidebar, since that block is rebuilt on each render.
     $("#journal-close").addEventListener("click", closeJournal);
@@ -1549,7 +1611,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     $("#pets-close").addEventListener("click", closePetsManager);
     $("#pets").addEventListener("click", function (e) { if (e.target === this) closePetsManager(); });
     document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") { closeDetail(); closePetsManager(); closeJournal(); return; }
+      if (e.key === "Escape") { closeDetail(); closeReportDetail(); closePetsManager(); closeJournal(); return; }
       // ← / → browse analytes while the detail modal is open.
       if (!$("#detail").hidden && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
         e.preventDefault();

@@ -300,8 +300,10 @@ samples/                your IDEXX PDFs (gitignored — real reports stay local)
 - `samples/demo-*.pdf` — **committed, fully synthetic** reports (fictional pets,
   owners, and clinics) with designed value trends for the conditions pethud
   highlights: CKD progression (Willow), treated hyperthyroidism (Otis), a stable
-  healthy cat (Cleo), controlled diabetes (Mochi), and a healthy dog with canine
-  reference intervals (Baxter). Drag them onto the web app, or `bin/pethud import
+  healthy cat (Cleo), controlled diabetes (Mochi), HCM screening with a rising
+  Cardiopet proBNP (Juniper), IBD / small-cell lymphoma with falling albumin +
+  A:G and low cobalamin (Sage), and a healthy dog with canine reference intervals
+  (Baxter). Drag them onto the web app, or `bin/pethud import
   samples/`. Regenerate with `bundle install --with tools && ruby scripts/make_sample_pdfs.rb`
   (uses Prawn to place text at the exact point coordinates a real report uses, so
   the parser ingests them unchanged).

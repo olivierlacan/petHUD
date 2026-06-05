@@ -37,7 +37,12 @@ A = {
   wbc:         ["Hematology", "WBC", "K/µL", { feline: [3.9, 19.0], canine: [4.0, 15.5] }],
   platelets:   ["Hematology", "Platelets", "K/µL", { feline: [151, 600], canine: [148, 484] }],
   t4:          ["Endocrinology", "Total T4", "µg/dL", { feline: [0.8, 4.0], canine: [1.0, 4.0] }],
-  usg:         ["Urinalysis", "Specific Gravity", "", { feline: [1.035, 1.060], canine: [1.015, 1.045] }]
+  usg:         ["Urinalysis", "Specific Gravity", "", { feline: [1.035, 1.060], canine: [1.015, 1.045] }],
+  # condition-specific markers, added per-patient via :extra (not in the shared panel)
+  probnp:      ["Chemistry", "Cardiopet proBNP (Feline)", "pmol/L", { feline: [0, 99] }],
+  agratio:     ["Chemistry", "Albumin: Globulin Ratio", "", { feline: [0.45, 1.2], canine: [0.7, 1.5] }],
+  cobalamin:   ["Chemistry", "Cobalamin", "ng/L", { feline: [270, 1000], canine: [251, 908] }],
+  folate:      ["Chemistry", "Folate", "µg/L", { feline: [9.7, 21.6], canine: [3.5, 11.0] }]
 }.freeze
 SECTION_ORDER = ["Hematology", "Chemistry", "Endocrinology", "Urinalysis"].freeze
 PANEL = %i[creatinine sdma bun phosphorus calcium totalprot albumin globulin glucose alt alp
@@ -46,10 +51,12 @@ PANEL = %i[creatinine sdma bun phosphorus calcium totalprot albumin globulin glu
 BASE = {
   feline: { bun: 24, creatinine: 1.5, sdma: 11, phosphorus: 4.6, calcium: 9.8, totalprot: 7.2, albumin: 3.1,
             globulin: 3.8, glucose: 95, alt: 55, alp: 40, cholesterol: 150, potassium: 4.4, sodium: 152,
-            hct: 40, hgb: 13.0, wbc: 9.5, platelets: 320, t4: 2.0, usg: 1.045 },
+            hct: 40, hgb: 13.0, wbc: 9.5, platelets: 320, t4: 2.0, usg: 1.045,
+            probnp: 55, cobalamin: 520, folate: 14.0 },
   canine: { bun: 18, creatinine: 1.0, sdma: 9, phosphorus: 4.0, calcium: 10.2, totalprot: 6.2, albumin: 3.4,
             globulin: 2.6, glucose: 95, alt: 50, alp: 70, cholesterol: 200, potassium: 4.4, sodium: 146,
-            hct: 48, hgb: 16.0, wbc: 9.0, platelets: 300, t4: 1.8, usg: 1.030 }
+            hct: 48, hgb: 16.0, wbc: 9.0, platelets: 300, t4: 1.8, usg: 1.030,
+            cobalamin: 480, folate: 7.0 }
 }.freeze
 
 CLINICS = {
@@ -88,7 +95,18 @@ PATIENTS = [
     gender: "Male Neutered", id: "900571", clinic: :cedar, vet: "Dana Holloway DVM",
     services: "Wellness Chem + CBC + Heartworm", ages: ["6 Years", "7 Years", "8 Years"],
     dates: ["05/01/23", "05/14/24", "06/03/25"],
-    trend: { alp: [78, 132, 168], cholesterol: [205, 230, 248], creatinine: [1.0, 1.1, 1.2], glucose: [96, 99, 101] } }
+    trend: { alp: [78, 132, 168], cholesterol: [205, 230, 248], creatinine: [1.0, 1.1, 1.2], glucose: [96, 99, 101] } },
+  { pet: "JUNIPER HALE", owner: "HALE", sp: :feline, species: "Feline", breed: "Ragdoll",
+    gender: "Male Neutered", id: "900684", clinic: :prairie, vet: "Marcus Bell DVM",
+    services: "Cardiopet proBNP + Chem + CBC + T4", ages: ["6 Years", "7 Years", "8 Years"],
+    dates: ["02/20/24", "08/26/24", "03/04/25"], extra: %i[probnp],
+    trend: { probnp: [62, 148, 305], creatinine: [1.5, 1.6, 1.6], t4: [2.0, 2.1, 2.0], hct: [42, 41, 41] } },
+  { pet: "SAGE OKONKWO", owner: "OKONKWO", sp: :feline, species: "Feline", breed: "Shorthair, Domestic",
+    gender: "Female Spayed", id: "900795", clinic: :harbor, vet: "Priya Raman DVM",
+    services: "Chem + CBC + Cobalamin/Folate + GI panel", ages: ["10 Years", "10 Years", "11 Years"],
+    dates: ["01/22/24", "07/30/24", "02/11/25"], extra: %i[agratio cobalamin folate],
+    trend: { albumin: [3.0, 2.6, 2.2], globulin: [4.0, 4.6, 5.2], totalprot: [7.0, 7.2, 7.4],
+             cobalamin: [300, 215, 165], folate: [13.0, 12.0, 11.0], wbc: [9.0, 10.5, 12.0] } }
 ].freeze
 
 def fmt(v)
@@ -152,10 +170,12 @@ def build_reports
   seq = 70_000
   reports = []
   PATIENTS.each do |p|
+    keys = (PANEL + Array(p[:extra])).uniq
     p[:dates].each_with_index do |date, i|
       values = BASE[p[:sp]].dup
       p[:trend].each { |k, arr| values[k] = arr[i] }
-      rows = PANEL.map { |k| [k, values[k]] }
+      values[:agratio] = (values[:albumin] / values[:globulin]).round(2) if keys.include?(:agratio)
+      rows = keys.map { |k| [k, values[k]] }
       reports << {
         file: "demo-#{p[:pet].split.first.downcase}-#{iso(date)}.pdf",
         pet: p[:pet], owner: p[:owner], species: p[:species], sp: p[:sp], breed: p[:breed],

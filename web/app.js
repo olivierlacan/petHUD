@@ -1438,15 +1438,19 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     Object.keys(counts).sort(function (x, y) {
       return SECTION_ORDER.indexOf(x) - SECTION_ORDER.indexOf(y);
     }).forEach(function (sec) {
-      var li = el("li", state.hiddenSections[sec] ? "off" : "on");
+      var visible = !state.hiddenSections[sec];
+      var btn = el("button", "sec-item " + (visible ? "on" : "off"));
+      btn.type = "button";
+      btn.setAttribute("aria-pressed", visible ? "true" : "false");
+      btn.setAttribute("aria-label", (visible ? "Hide " : "Show ") + sec + " (" + counts[sec] + " analytes)");
       var color = SECTION_COLOR[sec] || "#8b949e";
-      li.innerHTML = '<span class="label"><span class="dot" style="background:' + color + '"></span>' + sec +
+      btn.innerHTML = '<span class="label"><span class="dot" style="background:' + color + '"></span>' + sec +
         '</span><span class="count">' + counts[sec] + "</span>";
-      li.addEventListener("click", function () {
+      btn.addEventListener("click", function () {
         state.hiddenSections[sec] = !state.hiddenSections[sec];
         renderSidebar(); renderTrends();
       });
-      ul.appendChild(li);
+      ul.appendChild(btn);
     });
 
     // Bulk show/hide: one button that flips every visible section at once.

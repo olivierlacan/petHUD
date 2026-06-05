@@ -29,3 +29,5 @@
 
 # Node (JS tooling / browser build)
 node_modules/
+# Comprehensive Ruby parser tests over the private corpus (real PDFs) — local only
+/test/test_parser_local.rb

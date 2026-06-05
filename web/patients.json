@@ -1,15 +1,16 @@
 {
-  "_comment": "Patient aliasing. A report matches a patient when its patient external id is in external_ids, OR the pet's given name matches `names` (matched as the leading word of the report's pet name, which reads '<NAME> <OWNER SURNAME>'). Owner is intentionally NOT a match key — one household has multiple pets, so matching by owner would merge different animals. Reports matching nothing get an auto-created patient keyed by external id. Edit this file and re-run `bin/pethud reimport --force` (Ruby) or `bin/pethud build-web` + reload (browser) to regroup.",
-  "patients": [
+  "_comment": "Patient aliasing. A report matches a patient when its patient external id is in external_ids, OR the pet's given name matches `names` (matched as the leading word of the report's pet name, which reads '<NAME> <OWNER SURNAME>'). Owner is intentionally NOT a match key — one household may have multiple pets, so matching by owner would merge different animals. Reports matching nothing get an auto-created patient keyed by external id. The default ships empty; add your own rules (see _example) and re-run `bin/pethud reimport --force` (Ruby) or `bin/pethud build-web` + reload (browser) to regroup.",
+  "_example": [
     {
-      "slug": "iris",
-      "name": "Iris",
+      "slug": "nimbus",
+      "name": "Nimbus",
       "species": "Feline",
-      "notes": "Same cat across two households; appears as IRIS REED and IRIS PARK.",
+      "notes": "Same cat seen under two households (e.g. NIMBUS REED and NIMBUS PARK).",
       "match": {
-        "names": ["IRIS"],
+        "names": ["NIMBUS"],
         "external_ids": ["900901", "900902"]
       }
     }
-  ]
+  ],
+  "patients": []
 }

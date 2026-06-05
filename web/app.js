@@ -6,6 +6,7 @@ import * as db from "./lib/db.js";
 import { processPdf, looksLikePdf } from "./lib/process.js";
 import { buildPayload } from "./lib/aggregate.js";
 import { givenName } from "./lib/resolver.js";
+import { ordinalScaleFor, qualRuns, qualKey } from "./lib/qualitative.js";
 
 (function () {
   "use strict";
@@ -97,6 +98,39 @@ import { givenName } from "./lib/resolver.js";
       if (!cur || p.report_id > cur.report_id) byDate[p.date] = p;
     });
     return Object.keys(byDate).sort().map(function (d) { return byDate[d]; });
+  }
+
+  // ---- qualitative evolution ---------------------------------------------
+  // Ordinal detection + run collapsing live in ./lib/qualitative.js (pure,
+  // unit-tested). qualSpark renders the ordinal series and stays here because
+  // it depends on the app's scale/svg helpers.
+
+  // Stepped sparkline for an ordinal qualitative series (HV steps = discrete
+  // states). `levels` low->high becomes the chart's <title> for context.
+  function qualSpark(pts, ctx, levels) {
+    var W = 208, H = 46, box = { l: 2, t: 6, w: W - 4, h: H - 12 };
+    var firstMs = ms(pts[0].date), lastMs = ms(pts[pts.length - 1].date);
+    var domainMax = ctx ? Math.max(lastMs, ctx.latestMs || lastMs) : lastMs;
+    var gaps = ctx ? ctx.missingDates.filter(function (d) { return d >= firstMs && d <= domainMax; }) : [];
+    var s = scales(pts, box, null, null, gaps.concat([domainMax]));
+    var out = svgEl(W, H, "spark");
+    out += "<title>" + escapeHtml(levels.join(" → ")) + "</title>";
+    gaps.forEach(function (d) {
+      var gx = s.X(d).toFixed(1);
+      out += '<line class="gap-line" x1="' + gx + '" y1="' + box.t + '" x2="' + gx + '" y2="' + (box.t + box.h) + '"/>';
+    });
+    if (pts.length > 1) {
+      var d = "M" + s.X(ms(pts[0].date)).toFixed(1) + " " + s.Y(pts[0].value).toFixed(1);
+      for (var i = 1; i < pts.length; i++) {
+        var x = s.X(ms(pts[i].date)).toFixed(1);
+        d += " L" + x + " " + s.Y(pts[i - 1].value).toFixed(1) + " L" + x + " " + s.Y(pts[i].value).toFixed(1);
+      }
+      out += '<path class="series-line" d="' + d + '"/>';
+    }
+    pts.forEach(function (p, i) {
+      out += '<circle class="qpt" cx="' + s.X(ms(p.date)).toFixed(1) + '" cy="' + s.Y(p.value).toFixed(1) + '" r="' + (i === pts.length - 1 ? 3 : 2) + '"/>';
+    });
+    return out + "</svg>";
   }
 
   // ---- scales -------------------------------------------------------------
@@ -501,18 +535,39 @@ import { givenName } from "./lib/resolver.js";
         sparkline(num, ctx) +
         '<div class="card-foot"><span>' + refTxt + "</span>" + footMeta(num.length + " pts · " + fmtDate(last.date), last.date) + "</div>";
     } else {
-      // qualitative timeline
+      // qualitative: chart ordinal scales (direction matters), otherwise show a
+      // run-length "change timeline" so stable values don't repeat as noise.
       var qs = qualSeries(item.pts);
       var lastq = qs.length ? qs[qs.length - 1] : null;
-      var badges = qs.slice(-6).map(function (p) {
-        return '<span class="b" title="' + fmtDate(p.date) + '">' + escapeHtml(p.result_text) + "</span>";
-      }).join("");
       c.classList.add("flag-ok");
+      var nDistinct = Object.keys(qs.reduce(function (m, p) { m[qualKey(p.result_text)] = 1; return m; }, {})).length;
+      var mid;
+      var ord = nDistinct > 1 ? ordinalScaleFor(qs) : null;
+      if (ord) {
+        var ranks = ord.pts.map(function (p) { return p.value; });
+        if (Math.max.apply(null, ranks) === Math.min.apply(null, ranks)) ord = null; // flat → no chart
+      }
+      if (ord) {
+        mid = qualSpark(ord.pts, ctx, ord.levels);
+      } else if (nDistinct <= 1) {
+        // every reading identical → one chip with a count
+        mid = '<div class="qual-badges"><span class="b">' + escapeHtml(lastq ? lastq.result_text : "—") +
+          (qs.length > 1 ? ' <span class="x">×' + qs.length + "</span>" : "") + "</span></div>";
+      } else {
+        var rs = qualRuns(qs), MAXR = 7, trimmed = rs.length > MAXR;
+        var chips = rs.slice(-MAXR).map(function (run, idx) {
+          var span = run.from === run.to ? fmtDate(run.to) : fmtDate(run.from) + " – " + fmtDate(run.to);
+          var x = run.n > 1 ? ' <span class="x">×' + run.n + "</span>" : "";
+          return (idx ? '<span class="qual-sep">›</span>' : "") +
+            '<span class="b" title="' + span + '">' + escapeHtml(run.text) + x + "</span>";
+        }).join("");
+        mid = '<div class="qual-badges">' + (trimmed ? '<span class="qual-sep">…</span>' : "") + chips + "</div>";
+      }
       c.innerHTML =
         '<div class="card-top"><span class="card-name">' + a.name + "</span></div>" +
         '<div class="card-value"><span class="v ok" style="font-size:14px">' +
           (lastq ? escapeHtml(lastq.result_text) : "—") + "</span></div>" +
-        '<div class="qual-badges">' + badges + "</div>" +
+        mid +
         '<div class="card-foot"><span>qualitative</span>' + footMeta(qs.length + " obs", lastq ? lastq.date : null) + "</div>";
     }
 

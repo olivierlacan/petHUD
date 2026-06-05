@@ -1490,10 +1490,11 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
   function renderAll() {
     // No data (fresh, or just cleared) → the welcome screen, not empty panels.
     if (!DATA.patients || !DATA.patients.length) {
+      // renderSidebar() assumes a current patient (it reads p.identities), and the
+      // sidebar is hidden by the .is-empty CSS anyway — so skip it here.
       ["conditions", "reports"].forEach(function (v) { $("#" + v).hidden = true; });
       $("#trends").hidden = false;
-      renderPatientSelect();
-      renderSidebar();
+      renderPatientSelect(); // clears the (now hidden) patient dropdown
       renderWelcome();
       return;
     }

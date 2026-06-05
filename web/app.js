@@ -497,6 +497,19 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     });
   }
 
+  // The unit is redundant when the analyte name already carries it (e.g.
+  // "% Neutrophils" with unit "%") — then we omit it.
+  function unitRedundant(name, unit) {
+    if (!unit) return true;
+    var n = String(name || "").toLowerCase().replace(/\s+/g, "");
+    return n.indexOf(String(unit).toLowerCase().replace(/\s+/g, "")) >= 0;
+  }
+  // Inline unit chip shown right after the name (frees the top-right for the
+  // info icon), or "" when redundant/absent.
+  function unitChip(a) {
+    return unitRedundant(a.name, a.unit) ? "" : '<span class="card-unit">' + escapeHtml(a.unit) + "</span>";
+  }
+
   function card(item) {
     var a = item.a, num = item.num;
     var c = el("div", "card");
@@ -529,8 +542,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
       var ref = latestRef(num);
       var refTxt = (ref.low != null && ref.high != null) ? (fmtNum(ref.low) + "–" + fmtNum(ref.high)) : "—";
       c.innerHTML =
-        '<div class="card-top"><span class="card-name">' + a.name + '</span>' +
-        '<span class="card-unit">' + (a.unit || "") + "</span></div>" +
+        '<div class="card-top"><span class="card-name">' + a.name + "</span>" + unitChip(a) + "</div>" +
         '<div class="card-value"><span class="v ' + fl + '">' + fmtNum(last.value) + "</span>" + deltaHtml + "</div>" +
         sparkline(num, ctx) +
         '<div class="card-foot"><span>' + refTxt + "</span>" + footMeta(num.length + " pts · " + fmtDate(last.date), last.date) + "</div>";

@@ -209,9 +209,9 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 .card.flag-L { border-left: 3px solid var(--low); }
 .card.flag-ok { border-left: 3px solid transparent; }
 
-/* padding-right reserves a clear lane for the absolute .kbadge info icon so
-   the unit never crowds it. */
-.card-top { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; padding-right: 26px; }
+/* Unit sits inline right after the name; padding-right keeps the row clear of
+   the absolute .kbadge info icon in the corner. */
+.card-top { display: flex; align-items: baseline; gap: 6px; padding-right: 22px; }
 .card-name { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.25; }
 .card-unit { font-size: 11px; color: var(--text-mute); font-family: var(--mono); white-space: nowrap; }
 

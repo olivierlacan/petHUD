@@ -651,10 +651,31 @@ main { max-width: 1680px; margin-inline: auto; }
   .controls { gap: 10px 14px; width: 100%; }
   .ctl-search { flex: 1 1 140px; min-width: 0; }
   main { flex-direction: column; min-height: 0; }
+
+  /* The sidebar becomes a compact full-width band above the content (rather than
+     a tall narrow column that wastes the width and buries the data): section
+     filters wrap as tappable pills, and the actions flow as a horizontal link
+     row. Keeps everything visible/keyboard-reachable — no horizontal-scroll trap. */
   .sidebar {
-    position: static; width: auto; flex: 0 0 auto; height: auto; max-height: 42vh;
-    border-right: 0; border-bottom: 1px solid var(--line);
+    position: static; width: 100%; flex: 0 0 auto; height: auto; max-height: none;
+    border-right: 0; border-bottom: 1px solid var(--line); overflow: visible;
+    padding: 10px 12px;
   }
+  .section-list { display: flex; flex-wrap: wrap; gap: 7px; }
+  .section-list li {
+    justify-content: flex-start; gap: 6px; min-height: 34px; /* comfortable tap target */
+    padding: 6px 11px; border: 1px solid var(--line-2); border-radius: 17px; background: var(--bg-3);
+  }
+  .section-list li .label { flex: 0 0 auto; }
+  .section-list li .dot { margin-right: 5px; }
+  .section-list li .count { margin-left: 1px; }
+  .side-foot {
+    display: flex; flex-wrap: wrap; align-items: center; row-gap: 2px; column-gap: 18px;
+    margin-top: 12px; padding-top: 10px;
+  }
+  .side-foot br { display: none; } /* links are <br>-separated; flow them inline instead */
+  .side-foot .linkbtn { padding: 4px 0; min-height: 30px; display: inline-flex; align-items: center; }
+
   .content { padding: 12px; }
   .welcome { margin-top: 24px; }
   .welcome-h { font-size: 24px; }

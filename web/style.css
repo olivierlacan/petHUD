@@ -253,8 +253,13 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
   color: var(--text-dim); font-size: 12px; line-height: 1.4; margin-top: 2px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.ls-toggle { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; color: var(--text-mute); font-size: 11px; }
-.ls-chev { transition: transform 0.15s ease; font-size: 12px; }
+.ls-toggle {
+  display: inline-flex; align-items: center; gap: 5px; flex: 0 0 auto; align-self: center;
+  padding: 5px 11px; border: 1px solid var(--line-2); border-radius: 6px;
+  background: var(--bg-3); color: var(--accent); font-size: 12px; font-weight: 600;
+}
+.ls-head:hover .ls-toggle { background: var(--bg-2); border-color: var(--accent); }
+.ls-chev { transition: transform 0.15s ease; font-size: 11px; }
 .ls-body { padding: 0 14px 12px 14px; }
 /* Collapsed: hide the full summary + body, show the hook, point the chevron right. */
 .lifestage:not(.collapsed) .ls-hook { display: none; }

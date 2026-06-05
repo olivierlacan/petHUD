@@ -16,8 +16,10 @@
   --line-2:    light-dark(#c3ccd6, #2d3744);
   --text:      light-dark(#171c24, #d7dee7);
   --text-dim:  light-dark(#4d586a, #8b97a6);
-  --text-mute: light-dark(#76808f, #5d6675);
-  --accent:    light-dark(#1f6feb, #4aa8ff);
+  /* text-mute / accent darkened (light) and lightened (dark) to clear WCAG AA
+     4.5:1 against the surfaces they sit on — see test/wcag-audit.mjs. */
+  --text-mute: light-dark(#646d7c, #808a98);
+  --accent:    light-dark(#1a63d6, #4aa8ff);
   --on-accent: light-dark(#ffffff, #04121f);
   --normal:    light-dark(#1a7f37, #3fb950);
   --high:      light-dark(#cf222e, #f85149);
@@ -49,7 +51,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--sans);
-  font-size: 13px;
+  font-size: 14px;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -73,7 +75,7 @@ body {
 
 .controls { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; flex: 1; }
 .ctl { display: flex; flex-direction: column; gap: 2px; }
-.ctl > span { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-mute); }
+.ctl > span { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-mute); }
 .ctl select, .ctl input {
   background: var(--bg-3);
   border: 1px solid var(--line-2);
@@ -112,7 +114,7 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
   height: calc(100vh - 47px);
   overflow-y: auto;
 }
-.side-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-mute); margin: 4px 6px 8px; }
+.side-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-mute); margin: 4px 6px 8px; }
 .section-list { list-style: none; margin: 0; padding: 0; }
 .section-list li {
   display: flex; align-items: center; justify-content: space-between;
@@ -190,6 +192,10 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
   transition: border-color 0.12s, transform 0.12s;
   position: relative;
   overflow: hidden;
+  /* Flex column so the foot can pin to the bottom even when a card has no
+     spark chart (qualitative analytes), keeping grid rows aligned. */
+  display: flex;
+  flex-direction: column;
 }
 .card:hover { border-color: var(--line-2); transform: translateY(-1px); }
 .card.flag-H { border-left: 3px solid var(--high); }
@@ -198,7 +204,7 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 
 .card-top { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; padding-right: 13px; }
 .card-name { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.25; }
-.card-unit { font-size: 10px; color: var(--text-mute); font-family: var(--mono); white-space: nowrap; }
+.card-unit { font-size: 11px; color: var(--text-mute); font-family: var(--mono); white-space: nowrap; }
 
 .card-value { display: flex; align-items: baseline; gap: 7px; margin: 3px 0 1px; }
 .card-value .v { font-family: var(--mono); font-size: 20px; font-weight: 600; line-height: 1; }
@@ -213,7 +219,8 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 .spark { width: 100%; height: 46px; display: block; margin-top: 2px; }
 .card-foot {
   display: flex; justify-content: space-between;
-  font-family: var(--mono); font-size: 10px; color: var(--text-mute); margin-top: 3px;
+  font-family: var(--mono); font-size: 11px; color: var(--text-mute);
+  margin-top: auto; padding-top: 6px; /* auto pins it to the card's bottom edge */
 }
 /* stale = latest report didn't re-check this analyte; its last value is old.
    Kept subtle (footer tag + chart gap) since many cards can be stale at once. */
@@ -227,7 +234,7 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 .stale-note b { color: var(--low); }
 
 .qual-badges { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
-.qual-badges .b { font-family: var(--mono); font-size: 10px; padding: 1px 5px; border-radius: 3px; background: var(--bg-3); color: var(--text-dim); }
+.qual-badges .b { font-family: var(--mono); font-size: 11px; padding: 1px 5px; border-radius: 3px; background: var(--bg-3); color: var(--text-dim); }
 
 .empty { color: var(--text-mute); padding: 40px; text-align: center; }
 
@@ -269,7 +276,7 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 .lifestage.collapsed .ls-toggle-lbl::after { content: "Details"; }
 .lifestage:not(.collapsed) .ls-toggle-lbl::after { content: "Less"; }
 .ls-watch { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 11px; }
-.ls-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-mute); }
+.ls-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-mute); }
 .ls-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .ls-chip {
   cursor: pointer; background: var(--bg-3); border: 1px solid var(--line-2);
@@ -301,13 +308,15 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 .flag-table td { padding: 2px 4px; font-size: 11px; border-bottom: 1px solid var(--line); }
 .flag-table td.name { color: var(--text-dim); }
 .flag-table td.val { font-family: var(--mono); text-align: right; }
-.flag-table td.ref { font-family: var(--mono); color: var(--text-mute); text-align: right; font-size: 10px; }
+.flag-table td.ref { font-family: var(--mono); color: var(--text-mute); text-align: right; font-size: 11px; }
 .flag-table .H .val { color: var(--high); }
 .flag-table .L .val { color: var(--low); }
-.pill { display: inline-block; font-family: var(--mono); font-size: 10px; padding: 1px 6px; border-radius: 10px; }
-.pill.H { background: rgba(248,81,73,0.15); color: var(--high); }
-.pill.L { background: rgba(210,153,34,0.15); color: var(--low); }
-.section-tag { color: var(--text-mute); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; margin: 8px 0 3px; }
+.pill { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 1px 6px; border-radius: 10px; }
+/* Solid, theme-aware so the small pill text clears AA (translucent fills left
+   the saturated red/amber text below 4.5:1 on white). */
+.pill.H { background: light-dark(#fde0e0, #3a1a18); color: light-dark(#b01019, #ff8d85); }
+.pill.L { background: light-dark(#f4ecd6, #322610); color: light-dark(#7e5400, #e6b342); }
+.section-tag { color: var(--text-mute); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; margin: 8px 0 3px; }
 
 /* ---- detail overlay ---- */
 .overlay {
@@ -326,14 +335,14 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 .detail-sub { color: var(--text-dim); font-size: 12px; margin-bottom: 14px; font-family: var(--mono); }
 .bigchart { width: 100%; height: 280px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; margin-top: 4px; }
 .detail-table { width: 100%; border-collapse: collapse; margin-top: 14px; }
-.detail-table th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-mute); padding: 4px 8px; border-bottom: 1px solid var(--line-2); }
+.detail-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-mute); padding: 4px 8px; border-bottom: 1px solid var(--line-2); }
 .detail-table td { padding: 4px 8px; font-size: 12px; border-bottom: 1px solid var(--line); font-family: var(--mono); }
 .detail-table td.dt { color: var(--text-dim); }
 .detail-table tr.H td.value { color: var(--high); }
 .detail-table tr.L td.value { color: var(--low); }
 
 /* chart bits shared */
-.axis-label { fill: var(--text-mute); font-size: 10px; font-family: var(--mono); }
+.axis-label { fill: var(--text-mute); font-size: 11px; font-family: var(--mono); }
 .grid-line { stroke: var(--line); stroke-width: 1; }
 .ref-band { fill: var(--band); }
 .ref-edge { stroke: var(--band-line); stroke-width: 1; stroke-dasharray: 3 3; }
@@ -346,7 +355,7 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 /* missing-data gaps: a report existed at this date but didn't include the test */
 .gap-line { stroke: var(--low); stroke-width: 1; stroke-dasharray: 2 3; opacity: 0.45; }
 .gap-pt { fill: var(--low); opacity: 0.6; }
-.gap-label { fill: var(--low); opacity: 0.85; font-size: 9px; }
+.gap-label { fill: var(--low); opacity: 0.85; font-size: 10px; }
 
 /* ---- metric context panel (detail overlay) ---- */
 .context { margin: 6px 0 14px; }
@@ -366,7 +375,7 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 .dynamics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0 4px; }
 @media (max-width: 620px) { .dynamics { grid-template-columns: 1fr; } }
 .dyn { background: var(--bg-3); border: 1px solid var(--line); border-radius: 7px; padding: 9px 11px; }
-.dyn-lbl { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-mute); margin-bottom: 4px; }
+.dyn-lbl { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-mute); margin-bottom: 4px; }
 .dyn p { margin: 0; color: var(--text-dim); font-size: 12px; line-height: 1.5; }
 
 /* collapsible "reading changes over time" primer */
@@ -383,7 +392,7 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 .primer .sources-row { padding: 0 12px 10px; margin: 6px 0 0; }
 
 .related { margin: 12px 0 4px; }
-.related .lbl, .sources-row .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-mute); margin-bottom: 6px; }
+.related .lbl, .sources-row .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-mute); margin-bottom: 6px; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip {
   display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
@@ -399,7 +408,7 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 .sources-row .links { display: flex; flex-wrap: wrap; gap: 8px 14px; }
 .src-link { color: var(--accent); text-decoration: none; font-size: 12px; }
 .src-link:hover { text-decoration: underline; }
-.src-link .tier { color: var(--text-mute); font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; margin-left: 4px; }
+.src-link .tier { color: var(--text-mute); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; margin-left: 4px; }
 .disclaimer {
   color: var(--text-dim);
   font-size: 12px;
@@ -441,14 +450,14 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 .sidecard ul { margin: 0; padding-left: 16px; color: var(--text-dim); font-size: 12px; line-height: 1.6; }
 .sidecard .src-link { display: block; margin-bottom: 5px; }
 
-.card .role { font-size: 10px; color: var(--text-mute); margin-top: 4px; line-height: 1.3; border-top: 1px dashed var(--line); padding-top: 4px; }
+.card .role { font-size: 11px; color: var(--text-mute); margin-top: 4px; line-height: 1.3; border-top: 1px dashed var(--line); padding-top: 4px; }
 
 /* IRIS staging strip */
 .staging { margin-top: 4px; }
 .staging .srow { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 12px; }
 .staging .srow .name { width: 74px; color: var(--text-dim); font-family: var(--mono); }
 .stage-bar { display: flex; flex: 1; height: 22px; border-radius: 4px; overflow: hidden; border: 1px solid var(--line); }
-.stage-seg { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 9px; font-family: var(--mono); color: var(--text-mute); position: relative; border-right: 1px solid var(--line); }
+.stage-seg { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 10px; font-family: var(--mono); color: var(--text-mute); position: relative; border-right: 1px solid var(--line); }
 .stage-seg:last-child { border-right: 0; }
 .stage-seg.here { background: var(--accent); color: var(--on-accent); font-weight: 700; }
 .staging .note { color: var(--text-mute); font-size: 11px; font-style: italic; line-height: 1.5; margin-top: 6px; }

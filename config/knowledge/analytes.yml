@@ -822,3 +822,538 @@ analytes:
       A positive dipstick alone isn't meaningful — it needs a UPC ratio and an
       inactive sediment (no blood/infection) to interpret for CKD substaging.
     sources: [iris_staging]
+
+  # ---- Chemistry (liver / lipids / enzymes / acid-base / misc) -------------
+  "Chemistry / AST":
+    summary: >
+      Aspartate aminotransferase is a "leakage" enzyme found in both liver and
+      muscle cells; it rises when those cells are injured.
+    high: >
+      A high AST means liver-cell or muscle damage. It is less liver-specific
+      than ALT, so AST up alongside ALT points to the liver, while AST up with a
+      high creatine kinase points to muscle.
+    low: >
+      Low AST is not clinically significant.
+    isolation: >
+      Read with ALT (liver) and creatine kinase (muscle) to localize the source;
+      a rough blood draw can nudge it up on its own.
+    sources: [eclinpath_ast, eclinpath_alt]
+
+  "Chemistry / Bilirubin - Total":
+    summary: >
+      Bilirubin is a pigment from the breakdown of red cells that the liver
+      processes and excretes in bile; total bilirubin is the sum of its
+      conjugated and unconjugated forms.
+    high: >
+      A high total bilirubin causes jaundice and points to one of three things:
+      increased red-cell destruction (pre-hepatic), liver disease, or obstructed
+      bile flow (post-hepatic). In cats even mild elevations matter, and hepatic
+      lipidosis is a common cause.
+    low: >
+      Low bilirubin is not clinically significant.
+    isolation: >
+      Interpret with the conjugated/unconjugated split, the liver enzymes, and
+      red-cell values (hematocrit, reticulocytes) to find the cause.
+    sources: [eclinpath_bilirubin]
+
+  "Chemistry / Bilirubin - Conjugated":
+    summary: >
+      The water-soluble form of bilirubin already processed by the liver. It
+      accumulates mainly when bile flow is impaired (cholestasis).
+    high: >
+      A higher conjugated fraction points toward liver disease or bile-duct
+      obstruction.
+    low: >
+      A low/normal value is expected.
+    isolation: >
+      Read with total bilirubin and the cholestatic enzymes (ALP, GGT).
+    sources: [eclinpath_bilirubin]
+
+  "Chemistry / Bilirubin - Unconjugated":
+    summary: >
+      The form of bilirubin produced from hemoglobin breakdown before the liver
+      conjugates it.
+    high: >
+      A higher unconjugated fraction suggests red-cell destruction (hemolysis)
+      outpacing the liver's processing.
+    low: >
+      A low/normal value is expected.
+    isolation: >
+      Read with total bilirubin and red-cell values (hematocrit, reticulocytes).
+    sources: [eclinpath_bilirubin]
+
+  "Chemistry / Cholesterol":
+    summary: >
+      A blood lipid carried in the bloodstream; values are affected by recent
+      meals and by several hormonal and metabolic conditions.
+    high: >
+      High cholesterol is often simply post-meal, but can accompany diabetes,
+      cholestatic liver disease, or kidney disease with protein loss.
+    low: >
+      Low cholesterol can reflect liver insufficiency (including portosystemic
+      shunts) or protein-losing conditions.
+    isolation: >
+      Most meaningful on a fasted sample and read with the rest of the panel.
+    sources: [eclinpath_cholesterol]
+
+  "Chemistry / Creatine Kinase":
+    summary: >
+      Creatine kinase (CK) is a leakage enzyme concentrated in muscle — the most
+      specific marker of muscle-cell damage. It rises and clears quickly.
+    high: >
+      A high CK means muscle injury, which ranges from trivial (a rough blood
+      draw, an injection, or a cat that has been recumbent/anorexic) to
+      significant trauma or muscle disease.
+    low: >
+      Low CK is not clinically significant.
+    isolation: >
+      A mild rise is often handling-related; interpret with AST and the clinical
+      picture rather than alone.
+    sources: [eclinpath_ck]
+
+  "Chemistry / Amylase":
+    summary: >
+      An enzyme historically associated with the pancreas. In cats it is not a
+      reliable test for pancreatitis.
+    high: >
+      In cats a high amylase is non-specific — it is not diagnostic for
+      pancreatic disease and can rise simply with reduced kidney clearance.
+    low: >
+      Low amylase is not clinically significant.
+    isolation: >
+      Feline pancreatitis is assessed with pancreas-specific tests (e.g. fPL /
+      SpecfPL) and imaging, not amylase.
+    sources: [eclinpath_amylase]
+
+  "Chemistry / Lipase":
+    summary: >
+      An enzyme released by the pancreas. Standard ("catalytic") lipase is a poor
+      test for pancreatitis in cats.
+    high: >
+      A high catalytic lipase is non-specific in cats and is also affected by
+      kidney function and other organs.
+    low: >
+      Low lipase is not clinically significant.
+    isolation: >
+      Don't read catalytic lipase alone for feline pancreatitis — pancreas-
+      specific lipase (fPL / DGGR) and imaging are used instead.
+    sources: [eclinpath_lipase]
+
+  "Chemistry / TCO2 (Bicarbonate)":
+    summary: >
+      Total CO2 is essentially a measure of blood bicarbonate, the body's main
+      acid buffer, and is part of acid-base balance.
+    high: >
+      A high value (metabolic alkalosis) can follow vomiting of stomach acid or
+      certain electrolyte disturbances.
+    low: >
+      A low value (metabolic acidosis) accompanies conditions that add acid or
+      lose bicarbonate — kidney disease, diabetic ketoacidosis, or poor perfusion.
+    isolation: >
+      Interpret with the anion gap, electrolytes, and the cat's clinical status.
+    sources: [eclinpath_acidbase]
+
+  "Chemistry / Anion Gap":
+    summary: >
+      A calculated estimate of "unmeasured" acids in the blood, derived from the
+      electrolytes; a screen for metabolic acidosis.
+    high: >
+      A widened anion gap suggests a build-up of acids such as ketones (diabetic
+      ketoacidosis), lactate (poor perfusion), or certain toxins, or kidney
+      failure.
+    low: >
+      A low anion gap is uncommon and usually just reflects low albumin.
+    isolation: >
+      A calculation read with TCO2/bicarbonate and the electrolytes, not alone.
+    sources: [eclinpath_anion_gap]
+
+  "Chemistry / Na: K Ratio":
+    summary: >
+      The ratio of sodium to potassium — a quick screening flag derived from two
+      electrolytes.
+    high: >
+      A high ratio is generally not a concern.
+    low: >
+      A low Na:K ratio (from high potassium and/or low sodium) classically
+      prompts consideration of Addison's disease (rare in cats), but is more
+      often due to kidney/urinary disease, GI losses, body-cavity effusions, or
+      sample handling.
+    isolation: >
+      Interpret the actual sodium and potassium values and the clinical picture,
+      not the ratio on its own.
+    sources: [eclinpath_sodium, eclinpath_potassium]
+
+  "Chemistry / Osmolality":
+    summary: >
+      The concentration of dissolved particles in blood — driven mostly by
+      sodium, glucose, and urea — reflecting the body's water balance.
+    high: >
+      High osmolality indicates a relative water deficit (dehydration) or high
+      glucose or urea.
+    low: >
+      Low osmolality indicates a relative water excess.
+    isolation: >
+      Interpret with sodium, glucose, urea, and hydration status.
+    sources: [eclinpath_fluid_changes, eclinpath_sodium]
+
+  "Chemistry / IDEXX Cystatin B (Urine)":
+    summary: >
+      Cystatin B is a urine marker of active kidney tubular injury — it is
+      released when tubule cells are damaged, so it reflects ongoing injury
+      rather than overall filtration (unlike creatinine and SDMA).
+    high: >
+      A value at or above the lab's cutoff suggests active or recent kidney
+      tubular injury and warrants a closer look.
+    low: >
+      A low value suggests a lower likelihood of active injury.
+    isolation: >
+      A newer marker interpreted alongside creatinine, SDMA, urine specific
+      gravity, and the clinical picture.
+    sources: [idexx_cystatin_b]
+
+  # ---- Endocrinology ------------------------------------------------------
+  "Endocrinology / Free T4 (ng/dL)":
+    summary: >
+      The unbound, active fraction of thyroid hormone. It is a confirmatory test
+      for hyperthyroidism used to clarify a borderline total T4 — not a
+      first-line screen, because it can read falsely high in cats that are sick
+      for other reasons.
+    high: >
+      A high free T4 supports hyperthyroidism, but only when read alongside a
+      high or high-normal total T4.
+    low: >
+      A low free T4 can occur with non-thyroidal illness.
+    isolation: >
+      A high free T4 with a low total T4 usually reflects other illness rather
+      than thyroid disease; interpret with total T4 and clinical signs.
+    sources: [aafp_hyperthyroid, cornell_thyroid]
+
+  "Endocrinology / Free T4 (pmol/L)":
+    summary: >
+      The unbound, active fraction of thyroid hormone (reported in SI units). A
+      confirmatory test for hyperthyroidism used to clarify a borderline total
+      T4, not a first-line screen.
+    high: >
+      A high free T4 supports hyperthyroidism, but only when read alongside a
+      high or high-normal total T4.
+    low: >
+      A low free T4 can occur with non-thyroidal illness.
+    isolation: >
+      A high free T4 with a low total T4 usually reflects other illness; interpret
+      with total T4 and clinical signs.
+    sources: [aafp_hyperthyroid, cornell_thyroid]
+
+  # ---- Urinalysis (dipstick) ----------------------------------------------
+  "Urinalysis / pH":
+    summary: >
+      How acidic or alkaline the urine is, influenced by diet, time since eating,
+      and acid-base status.
+    high: >
+      Alkaline urine (higher pH) can follow a meal or certain diets, or a urinary
+      infection with urease-producing bacteria, and favours struvite crystals.
+    low: >
+      Acidic urine (lower pH) is common in cats on meat-based diets and favours
+      calcium oxalate crystals.
+    isolation: >
+      Read on a fresh sample (pH drifts as urine sits) and together with the
+      sediment (crystals, bacteria).
+    sources: [eclinpath_ua_chemical]
+
+  "Urinalysis / Ketones":
+    summary: >
+      Ketones are byproducts of fat metabolism, normally absent from urine.
+    high: >
+      Ketones in the urine most often accompany diabetic ketoacidosis, but can
+      also appear with prolonged anorexia or fasting.
+    low: >
+      "Negative" is the normal result.
+    isolation: >
+      Read with blood glucose — ketones plus high glucose is a diabetic-emergency
+      flag.
+    sources: [eclinpath_ua_chemical, merck_diabetes]
+
+  "Urinalysis / Blood / Hemoglobin":
+    summary: >
+      The dipstick "blood" pad detects heme, which can come from intact red
+      cells, free hemoglobin, or muscle myoglobin — it can't tell them apart.
+    high: >
+      A positive can mean true bleeding into the urinary tract (stones,
+      inflammation, infection, tumour) or hemoglobin/myoglobin in the blood.
+    low: >
+      "Negative" is the normal result.
+    isolation: >
+      Always confirm against the sediment — a positive pad with no red cells on
+      microscopy points to hemoglobin or myoglobin rather than bleeding.
+    sources: [eclinpath_ua_chemical, eclinpath_ua_cells]
+
+  "Urinalysis / Bilirubin":
+    summary: >
+      Bilirubin (a bile pigment) detected on the dipstick.
+    high: >
+      Any bilirubin in cat urine is abnormal and can be an early sign of liver
+      disease or red-cell breakdown (unlike dogs, cats should not have bilirubin
+      in their urine).
+    low: >
+      "Negative" is the normal result.
+    isolation: >
+      Read with blood bilirubin and the liver enzymes.
+    sources: [eclinpath_ua_chemical, eclinpath_bilirubin]
+
+  "Urinalysis / Urobilinogen":
+    summary: >
+      A pigment derived from bilirubin in the gut. The urine dipstick pad is of
+      limited diagnostic value in animals.
+    high: >
+      Results are unreliable and are not used to diagnose disease on their own.
+    low: >
+      A normal/low result is expected.
+    isolation: >
+      Generally not interpreted in isolation; liver assessment relies on blood
+      tests.
+    sources: [eclinpath_ua_chemical]
+
+  # ---- Urinalysis (physical) ----------------------------------------------
+  "Urinalysis / Color":
+    summary: >
+      The urine's colour, normally pale to dark yellow depending on how
+      concentrated it is. Red or brown can indicate blood, hemoglobin, or
+      myoglobin; very dark can indicate bilirubin; colourless suggests very
+      dilute urine.
+    isolation: >
+      Interpret with the specific gravity and the sediment/chemistry pads rather
+      than on its own.
+    sources: [eclinpath_ua_visual]
+
+  "Urinalysis / Clarity":
+    summary: >
+      How clear or cloudy the urine is. Cloudiness (turbidity) can come from
+      cells, crystals, mucus, or debris.
+    isolation: >
+      Cloudiness is a prompt to examine the sediment; clear urine can still
+      contain abnormalities.
+    sources: [eclinpath_ua_visual]
+
+  "Urinalysis / Collection Method":
+    summary: >
+      How the sample was obtained — cystocentesis (a needle into the bladder),
+      free catch, or catheter — which affects how the results are read.
+    isolation: >
+      Cystocentesis is cleanest for assessing infection (bacteria or blood in a
+      free-catch sample may be contamination) but can add a little blood; note
+      the method when reading the sediment.
+    sources: [eclinpath_ua_cells]
+
+  # ---- Urinalysis (sediment) ----------------------------------------------
+  "Urinalysis / Red Blood Cells":
+    summary: >
+      Red blood cells seen in the urine sediment under the microscope.
+    high: >
+      Increased red cells (hematuria) can come from inflammation, infection,
+      stones, trauma (including the collection needle), or tumours anywhere along
+      the urinary tract.
+    low: >
+      None to a few is normal — a few are common right after cystocentesis.
+    isolation: >
+      Read with the collection method and the rest of the sediment.
+    sources: [eclinpath_ua_cells]
+
+  "Urinalysis / White Blood Cells":
+    summary: >
+      White blood cells seen in the urine sediment.
+    high: >
+      Increased white cells (pyuria) suggests inflammation or infection of the
+      urinary tract.
+    low: >
+      None to a few is normal.
+    isolation: >
+      Read with bacteria in the sediment and the collection method; pyuria plus
+      bacteria supports infection.
+    sources: [eclinpath_ua_cells]
+
+  "Urinalysis / Bacteria":
+    summary: >
+      Bacteria seen in the urine sediment.
+    high: >
+      True bacteriuria suggests a urinary tract infection, especially with white
+      cells present — but free-catch samples are often contaminated.
+    low: >
+      "None seen" is the expected result.
+    isolation: >
+      Interpret with white cells and the collection method; a culture (ideally
+      from cystocentesis) is the gold standard for confirming infection.
+    sources: [eclinpath_ua_cells]
+
+  "Urinalysis / Epithelial Cells":
+    summary: >
+      Cells shed from the lining of the urinary and genital tract into the
+      sediment.
+    high: >
+      Small numbers are normal; many cells can reflect inflammation or, rarely,
+      abnormal cells worth a closer look.
+    low: >
+      Few to none is normal.
+    isolation: >
+      Usually a minor finding read with the rest of the sediment.
+    sources: [eclinpath_ua_cells]
+
+  "Urinalysis / Casts":
+    summary: >
+      Cylindrical "molds" formed inside the kidney tubules and flushed into the
+      urine.
+    high: >
+      A few hyaline casts can be normal, but increased or cellular/granular casts
+      point to active kidney tubular injury.
+    low: >
+      None to rare is normal.
+    isolation: >
+      A specific clue to kidney (tubular) injury, read with the blood kidney
+      values and urine specific gravity.
+    sources: [eclinpath_ua_casts]
+
+  "Urinalysis / Crystals":
+    summary: >
+      Mineral crystals that can form in urine; the type (e.g. struvite, calcium
+      oxalate) matters more than their mere presence.
+    high: >
+      Crystals can be normal — especially in urine that has sat or cooled — but
+      some types relate to stone risk or specific conditions.
+    low: >
+      None is common and normal.
+    isolation: >
+      Interpret with urine pH, how fresh the sample is, and any history of
+      stones; crystals alone don't equal disease.
+    sources: [eclinpath_ua_crystals]
+
+  "Urinalysis / Mucus":
+    summary: >
+      Mucus threads in the urine sediment.
+    high: >
+      Small amounts are usually unimportant; more can reflect contamination or
+      lower-tract irritation.
+    low: >
+      Little to none is normal.
+    isolation: >
+      Generally a minor finding.
+    sources: [eclinpath_ua_cells]
+
+  # ---- Serology -----------------------------------------------------------
+  "Serology / FeLV Antigen (ELISA)":
+    summary: >
+      A screening test for feline leukemia virus (FeLV) that detects viral
+      antigen in the blood.
+    high: >
+      A positive (antigen-detected) result indicates FeLV infection and should be
+      confirmed by a second method — a single positive in a healthy, low-risk cat
+      can be a false positive.
+    low: >
+      A negative is reassuring, but a recently exposed cat may need retesting.
+    isolation: >
+      Confirm positives and interpret with the cat's risk and clinical status,
+      per AAFP guidance.
+    sources: [aafp_retrovirus]
+
+  "Serology / FIV Antibody (ELISA)":
+    summary: >
+      A screening test for feline immunodeficiency virus (FIV) that detects
+      antibodies to the virus.
+    high: >
+      A positive (antibody-detected) result suggests FIV exposure or infection;
+      because vaccinated cats and kittens with maternal antibody can also test
+      positive, positives are confirmed and read with the history.
+    low: >
+      A negative is reassuring; retest if recent exposure is possible, since
+      antibodies take weeks to appear.
+    isolation: >
+      Confirm and interpret positives per AAFP guidance, accounting for
+      vaccination and age.
+    sources: [aafp_retrovirus]
+
+  "Serology / Heartworm Antigen":
+    summary: >
+      A test that detects antigen from adult heartworms.
+    high: >
+      A positive supports heartworm infection.
+    low: >
+      In cats a negative does NOT rule it out — cats often have very few worms or
+      single-sex/immature infections, so antigen tests miss many cases.
+    isolation: >
+      In cats, interpret a negative cautiously and pair it with antibody testing
+      and imaging, per American Heartworm Society guidance.
+    sources: [ahs_heartworm]
+
+  # ---- Parasitology -------------------------------------------------------
+  "Parasitology / Ova & Parasites - Zinc Sulfate Centrifugation":
+    summary: >
+      A fecal flotation (zinc-sulfate centrifugation) that concentrates and
+      detects parasite eggs and cysts under the microscope.
+    high: >
+      Finding ova or parasites confirms infection.
+    low: >
+      "None seen" lowers the likelihood but doesn't eliminate it — shedding is
+      intermittent and some parasites are missed.
+    isolation: >
+      A negative flotation with ongoing signs may warrant repeat testing or
+      antigen tests, per CAPC.
+    sources: [capc_parasites]
+
+  "Parasitology / Roundworm Antigen":
+    summary: >
+      An antigen test for roundworms (Toxocara) that detects the worms directly,
+      catching infections the microscope misses (single-sex worms, or worms not
+      yet shedding eggs).
+    high: >
+      A positive confirms roundworm infection.
+    low: >
+      A negative is reassuring.
+    isolation: >
+      Complements fecal flotation; CAPC recommends routine fecal screening.
+    sources: [idexx_fecal_dx, capc_parasites]
+
+  "Parasitology / Hookworm Antigen":
+    summary: >
+      An antigen test for hookworms that detects the worms directly, catching
+      infections the microscope can miss.
+    high: >
+      A positive confirms hookworm infection.
+    low: >
+      A negative is reassuring.
+    isolation: >
+      Complements fecal flotation, per CAPC.
+    sources: [idexx_fecal_dx, capc_parasites]
+
+  "Parasitology / Whipworm Antigen":
+    summary: >
+      An antigen test for whipworms.
+    high: >
+      A positive indicates whipworm antigen; note that true feline whipworm
+      infection is rare in North America, so positives are interpreted carefully.
+    low: >
+      A negative is the expected, reassuring result.
+    isolation: >
+      Complements fecal flotation, per CAPC.
+    sources: [idexx_fecal_dx, capc_parasites]
+
+  "Parasitology / Flea Tapeworm Antigen":
+    summary: >
+      An antigen test for the flea tapeworm (Dipylidium caninum).
+    high: >
+      A positive indicates tapeworm antigen and goes hand-in-hand with flea
+      control.
+    low: >
+      A negative is reassuring.
+    isolation: >
+      Interpret with the cat's flea exposure and history.
+    sources: [idexx_fecal_dx, capc_parasites]
+
+  "Parasitology / Cystoisospora Antigen":
+    summary: >
+      An antigen test for Cystoisospora, a single-celled (coccidian) intestinal
+      parasite.
+    high: >
+      A positive indicates infection — most significant in kittens or cats with
+      diarrhea.
+    low: >
+      A negative is reassuring.
+    isolation: >
+      Interpret with the cat's age and any GI signs.
+    sources: [idexx_fecal_dx, capc_parasites]

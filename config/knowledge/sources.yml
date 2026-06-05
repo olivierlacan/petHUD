@@ -129,6 +129,110 @@ sources:
     tier: academic
     url: "https://eclinpath.com/hematology/tests/platelet-count/"
 
+  # --- Cornell eClinpath (academic; remaining chemistry) -------------------
+  # URLs verified reachable on 2026-06-05.
+  eclinpath_ast:
+    name: "eClinpath — Aspartate Aminotransferase (AST)"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/liver/liver-injury/aspartate-aminotransferase/"
+  eclinpath_bilirubin:
+    name: "eClinpath — Bilirubin"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/liver/cholestasis/bilirubin/"
+  eclinpath_cholesterol:
+    name: "eClinpath — Cholesterol"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/energy-metabolism/cholesterol/"
+  eclinpath_ck:
+    name: "eClinpath — Creatine Kinase"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/muscle/creatine-kinase/"
+  eclinpath_amylase:
+    name: "eClinpath — Amylase"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/pancreas/amylase/"
+  eclinpath_lipase:
+    name: "eClinpath — Lipase"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/pancreas/lipase/"
+  eclinpath_anion_gap:
+    name: "eClinpath — Anion Gap"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/acid-base/chemistry-tests/anion-gap/"
+  eclinpath_acidbase:
+    name: "eClinpath — Acid-Base (bicarbonate / TCO2)"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/acid-base/"
+  eclinpath_fluid_changes:
+    name: "eClinpath — Fluid changes (osmolality / tonicity)"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/chemistry/electrolytes/fluid-changes/"
+
+  # --- Cornell eClinpath (academic; urinalysis) ----------------------------
+  eclinpath_ua_chemical:
+    name: "eClinpath — Urine chemical constituents"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/urinalysis/chemical-constituents/"
+  eclinpath_ua_cells:
+    name: "eClinpath — Urine cellular constituents"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/urinalysis/cellular-constituents/"
+  eclinpath_ua_casts:
+    name: "eClinpath — Urine casts"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/urinalysis/casts/"
+  eclinpath_ua_crystals:
+    name: "eClinpath — Urine crystals"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/urinalysis/crystals/"
+  eclinpath_ua_visual:
+    name: "eClinpath — Urine visual features (color, clarity)"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/urinalysis/visual-features/"
+
+  # --- Guidelines (serology / parasitology / thyroid) ----------------------
+  aafp_retrovirus:
+    name: "2020 AAFP Feline Retrovirus Testing and Management Guidelines"
+    publisher: "American Association of Feline Practitioners"
+    tier: guideline
+    url: "https://catvets.com/resource/feline-retrovirus-management-guidelines/"
+  ahs_heartworm:
+    name: "American Heartworm Society — Feline Heartworm Guidelines"
+    publisher: "American Heartworm Society"
+    tier: guideline
+    url: "https://www.heartwormsociety.org/veterinary-resources/american-heartworm-society-guidelines"
+  capc_parasites:
+    name: "CAPC Guidelines — intestinal parasites"
+    publisher: "Companion Animal Parasite Council"
+    tier: guideline
+    url: "https://capcvet.org/guidelines/"
+
+  # --- IDEXX (industry; diagnostic-lab reference material) ------------------
+  idexx_cystatin_b:
+    name: "IDEXX Cystatin B (kidney injury biomarker)"
+    publisher: "IDEXX Laboratories"
+    tier: industry
+    url: "https://www.idexx.com/en/veterinary/reference-laboratories/cystatin-b/"
+  idexx_fecal_dx:
+    name: "IDEXX Fecal Dx antigen testing"
+    publisher: "IDEXX Laboratories"
+    tier: industry
+    url: "https://www.idexx.com/en/veterinary/reference-laboratories/fecal-testing/"
+
   # --- IRIS (guideline; CKD staging authority) -----------------------------
   iris_staging:
     name: "IRIS Staging of CKD"

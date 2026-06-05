@@ -27,6 +27,13 @@ for (const f of willow) {
   const doc = parseReport(lines, { sourceFile: f, fileSha256: f });
   records.push({ sha256: f, reportDoc: doc, patientSlug: null });
 }
+// Illustrate the trailing-gap behaviour for the About page: a real recheck often
+// re-runs the kidney panel but not the thyroid screen, so drop Total T4 from the
+// most recent visit. The chart then draws a dashed "no result in this report"
+// marker at the latest date instead of silently flat-lining a stale value — the
+// exact misreading the feature is meant to prevent.
+const latest = records[records.length - 1].reportDoc;
+for (const s of latest.sections) s.measurements = s.measurements.filter((m) => m.name !== "Total T4");
 // owner journal: declining weight + a diet-change event (slug "willow")
 const journal = { willow: {
   weights: [["2024-02-14", 4.8], ["2024-08-20", 4.5], ["2025-02-26", 4.1], ["2025-09-03", 3.7]].map(([date, kg]) => ({ date, kg })),
@@ -99,6 +106,14 @@ await ev(`(function(){var c=[...document.querySelectorAll('.card[data-analyte]')
 await waitFor(`document.querySelector('#detail svg.bigchart') !== null`);
 await wait(250);
 await shot("detail", "#detail .overlay-card", 660, 0);
+await ev(`document.getElementById("detail-close").click()`); await wait(150);
+
+// 2b. gap awareness — Total T4 (dropped from the latest visit above) shows a
+// dashed "no result in this report" marker so a stale value isn't read as stable
+await ev(`(function(){var c=[...document.querySelectorAll('.card[data-analyte]')].find(x=>/^Total T4\\b/.test(x.querySelector('.card-name').textContent));c&&c.click();})()`);
+await waitFor(`document.querySelector('#detail svg.bigchart line.gap-line') !== null`);
+await wait(250);
+await shot("gaps", "#detail svg.bigchart", 9999, 10);
 await ev(`document.getElementById("detail-close").click()`); await wait(150);
 
 // 3. conditions — CKD panel + IRIS staging

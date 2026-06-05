@@ -4,25 +4,25 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <meta name="description" content="pethud turns your pet's IDEXX bloodwork PDFs into clear trends, cited context, condition screening, and visit prep — all in your browser, nothing uploaded.">
-  <title>pethud — features</title>
+  <meta name="description" content="PetHUD turns your pet's IDEXX bloodwork PDFs into clear trends, cited context, condition screening, and visit prep — all in your browser, nothing uploaded. A companion for talking with your vet, not a replacement for one.">
+  <title>PetHUD — features &amp; story</title>
   <script>
     (function () {
       try {
         var q = new URLSearchParams(location.search).get("theme");
-        var t = q || localStorage.getItem("pethud-theme") || "auto";
+        var t = q || localStorage.getItem("pethud-theme") || localStorage.getItem("pethud-theme") || "auto";
         document.documentElement.setAttribute("data-theme", t);
       } catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
     })();
   </script>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%231a63d6'/%3E%3Ctext x='8' y='12.5' font-size='12' font-family='system-ui,sans-serif' font-weight='700' fill='white' text-anchor='middle'%3Ei%3C/text%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%231a63d6'/%3E%3Ccircle cx='8' cy='8' r='3.1' fill='none' stroke='white' stroke-width='1.2'/%3E%3Cpath d='M8 2.2v2.2M8 11.6v2.2M2.2 8h2.2M11.6 8h2.2' stroke='white' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="../style.css">
   <style>
     body { font-size: 15px; }
     .about { max-width: 980px; margin: 0 auto; padding: 0 20px 80px; }
     .a-nav { display: flex; align-items: baseline; gap: 12px; padding: 20px 0 0; }
     .a-nav .logo { font-weight: 700; font-size: 20px; letter-spacing: -0.02em; }
-    .a-nav .logo::first-letter { color: var(--accent); }
+    .a-nav .logo .hud { color: var(--accent); }
     .a-nav .sub { color: var(--text-mute); font-size: 13px; }
     .a-nav .spacer { margin-left: auto; }
     .btn { display: inline-block; background: var(--accent); color: var(--on-accent); border-radius: 7px;
@@ -42,18 +42,56 @@
     .ft-text p { color: var(--text-dim); line-height: 1.6; margin: 0; }
     .ft-img a { display: inline-block; max-width: 100%; line-height: 0; }
     /* Cap the displayed height so tall shots don't tower over short paragraphs;
-       the image is a link to the full-resolution PNG (2× retina). */
+       clicking opens the full-resolution capture in an in-page lightbox. */
     .ft-img img { max-width: 100%; max-height: 340px; width: auto; height: auto; display: block;
       border: 1px solid var(--line-2); border-radius: 11px; box-shadow: 0 10px 40px var(--shadow);
       background: var(--bg-2); cursor: zoom-in; transition: box-shadow 0.15s; }
     .ft-img a:hover img { box-shadow: 0 12px 48px var(--shadow); border-color: var(--accent); }
+    /* "What's an analyte?" style inline definition / aside */
+    .define { margin-top: 16px; background: var(--bg-3); border: 1px solid var(--line-2);
+      border-left: 3px solid var(--accent); border-radius: 9px; padding: 12px 14px;
+      font-size: 14px; line-height: 1.55; color: var(--text-dim); }
+    .define strong { color: var(--text); }
+    /* A standalone, full-width callout (e.g. the "companion, not a replacement" note) */
+    .band { border-bottom: 1px solid var(--line); padding: 46px 0; }
+    .band .inner { max-width: 64ch; margin: 0 auto; text-align: center; }
+    .band .kicker { color: var(--accent); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; }
+    .band h2 { font-size: 24px; line-height: 1.2; margin: 8px 0 12px; letter-spacing: -0.01em; }
+    .band p { color: var(--text-dim); line-height: 1.65; margin: 0 auto 14px; font-size: 16px; }
+    /* Philosophy — longer-form prose */
+    .philosophy { padding: 54px 0; border-bottom: 1px solid var(--line); }
+    .philosophy .prose { max-width: 64ch; margin: 0 auto; }
+    .philosophy h2 { font-size: 26px; margin: 0 0 18px; letter-spacing: -0.01em; }
+    .philosophy p { color: var(--text-dim); line-height: 1.75; margin: 0 0 16px; font-size: 16px; }
+    .philosophy p strong { color: var(--text); font-weight: 600; }
     .closing { padding: 56px 0 0; text-align: center; }
     .closing h2 { font-size: 26px; margin: 0 0 14px; letter-spacing: -0.01em; }
     .closing p { color: var(--text-dim); line-height: 1.6; max-width: 62ch; margin: 0 auto 22px; }
     .pillrow { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 0 0 26px; }
     .pillrow span { background: var(--bg-3); border: 1px solid var(--line-2); border-radius: 20px;
       padding: 5px 13px; font-size: 13px; color: var(--text-dim); }
+    /* In memoriam */
+    .memoriam { margin-top: 64px; border-top: 1px solid var(--line); padding: 56px 0 8px; }
+    .memoriam .prose { max-width: 62ch; margin: 0 auto; }
+    .memoriam .kicker { text-align: center; color: var(--accent); font-size: 12px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.08em; }
+    .memoriam h2 { text-align: center; font-size: 25px; margin: 8px 0 22px; letter-spacing: -0.01em; }
+    .memoriam p { color: var(--text-dim); line-height: 1.8; margin: 0 0 16px; font-size: 16px; }
+    .memoriam .ded { text-align: center; font-style: italic; color: var(--text); font-size: 18px;
+      line-height: 1.6; margin: 26px auto 8px; max-width: 46ch; }
+    .memoriam .thanks { color: var(--text-mute); font-size: 14px; line-height: 1.7; }
     .a-foot { color: var(--text-mute); font-size: 12px; text-align: center; padding: 40px 0 0; line-height: 1.6; }
+    /* In-page lightbox (shadow box) so full-res shots open without leaving the page */
+    .lightbox { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center;
+      padding: 32px; background: rgba(7, 9, 13, 0.86); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+    .lightbox[hidden] { display: none; }
+    .lightbox figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .lightbox img { max-width: 94vw; max-height: 82vh; width: auto; height: auto; border-radius: 12px;
+      border: 1px solid var(--line-2); background: var(--bg-2); box-shadow: 0 24px 90px rgba(0,0,0,0.6); cursor: default; }
+    .lightbox figcaption { color: #cdd6e2; font-size: 13.5px; line-height: 1.5; text-align: center; max-width: 72ch; }
+    .lb-close { position: fixed; top: 16px; right: 22px; background: none; border: none; color: #fff;
+      font-size: 34px; line-height: 1; cursor: pointer; opacity: 0.85; }
+    .lb-close:hover { opacity: 1; }
     @media (max-width: 720px) {
       .feature, .feature:nth-child(even) { flex-direction: column; gap: 18px; padding: 36px 0; }
       .hero h1 { font-size: 27px; } .ft-text, .ft-img { flex-basis: auto; width: 100%; }
@@ -63,7 +101,7 @@
 <body>
   <div class="about">
     <nav class="a-nav">
-      <span class="logo">pethud</span>
+      <span class="logo">Pet<span class="hud">HUD</span></span>
       <span class="sub">pet bloodwork trends</span>
       <span class="spacer"></span>
       <a class="btn ghost" href="../">Open the app →</a>
@@ -71,10 +109,11 @@
 
     <header class="hero">
       <h1>Make sense of your pet's bloodwork.</h1>
-      <p>Drop your IDEXX VetConnect&nbsp;PLUS PDF reports onto the page and pethud turns
+      <p>Drop your IDEXX VetConnect&nbsp;PLUS PDF reports onto the page and PetHUD turns
         them into clear trends over time, plain-language explanations of every value,
         condition screening, and a head start on your next vet visit — all in your
-        browser. Nothing is uploaded.</p>
+        browser. Nothing is uploaded. It's a companion for the conversation with your
+        vet, not a replacement for one.</p>
       <div class="cta">
         <a class="btn" href="../">Open the app</a>
         <span class="note">Free &amp; open source · works offline · your data never leaves your device</span>
@@ -88,20 +127,42 @@
         <p>Each analyte becomes a compact sparkline so you can see the direction of travel
           at a glance. Out-of-range results are flagged and color-coded, and subtle markers
           show when a test wasn't run or when something in your pet's care changed.</p>
+        <div class="define">
+          <strong>What's an "analyte"?</strong> It's the lab's word for a single thing
+          measured in a blood or urine sample — creatinine, glucose, a white-blood-cell
+          count. One report holds dozens; PetHUD gives each its own card and its own
+          history so you can follow it over time.
+        </div>
       </div>
-      <div class="ft-img"><a href="img/trends.png" target="_blank" rel="noopener" title="Open full size"><img src="img/trends.png" alt="Trends grid of sparkline cards for each analyte"></a></div>
+      <div class="ft-img"><a data-shot href="img/trends.png" title="Open full size"><img src="img/trends.png" alt="Trends grid of sparkline cards, one per analyte, with out-of-range values flagged"></a></div>
+    </section>
+
+    <section class="feature">
+      <div class="ft-text">
+        <div class="tag">Honest charts</div>
+        <h2>Graphs that show what's <em>missing</em>, not just what's there</h2>
+        <p>A flat line can fool you. If a test wasn't repeated at the latest visit, most
+          tools just keep drawing the last value — so a number that's months stale looks
+          reassuringly steady. PetHUD instead draws a dashed marker exactly where a result
+          is absent, so you can tell "unchanged" apart from "not measured this time" and
+          never misread a gap as good news. Care events you log appear on the same timeline,
+          so cause and effect line up.</p>
+      </div>
+      <div class="ft-img"><a data-shot href="img/gaps.png" title="Open full size"><img src="img/gaps.png" alt="A chart where the thyroid value is steady across three visits, then a dashed marker shows it simply wasn't measured at the most recent visit"></a></div>
     </section>
 
     <section class="feature">
       <div class="ft-text">
         <div class="tag">Cited context</div>
-        <h2>Understand what each value means</h2>
-        <p>Open any result for a plain-language, sourced explanation: what the test measures,
-          what a high or low value may suggest, what moves it, how quickly to expect change,
-          and the related metrics to read alongside it. Every statement links to references
-          like Cornell eClinpath, IRIS, and ACVIM/AAFP guidelines.</p>
+        <h2>Understand what each value means — sourced, not invented</h2>
+        <p>Open any result for a plain-language explanation: what the test measures, what a
+          high or low value may suggest, what moves it, how quickly to expect change, and the
+          related metrics to read alongside it. Every statement links to respected references
+          — Cornell eClinPath, the IRIS kidney-staging guidelines, ACVIM and AAFP consensus
+          statements. PetHUD deliberately points you to those sources and to your vet rather
+          than handing you a verdict of its own.</p>
       </div>
-      <div class="ft-img"><a href="img/detail.png" target="_blank" rel="noopener" title="Open full size"><img src="img/detail.png" alt="Analyte detail with cited context and related metrics"></a></div>
+      <div class="ft-img"><a data-shot href="img/detail.png" title="Open full size"><img src="img/detail.png" alt="Analyte detail with cited, sourced context and related metrics"></a></div>
     </section>
 
     <section class="feature">
@@ -111,9 +172,10 @@
         <p>Panels for the conditions that matter in older pets — CKD, hyperthyroidism, heart
           disease (HCM), IBD / small-cell lymphoma, diabetes and more — gather the relevant
           markers in one place. For chronic kidney disease, your cat's IRIS stage is computed
-          from its own creatinine and SDMA.</p>
+          from its own creatinine and SDMA. These are screening prompts to raise with your
+          vet, never diagnoses.</p>
       </div>
-      <div class="ft-img"><a href="img/conditions.png" target="_blank" rel="noopener" title="Open full size"><img src="img/conditions.png" alt="Chronic Kidney Disease panel with IRIS staging"></a></div>
+      <div class="ft-img"><a data-shot href="img/conditions.png" title="Open full size"><img src="img/conditions.png" alt="Chronic Kidney Disease panel with IRIS staging"></a></div>
     </section>
 
     <section class="feature">
@@ -124,7 +186,7 @@
           current age, split into what bloodwork can screen for versus what to watch
           clinically — with the guidelines it's drawn from.</p>
       </div>
-      <div class="ft-img"><a href="img/lifestage.png" target="_blank" rel="noopener" title="Open full size"><img src="img/lifestage.png" alt="Life-stage vigilance banner for a senior cat"></a></div>
+      <div class="ft-img"><a data-shot href="img/lifestage.png" title="Open full size"><img src="img/lifestage.png" alt="Life-stage vigilance banner for a senior cat"></a></div>
     </section>
 
     <section class="feature">
@@ -135,18 +197,18 @@
           what changed since the last visit, and which multi-marker patterns are worth
           raising — each linking through to the relevant condition panel.</p>
       </div>
-      <div class="ft-img"><a href="img/summary.png" target="_blank" rel="noopener" title="Open full size"><img src="img/summary.png" alt="Plain-language per-report summary"></a></div>
+      <div class="ft-img"><a data-shot href="img/summary.png" title="Open full size"><img src="img/summary.png" alt="Plain-language per-report summary"></a></div>
     </section>
 
     <section class="feature">
       <div class="ft-text">
         <div class="tag">Visit prep</div>
         <h2>Walk in ready for your vet</h2>
-        <p>pethud turns the latest results into a short prep list: how long it's been since
+        <p>PetHUD turns the latest results into a short prep list: how long it's been since
           the last panel and the typical recheck cadence, plus specific questions to consider
           asking — all grounded in your own pet's results.</p>
       </div>
-      <div class="ft-img"><a href="img/vetvisit.png" target="_blank" rel="noopener" title="Open full size"><img src="img/vetvisit.png" alt="For your next vet visit card with questions and reminders"></a></div>
+      <div class="ft-img"><a data-shot href="img/vetvisit.png" title="Open full size"><img src="img/vetvisit.png" alt="For your next vet visit card with questions and reminders"></a></div>
     </section>
 
     <section class="feature">
@@ -157,7 +219,40 @@
           note medications, diet changes or symptoms — weight gets its own trend, and events
           appear as markers on every chart, so cause and effect are easy to see.</p>
       </div>
-      <div class="ft-img"><a href="img/journal.png" target="_blank" rel="noopener" title="Open full size"><img src="img/journal.png" alt="Owner journal for weight and events"></a></div>
+      <div class="ft-img"><a data-shot href="img/journal.png" title="Open full size"><img src="img/journal.png" alt="Owner journal for weight and events"></a></div>
+    </section>
+
+    <section class="band">
+      <div class="inner">
+        <div class="kicker">A companion, not a replacement</div>
+        <h2>PetHUD helps you ask better questions — it doesn't answer them for you</h2>
+        <p>Every explanation here is drawn from published veterinary references and points
+          back to them, and to your veterinary team. PetHUD will not diagnose your pet,
+          will not tell you what to do, and is not a substitute for a professional exam.
+          What it does is help you walk into the room understanding the trends, knowing
+          which results to ask about, and able to follow the answers.</p>
+      </div>
+    </section>
+
+    <section class="philosophy">
+      <div class="prose">
+        <h2>Why PetHUD exists</h2>
+        <p>Our pets can't tell us how they feel, and they age faster than we're ready for.
+          Bloodwork is one of the few honest windows we get — but it arrives as a dense PDF
+          of numbers and reference ranges, usually at a stressful moment, and it's genuinely
+          hard to know <strong>which numbers matter</strong>, how a value compares to last
+          year, or <strong>how urgent any of it really is</strong>.</p>
+        <p>Even with a caring vet, the questions only occur to you later. It's hard to know
+          what to ask in the room, hard to hold a year of results in your head, and
+          <strong>life gets in the way</strong> — work, distance, money, the sheer hope that
+          our hearty companion is fine — of tending to the creatures we love most. A trend
+          quietly drifting in the wrong direction can hide in plain sight.</p>
+        <p>PetHUD was built to close that gap a little: to turn scattered reports into a clear
+          story over time, to explain the jargon in plain language with real sources behind
+          it, and to hand you a short list of things worth raising — so that the
+          conversation with your vet starts further along, and nothing important slips past
+          simply because it was hard to see.</p>
+      </div>
     </section>
 
     <section class="closing">
@@ -171,8 +266,66 @@
       <a class="btn" href="../">Open the app</a>
     </section>
 
-    <p class="a-foot">pethud is an educational tool to help you read and discuss your pet's
+    <section class="memoriam">
+      <div class="prose">
+        <div class="kicker">In memoriam</div>
+        <h2>For P'tit Loup</h2>
+        <p>I built PetHUD after my dear cat <strong>P'tit Loup</strong> died suddenly in
+          May 2026 from acute kidney injury and related conditions, after fourteen beautiful
+          years. My other cat, <strong>Iris</strong> — a female of the same age — had already
+          been treated for early-stage chronic kidney disease. But P'tit Loup was such a
+          hearty goofball that, aside from some slightly elevated BUN and a temporary dip in
+          weight about half a year earlier, he showed almost no sign of ailing health until
+          his very last weeks.</p>
+        <p>I keep wondering whether I'd have seen it sooner if those scattered numbers had
+          ever lined up into a picture I could read. This project is my attempt to give other
+          people that picture.</p>
+        <p class="ded">Dedicated to the memory of P'tit Loup, and to his sometimes
+          reluctantly loving sister Iris — whom I'm now caring for very closely.</p>
+        <p class="thanks">PetHUD exists thanks to the knowledge I gained from the wonderful
+          vet techs, doctors and staff at <strong>Fremont Animal Hospital</strong>, the
+          <strong>Veterinary Emergency Group</strong>, and the <strong>Animal Medical Center
+          of Seattle</strong>. Through harrowing circumstances they were endlessly supportive
+          and patient, and they taught me how to care for P'tit Loup and Iris. Without them
+          this project would not exist. I hope it helps other cat and dog lovers build the
+          same kind of trust with their own veterinary teams.</p>
+      </div>
+    </section>
+
+    <p class="a-foot">PetHUD is an educational tool to help you read and discuss your pet's
       bloodwork. It is not a diagnosis and does not replace veterinary care.</p>
   </div>
+
+  <!-- Shadow-box lightbox: full-resolution captures open in place, never a new tab. -->
+  <div class="lightbox" id="lightbox" hidden>
+    <button class="lb-close" id="lb-close" aria-label="Close">&times;</button>
+    <figure>
+      <img id="lb-img" alt="">
+      <figcaption id="lb-cap"></figcaption>
+    </figure>
+  </div>
+
+  <script>
+    (function () {
+      var lb = document.getElementById("lightbox");
+      var img = document.getElementById("lb-img");
+      var cap = document.getElementById("lb-cap");
+      function open(src, alt) {
+        img.src = src; img.alt = alt || ""; cap.textContent = alt || "";
+        lb.hidden = false; document.body.style.overflow = "hidden";
+      }
+      function close() { lb.hidden = true; img.src = ""; document.body.style.overflow = ""; }
+      document.querySelectorAll("a[data-shot]").forEach(function (a) {
+        a.addEventListener("click", function (e) {
+          e.preventDefault();
+          var thumb = a.querySelector("img");
+          open(a.getAttribute("href"), thumb ? thumb.alt : "");
+        });
+      });
+      // Close on the backdrop, the × button, or Escape — but not when clicking the image.
+      lb.addEventListener("click", function (e) { if (e.target !== img) close(); });
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !lb.hidden) close(); });
+    })();
+  </script>
 </body>
 </html>

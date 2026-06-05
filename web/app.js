@@ -1116,6 +1116,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
 
   function openReportDetail(r) {
     var bySection = pointsForReport(r);
+    var flagged = flaggedFor(r);
     var total = 0;
     var secHtml = SECTION_ORDER.filter(function (s) { return bySection[s]; })
       .concat(Object.keys(bySection).filter(function (s) { return SECTION_ORDER.indexOf(s) < 0; }))
@@ -1140,8 +1141,16 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
       ' · <span class="k">age</span> ' + escapeHtml(r.age_text || "—") +
       (r.lab_id ? ' · <span class="k">lab</span> ' + escapeHtml(String(r.lab_id)) : "") + "</div>" +
       (r.idexx_services ? '<div class="svc">' + escapeHtml(r.idexx_services) + "</div>" : "") +
+      reportSummary(r, flagged) +
       '<div class="rd-count">' + total + " result" + (total === 1 ? "" : "s") + " in this report</div>" +
       (secHtml || '<div class="empty">No measurements parsed from this report.</div>');
+    // Condition links in the summary: close the overlay and jump to that panel.
+    $("#report-detail-body").querySelectorAll(".rs-cond[data-cond]").forEach(function (el) {
+      el.addEventListener("click", function () {
+        closeReportDetail();
+        goToCondition(el.getAttribute("data-cond"));
+      });
+    });
     $("#report-detail").hidden = false;
   }
   function closeReportDetail() { $("#report-detail").hidden = true; }

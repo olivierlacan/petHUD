@@ -625,7 +625,8 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 64px); }
    loaded, so the welcome screen reads as a clean landing page. */
 .is-empty .sidebar { display: none; }
 .is-empty #view-toggle,
-.is-empty .controls .ctl,
+.is-empty .controls .ctl-select,
+.is-empty .controls .ctl-search,
 .is-empty .controls .check { display: none; }
 /* The footer now holds only the current-patient meta line — nothing to show
    on the welcome screen. */
@@ -638,11 +639,17 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 64px); }
    bar and footer stay full-width; only the sidebar+content block is centered. */
 main { max-width: 1680px; margin-inline: auto; }
 
+/* Below this, the brand + all controls no longer fit on one row, so drop the
+   whole controls group onto its own full-width line beneath the brand (instead
+   of letting flex squeeze them into a tall, ragged column on the right). */
+@media (max-width: 1180px) {
+  .controls { flex-basis: 100%; }
+}
+
 @media (max-width: 760px) {
   .topbar { gap: 10px 14px; padding: 8px 12px; }
   .controls { gap: 10px 14px; width: 100%; }
-  .ctl.search { flex: 1 1 140px; }
-  .ctl.search input { min-width: 0; width: 100%; }
+  .ctl-search { flex: 1 1 140px; min-width: 0; }
   main { flex-direction: column; min-height: 0; }
   .sidebar {
     position: static; width: auto; flex: 0 0 auto; height: auto; max-height: 42vh;

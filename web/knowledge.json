@@ -112,6 +112,36 @@
       "tier": "academic",
       "url": "https://eclinpath.com/chemistry/liver/cholestasis/gamma-glutamyl-transferase/"
     },
+    "eclinpath_anemia": {
+      "name": "eClinpath — Anemia (erythrogram interpretation)",
+      "publisher": "Cornell University College of Veterinary Medicine",
+      "tier": "academic",
+      "url": "https://eclinpath.com/hematology/anemia/"
+    },
+    "eclinpath_rbc_indices": {
+      "name": "eClinpath — RBC indices interpretation",
+      "publisher": "Cornell University College of Veterinary Medicine",
+      "tier": "academic",
+      "url": "https://eclinpath.com/hematology/tests/rbc-indices-interpretation/"
+    },
+    "eclinpath_regeneration": {
+      "name": "eClinpath — Assessment of regeneration (reticulocytes)",
+      "publisher": "Cornell University College of Veterinary Medicine",
+      "tier": "academic",
+      "url": "https://eclinpath.com/hematology/anemia/assessment-regeneration/"
+    },
+    "eclinpath_leukogram": {
+      "name": "eClinpath — Leukogram (white blood cell interpretation)",
+      "publisher": "Cornell University College of Veterinary Medicine",
+      "tier": "academic",
+      "url": "https://eclinpath.com/hematology/leukogram/"
+    },
+    "eclinpath_platelets": {
+      "name": "eClinpath — Platelet count",
+      "publisher": "Cornell University College of Veterinary Medicine",
+      "tier": "academic",
+      "url": "https://eclinpath.com/hematology/tests/platelet-count/"
+    },
     "iris_staging": {
       "name": "IRIS Staging of CKD",
       "publisher": "International Renal Interest Society",
@@ -499,7 +529,8 @@
         "confounders": "Dehydration concentrates it (a falsely reassuring value); IV fluids dilute it. Stress or excitement can transiently raise it in cats.\n",
         "monitoring": "Read with hydration status and reticulocytes; CKD-related anemia develops slowly over months.\n",
         "sources": [
-          "eclinpath_creatinine"
+          "eclinpath_anemia",
+          "iris_staging"
         ]
       },
       "summary": "The fraction of blood made up of red cells; a core measure of anemia or dehydration.\n",
@@ -507,7 +538,215 @@
       "low": "A low hematocrit means anemia. Cats with advanced CKD often develop a mild, slowly-progressive non-regenerative anemia.\n",
       "isolation": "Read with hydration status (a dehydrated anemic cat can look deceptively normal) and the reticulocyte count to judge whether the marrow is responding.\n",
       "sources": [
-        "eclinpath_creatinine"
+        "eclinpath_anemia"
+      ]
+    },
+    "Hematology / RBC": {
+      "summary": "The red blood cell count — the number of red cells, which carry oxygen. It moves together with hematocrit and hemoglobin.\n",
+      "high": "A true high count (erythrocytosis) is uncommon; far more often a high value reflects dehydration concentrating the blood, or stress/excitement transiently mobilising red cells in cats.\n",
+      "low": "A low count means anemia. Whether the marrow is responding is judged by the reticulocyte count (regenerative vs non-regenerative).\n",
+      "isolation": "Interpret alongside hematocrit, hemoglobin, hydration status, and reticulocytes rather than on its own.\n",
+      "sources": [
+        "eclinpath_anemia"
+      ]
+    },
+    "Hematology / Hemoglobin": {
+      "summary": "The concentration of hemoglobin, the oxygen-carrying protein in red cells. It tracks closely with the red cell count and hematocrit.\n",
+      "high": "Usually reflects dehydration (concentration) or stress rather than a true excess of red cells.\n",
+      "low": "A low hemoglobin indicates anemia. Read with the reticulocyte count to see whether the marrow is regenerating.\n",
+      "isolation": "Lipemia or hemolysis in the sample can falsely raise the measured value, so read it together with the red cell count and hematocrit.\n",
+      "sources": [
+        "eclinpath_anemia"
+      ]
+    },
+    "Hematology / MCV": {
+      "summary": "Mean cell volume — the average size of the red cells. It classifies anemia as small-celled (microcytic), normal (normocytic), or large-celled (macrocytic).\n",
+      "high": "Larger cells (macrocytosis) often accompany a regenerative response (young red cells are larger); in cats it can also occur with certain marrow disorders or FeLV.\n",
+      "low": "Smaller cells (microcytosis) classically suggest iron deficiency (e.g. chronic blood loss) or portosystemic liver shunting.\n",
+      "isolation": "Most useful read with MCHC and the reticulocyte count; a small average-size shift is not meaningful in isolation.\n",
+      "sources": [
+        "eclinpath_rbc_indices",
+        "eclinpath_anemia"
+      ]
+    },
+    "Hematology / MCH": {
+      "summary": "Mean cell hemoglobin — the average amount of hemoglobin per red cell. It moves in parallel with MCV and MCHC.\n",
+      "high": "A high value is usually an artifact of lipemia or hemolysis in the sample rather than a true finding.\n",
+      "low": "A low value reflects red cells with less hemoglobin, as in iron deficiency.\n",
+      "isolation": "A calculated index best read alongside MCV, MCHC, and the red cell count, not on its own.\n",
+      "sources": [
+        "eclinpath_rbc_indices"
+      ]
+    },
+    "Hematology / MCHC": {
+      "summary": "Mean cell hemoglobin concentration — how concentrated the hemoglobin is within the red cells (normochromic vs hypochromic).\n",
+      "high": "A true high is not biologically possible; an elevated MCHC almost always means hemolysis or lipemia in the sample interfered with the measurement.\n",
+      "low": "A low MCHC (hypochromia) accompanies regeneration (young cells are less hemoglobinised) and iron deficiency.\n",
+      "isolation": "Interpret with MCV and the reticulocyte count; treat a high value as a likely sample artifact first.\n",
+      "sources": [
+        "eclinpath_rbc_indices"
+      ]
+    },
+    "Hematology / RDW": {
+      "summary": "Red cell distribution width — how variable the red cells are in size (anisocytosis). It often rises before the average size (MCV) shifts.\n",
+      "high": "A wider distribution means more variation in cell size, which can accompany a regenerative response or early iron deficiency.\n",
+      "low": "A low RDW is not clinically significant.\n",
+      "isolation": "A sensitive but non-specific flag; read with MCV and the reticulocyte count to understand what kind of cells are driving the variation.\n",
+      "sources": [
+        "eclinpath_rbc_indices"
+      ]
+    },
+    "Hematology / Reticulocytes": {
+      "summary": "The absolute count of reticulocytes — newly released, immature red cells. In cats the laboratory aggregate reticulocyte count is the key measure of whether the marrow is regenerating.\n",
+      "high": "A raised reticulocyte count means the marrow is regenerating, as expected when anemia is caused by blood loss or red cell destruction (hemolysis).\n",
+      "low": "A low or normal count in the face of anemia means the response is non-regenerative — the marrow isn't keeping up — as seen with chronic kidney disease, inflammation, or marrow disease.\n",
+      "isolation": "Only meaningful alongside the degree of anemia; the same count can be normal or inadequate depending on how anemic the cat is.\n",
+      "sources": [
+        "eclinpath_regeneration",
+        "eclinpath_anemia"
+      ]
+    },
+    "Hematology / % Reticulocyte": {
+      "summary": "The percentage of red cells that are reticulocytes (young red cells). The absolute reticulocyte count is the more reliable measure of regeneration.\n",
+      "high": "A higher percentage suggests the marrow is producing new red cells, but a percentage can look high simply because the total red cell count is low.\n",
+      "low": "A low percentage with anemia points to a non-regenerative process.\n",
+      "isolation": "Prefer the absolute reticulocyte count, and read it against how anemic the cat actually is.\n",
+      "sources": [
+        "eclinpath_regeneration"
+      ]
+    },
+    "Hematology / % Reticulocytes": {
+      "summary": "The percentage of red cells that are reticulocytes (young red cells). The absolute reticulocyte count is the more reliable measure of regeneration.\n",
+      "high": "A higher percentage suggests the marrow is producing new red cells, but a percentage can look high simply because the total red cell count is low.\n",
+      "low": "A low percentage with anemia points to a non-regenerative process.\n",
+      "isolation": "Prefer the absolute reticulocyte count, and read it against how anemic the cat actually is.\n",
+      "sources": [
+        "eclinpath_regeneration"
+      ]
+    },
+    "Hematology / Reticulocyte Hemoglobin": {
+      "summary": "The hemoglobin content of the youngest red cells (reticulocytes) — a near-real-time readout of whether enough iron is reaching the marrow to build new red cells.\n",
+      "high": "A high value is not typically a concern.\n",
+      "low": "A low value flags iron-restricted red cell production (e.g. iron deficiency from chronic blood loss) earlier than the standard indices do.\n",
+      "isolation": "A forward-looking marker best read with MCV, MCHC, and the reticulocyte count when iron deficiency is being considered.\n",
+      "sources": [
+        "eclinpath_regeneration",
+        "eclinpath_rbc_indices"
+      ]
+    },
+    "Hematology / WBC": {
+      "summary": "The total white blood cell count — the body's circulating immune cells. Changes are interpreted from the differential (which cell types changed), not the total alone.\n",
+      "high": "A high count (leukocytosis) commonly reflects inflammation, infection, or — very often in cats — a stress or excitement (adrenaline) response.\n",
+      "low": "A low count (leukopenia) can reflect overwhelming infection consuming cells, or reduced marrow production; in cats it raises concern for viral disease.\n",
+      "isolation": "Always read the differential: the same total can mean very different things depending on which white cell type is driving it.\n",
+      "sources": [
+        "eclinpath_leukogram"
+      ]
+    },
+    "Hematology / Neutrophils": {
+      "summary": "The absolute neutrophil count — the front-line cells against bacterial infection and inflammation. This absolute number is more meaningful than the percentage.\n",
+      "high": "Neutrophilia accompanies inflammation and infection, and also a stress (steroid) response, which is common in cats.\n",
+      "low": "Neutropenia can reflect consumption in severe infection or reduced marrow production, and warrants attention.\n",
+      "isolation": "Read with the rest of the differential and the clinical picture; a stress pattern and an inflammatory pattern can look similar on the count alone.\n",
+      "sources": [
+        "eclinpath_leukogram"
+      ]
+    },
+    "Hematology / % Neutrophils": {
+      "summary": "The percentage of white cells that are neutrophils. The absolute neutrophil count (also reported) is the number to judge.\n",
+      "high": "A higher share of neutrophils can reflect inflammation, infection, or a stress response — but a percentage shift can also just mirror a change in another cell line.\n",
+      "low": "Interpret a low percentage via the absolute neutrophil count.\n",
+      "isolation": "Percentages always sum to 100%, so one going up forces others down; rely on the absolute counts.\n",
+      "sources": [
+        "eclinpath_leukogram"
+      ]
+    },
+    "Hematology / Lymphocytes": {
+      "summary": "The absolute lymphocyte count — immune cells central to antibody and viral defense. Judge this absolute number rather than the percentage.\n",
+      "high": "Lymphocytosis in cats is frequently a transient adrenaline (excitement) response; it can less commonly reflect chronic immune stimulation or lymphoid disease.\n",
+      "low": "Lymphopenia is most often a stress (steroid) effect, and can also occur with acute viral infection or loss of lymph fluid.\n",
+      "isolation": "Read with the full differential and the cat's stress level at sampling.\n",
+      "sources": [
+        "eclinpath_leukogram"
+      ]
+    },
+    "Hematology / % Lymphocytes": {
+      "summary": "The percentage of white cells that are lymphocytes. The absolute lymphocyte count is the more meaningful figure.\n",
+      "high": "A higher share can reflect excitement or immune stimulation, but may simply mirror a fall in another cell type.\n",
+      "low": "Interpret via the absolute lymphocyte count.\n",
+      "isolation": "Because percentages are interdependent, rely on the absolute counts.\n",
+      "sources": [
+        "eclinpath_leukogram"
+      ]
+    },
+    "Hematology / Monocytes": {
+      "summary": "The absolute monocyte count — cells that clean up tissue debris and support chronic inflammation.\n",
+      "high": "Monocytosis can accompany inflammation, tissue damage, or a stress response.\n",
+      "low": "A low monocyte count is not clinically significant.\n",
+      "isolation": "A supporting clue read alongside the neutrophil count and clinical picture, not a standalone finding.\n",
+      "sources": [
+        "eclinpath_leukogram"
+      ]
+    },
+    "Hematology / % Monocytes": {
+      "summary": "The percentage of white cells that are monocytes. The absolute count is the number to judge.\n",
+      "high": "A higher share may reflect chronic inflammation, or simply mirror changes in other cell lines.\n",
+      "low": "Interpret via the absolute monocyte count.\n",
+      "isolation": "Rely on the absolute counts rather than the percentage.\n",
+      "sources": [
+        "eclinpath_leukogram"
+      ]
+    },
+    "Hematology / Eosinophils": {
+      "summary": "The absolute eosinophil count — cells involved in allergic and parasitic responses.\n",
+      "high": "Eosinophilia classically points to parasites (e.g. fleas, intestinal worms) or allergic/hypersensitivity conditions; some feline syndromes raise it markedly.\n",
+      "low": "A low eosinophil count is usually a stress (steroid) effect and is not a concern on its own.\n",
+      "isolation": "Most informative with history (parasite exposure, skin or airway signs) rather than in isolation.\n",
+      "sources": [
+        "eclinpath_leukogram"
+      ]
+    },
+    "Hematology / % Eosinophils": {
+      "summary": "The percentage of white cells that are eosinophils. The absolute count is the more meaningful figure.\n",
+      "high": "A higher share suggests an allergic or parasitic process; confirm with the absolute count.\n",
+      "low": "Interpret via the absolute eosinophil count.\n",
+      "isolation": "Rely on the absolute counts rather than the percentage.\n",
+      "sources": [
+        "eclinpath_leukogram"
+      ]
+    },
+    "Hematology / Basophils": {
+      "summary": "The absolute basophil count — a rare white cell type involved in allergic and parasitic immunity. Normally present in very low numbers in cats.\n",
+      "high": "Basophilia is uncommon and, when present, tends to accompany the same allergic or parasitic conditions that raise eosinophils.\n",
+      "low": "A low or zero basophil count is normal and not significant.\n",
+      "isolation": "A minor finding interpreted alongside the eosinophil count.\n",
+      "sources": [
+        "eclinpath_leukogram"
+      ]
+    },
+    "Hematology / % Basophils": {
+      "summary": "The percentage of white cells that are basophils — normally very low.\n",
+      "high": "A higher share is uncommon; confirm with the absolute count and read with the eosinophils.\n",
+      "low": "Not significant.\n",
+      "isolation": "Rely on the absolute counts rather than the percentage.\n",
+      "sources": [
+        "eclinpath_leukogram"
+      ]
+    },
+    "Hematology / Platelets": {
+      "dynamics": {
+        "confounders": "Feline platelets clump extremely readily, which falsely lowers the automated count — so a low number is very often an artifact, not true thrombocytopenia. A blood-smear estimate is used to confirm.\n",
+        "monitoring": "A genuinely low count is rechecked (often on a fresh, well-mixed sample) and confirmed on a smear before it is acted on.\n",
+        "sources": [
+          "eclinpath_platelets"
+        ]
+      },
+      "summary": "The platelet count — the cell fragments that form clots. In cats this is the count most prone to laboratory artifact.\n",
+      "high": "A high count (thrombocytosis) in cats is usually a reactive response to inflammation or other stimuli rather than a primary problem.\n",
+      "low": "A truly low count (thrombocytopenia) can raise bleeding risk, but in cats a low automated value is far more often caused by platelet clumping than by real disease.\n",
+      "isolation": "Don't act on a low automated platelet count without a smear estimate to rule out clumping; true thrombocytopenia is uncommon in cats.\n",
+      "sources": [
+        "eclinpath_platelets"
       ]
     },
     "Urinalysis / Specific Gravity": {

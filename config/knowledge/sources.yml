@@ -101,6 +101,34 @@ sources:
     tier: academic
     url: "https://eclinpath.com/chemistry/liver/cholestasis/gamma-glutamyl-transferase/"
 
+  # --- Cornell eClinpath (academic; hematology / CBC) ----------------------
+  # URLs verified reachable on 2026-06-04.
+  eclinpath_anemia:
+    name: "eClinpath — Anemia (erythrogram interpretation)"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/hematology/anemia/"
+  eclinpath_rbc_indices:
+    name: "eClinpath — RBC indices interpretation"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/hematology/tests/rbc-indices-interpretation/"
+  eclinpath_regeneration:
+    name: "eClinpath — Assessment of regeneration (reticulocytes)"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/hematology/anemia/assessment-regeneration/"
+  eclinpath_leukogram:
+    name: "eClinpath — Leukogram (white blood cell interpretation)"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/hematology/leukogram/"
+  eclinpath_platelets:
+    name: "eClinpath — Platelet count"
+    publisher: "Cornell University College of Veterinary Medicine"
+    tier: academic
+    url: "https://eclinpath.com/hematology/tests/platelet-count/"
+
   # --- IRIS (guideline; CKD staging authority) -----------------------------
   iris_staging:
     name: "IRIS Staging of CKD"

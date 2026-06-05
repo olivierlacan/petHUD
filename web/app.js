@@ -16,6 +16,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
   var userConfig = { patients: [] };     // user overrides (renames/merges, in IndexedDB)
   var knowledge = null;                  // medical-context payload (knowledge.json)
   var analyteAliases = null;             // analyte-name aliases (analyte_aliases.json)
+  var journal = {};                      // owner-entered weight + events, keyed by patient slug
 
   var SECTION_ORDER = ["Hematology", "Chemistry", "Urinalysis", "Urine Chemistry",
     "Endocrinology", "Serology", "Immunology", "Parasitology", "Microbiology",
@@ -191,6 +192,12 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
       var gx = s.X(d).toFixed(1);
       out += '<line class="gap-line" x1="' + gx + '" y1="' + box.t + '" x2="' + gx + '" y2="' + (box.t + box.h) + '"/>';
     });
+    // owner events (meds/diet/symptoms) within the chart's time span
+    patientEventMarks().forEach(function (m) {
+      if (m.ms < s.xmin || m.ms > s.xmax) return;
+      out += '<line class="event-line" x1="' + s.X(m.ms).toFixed(1) + '" y1="' + box.t + '" x2="' + s.X(m.ms).toFixed(1) +
+        '" y2="' + (box.t + box.h) + '"><title>' + escapeHtml(m.label) + "</title></line>";
+    });
     if (pts.length > 1) {
       var d = pts.map(function (p, i) {
         return (i ? "L" : "M") + s.X(ms(p.date)).toFixed(1) + " " + s.Y(p.value).toFixed(1);
@@ -239,6 +246,13 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
       var gx = s.X(gd).toFixed(1);
       out += '<line class="gap-line" x1="' + gx + '" y1="' + box.t + '" x2="' + gx + '" y2="' + (box.t + box.h) + '"/>';
       out += '<circle class="gap-pt" cx="' + gx + '" cy="' + (box.t + box.h) + '" r="2.5"/>';
+    });
+    // owner events (meds/diet/symptoms): a marked vertical line with a top flag
+    patientEventMarks().forEach(function (m) {
+      if (m.ms < s.xmin || m.ms > s.xmax) return;
+      var ex = s.X(m.ms).toFixed(1);
+      out += '<line class="event-line" x1="' + ex + '" y1="' + box.t + '" x2="' + ex + '" y2="' + (box.t + box.h) + '"><title>' + escapeHtml(m.label) + "</title></line>";
+      out += '<circle class="event-pt" cx="' + ex + '" cy="' + box.t + '" r="3"><title>' + escapeHtml(m.label) + "</title></circle>";
     });
     // when meaningfully stale, label the latest report so the trailing gap reads
     if (ctx && ctx.staleFlag && ctx.latestMs > lastMs) {
@@ -464,6 +478,8 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     host.innerHTML = "";
     var banner = lifeStageBanner();
     if (banner) host.appendChild(banner);
+    var wc = weightCard();
+    if (wc) host.appendChild(wc);
     var analytes = patientAnalytes();
     var q = state.search.toLowerCase();
 
@@ -1165,6 +1181,106 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
   function openPetsManager() { $("#pets").hidden = false; renderPetsManager(); }
   function closePetsManager() { $("#pets").hidden = true; }
 
+  // ---- owner journal: weight + events (meds/diet/symptoms) ----------------
+  // Stored per patient slug in IndexedDB settings; never leaves the browser.
+  function currentJournal() {
+    var p = currentPatient(), j = p ? journal[p.slug] : null;
+    return { weights: (j && j.weights) || [], events: (j && j.events) || [] };
+  }
+  function loadJournal() { return db.getSetting("journal").then(function (v) { journal = v || {}; }); }
+  function saveJournal() { return db.putSetting("journal", journal); }
+  function mutateJournal(fn) {
+    var p = currentPatient(); if (!p) return;
+    fn(journal[p.slug] || (journal[p.slug] = { weights: [], events: [] }));
+    saveJournal().then(function () { renderAll(); renderJournal(); });
+  }
+  // Event date+label markers for charts (vertical lines).
+  function patientEventMarks() {
+    return currentJournal().events.map(function (e) { return { ms: ms(e.date), label: e.kind + ": " + e.label }; });
+  }
+
+  function openJournal() { $("#journal").hidden = false; renderJournal(); }
+  function closeJournal() { $("#journal").hidden = true; }
+  function renderJournal() {
+    var body = $("#journal-body"); if (!body || $("#journal").hidden) return;
+    var p = currentPatient();
+    if (!p) { body.innerHTML = '<div class="empty">Add a report first.</div>'; return; }
+    var j = currentJournal();
+    var weights = j.weights.slice().sort(function (a, b) { return b.date.localeCompare(a.date); });
+    var events = j.events.slice().sort(function (a, b) { return b.date.localeCompare(a.date); });
+    var today = new Date().toISOString().slice(0, 10);
+    var wList = weights.length ? weights.map(function (w) {
+      return '<li><span class="jr-d">' + fmtDate(w.date) + '</span><span class="jr-v">' + fmtNum(w.kg) + " kg</span>" +
+        '<button class="jr-del" data-kind="weight" data-date="' + w.date + '" aria-label="Delete">&times;</button></li>';
+    }).join("") : '<li class="jr-empty">No weights yet.</li>';
+    var eList = events.length ? events.map(function (e) {
+      return '<li><span class="jr-d">' + fmtDate(e.date) + '</span><span class="jr-kind ' + e.kind + '">' + e.kind + "</span>" +
+        '<span class="jr-label">' + escapeHtml(e.label) + "</span>" +
+        '<button class="jr-del" data-kind="event" data-date="' + e.date + '" data-label="' + escapeHtml(e.label) + '" aria-label="Delete">&times;</button></li>';
+    }).join("") : '<li class="jr-empty">No events yet.</li>';
+    body.innerHTML =
+      '<p class="jr-intro">Your own observations for <b>' + escapeHtml(p.name) + "</b>. Weight is charted on its own; events " +
+      "(medication, diet, symptoms) appear as markers on every chart so you can see what changed and when. Stored only in this browser.</p>" +
+      '<div class="jr-grid"><div class="jr-col"><h4>Weight</h4>' +
+        '<form id="jr-weight-form" class="jr-form"><input type="date" id="jrw-date" value="' + today + '" max="' + today + '" required>' +
+        '<input type="number" id="jrw-val" step="0.01" min="0" placeholder="weight" required>' +
+        '<select id="jrw-unit"><option value="kg">kg</option><option value="lb">lb</option></select>' +
+        '<button type="submit" class="jr-add">Add</button></form><ul class="jr-list">' + wList + "</ul></div>" +
+      '<div class="jr-col"><h4>Events</h4>' +
+        '<form id="jr-event-form" class="jr-form"><input type="date" id="jre-date" value="' + today + '" max="' + today + '" required>' +
+        '<select id="jre-kind"><option value="med">Medication</option><option value="diet">Diet</option><option value="symptom">Symptom</option><option value="note">Note</option></select>' +
+        '<input type="text" id="jre-label" placeholder="e.g. started methimazole" maxlength="60" required>' +
+        '<button type="submit" class="jr-add">Add</button></form><ul class="jr-list">' + eList + "</ul></div></div>";
+
+    $("#jr-weight-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var date = $("#jrw-date").value, val = parseFloat($("#jrw-val").value), unit = $("#jrw-unit").value;
+      if (!date || !(val > 0)) return;
+      var kg = unit === "lb" ? val * 0.453592 : val;
+      mutateJournal(function (jj) { jj.weights = jj.weights.filter(function (w) { return w.date !== date; }); jj.weights.push({ date: date, kg: Math.round(kg * 100) / 100 }); });
+    });
+    $("#jr-event-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var date = $("#jre-date").value, kind = $("#jre-kind").value, label = $("#jre-label").value.trim();
+      if (!date || !label) return;
+      mutateJournal(function (jj) { jj.events.push({ date: date, kind: kind, label: label }); });
+    });
+    body.querySelectorAll(".jr-del").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var kind = btn.getAttribute("data-kind"), date = btn.getAttribute("data-date"), label = btn.getAttribute("data-label");
+        mutateJournal(function (jj) {
+          if (kind === "weight") jj.weights = jj.weights.filter(function (w) { return w.date !== date; });
+          else jj.events = jj.events.filter(function (e) { return !(e.date === date && e.label === label); });
+        });
+      });
+    });
+  }
+
+  // Weight trend as its own card at the top of Trends (from the owner journal).
+  function weightCard() {
+    var w = currentJournal().weights.slice().sort(function (a, b) { return a.date.localeCompare(b.date); });
+    if (!w.length) return null;
+    var pts = w.map(function (p) { return { date: p.date, value: p.kg, numeric: true, ref_low: null, ref_high: null }; });
+    var last = pts[pts.length - 1], prev = pts.length > 1 ? pts[pts.length - 2] : null;
+    var deltaHtml = "";
+    if (prev) {
+      var dv = last.value - prev.value, dir = dv > 0 ? "up" : dv < 0 ? "down" : "flat", arrow = dv > 0 ? "▲" : dv < 0 ? "▼" : "▬";
+      deltaHtml = '<span class="delta ' + dir + '">' + arrow + " " + fmtNum(Math.abs(dv)) + " kg</span>";
+    }
+    var c = el("div", "card weight-card flag-ok");
+    c.innerHTML =
+      '<div class="card-top"><span class="card-name">Weight</span><span class="card-unit">kg · your log</span></div>' +
+      '<div class="card-value"><span class="v ok">' + fmtNum(last.value) + "</span>" + deltaHtml + "</div>" +
+      sparkline(pts, null) +
+      '<div class="card-foot"><span></span><span>' + pts.length + " entr" + (pts.length === 1 ? "y" : "ies") + " · " + fmtDate(last.date) + "</span></div>";
+    var wrap = el("div", "section-block");
+    var head = el("div", "section-head");
+    head.innerHTML = '<span class="bar" style="background:var(--accent)"></span><h2>Your log</h2>';
+    wrap.appendChild(head);
+    var grid = el("div", "grid"); grid.appendChild(c); wrap.appendChild(grid);
+    return wrap;
+  }
+
   function renderPetsManager() {
     var body = $("#pets-body");
     if (!DATA.patients.length) { body.innerHTML = '<div class="empty">No pets yet — import a report first.</div>'; return; }
@@ -1405,10 +1521,13 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     $("#detail-close").addEventListener("click", closeDetail);
     $("#detail").addEventListener("click", function (e) { if (e.target === this) closeDetail(); });
     $("#manage-pets").addEventListener("click", openPetsManager);
+    $("#open-journal").addEventListener("click", openJournal);
+    $("#journal-close").addEventListener("click", closeJournal);
+    $("#journal").addEventListener("click", function (e) { if (e.target === this) closeJournal(); });
     $("#pets-close").addEventListener("click", closePetsManager);
     $("#pets").addEventListener("click", function (e) { if (e.target === this) closePetsManager(); });
     document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") { closeDetail(); closePetsManager(); return; }
+      if (e.key === "Escape") { closeDetail(); closePetsManager(); closeJournal(); return; }
       // ← / → browse analytes while the detail modal is open.
       if (!$("#detail").hidden && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
         e.preventDefault();
@@ -1578,6 +1697,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     wire(); // includes the dropzone, needed even before any data exists
     loadStaticConfig()
       .then(loadUserConfig)
+      .then(loadJournal)
       .then(rebuildFromDb)
       .then(function () {
         if (!DATA.patients || !DATA.patients.length) {

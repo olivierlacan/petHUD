@@ -91,7 +91,10 @@
 
   <footer class="footer">
     <span id="patient-meta"></span>
-    <button id="manage-pets" class="linkbtn">Manage pets &amp; aliases…</button>
+    <span class="foot-actions">
+      <button id="open-journal" class="linkbtn">Weight &amp; notes…</button>
+      <button id="manage-pets" class="linkbtn">Manage pets &amp; aliases…</button>
+    </span>
   </footer>
 
   <!-- Pets & aliases manager -->
@@ -100,6 +103,15 @@
       <button class="close" id="pets-close" aria-label="Close">&times;</button>
       <h2 style="margin:0 0 4px">Pets &amp; aliases</h2>
       <div id="pets-body"></div>
+    </div>
+  </div>
+
+  <!-- Owner journal: weight + events (meds, diet, symptoms) -->
+  <div id="journal" class="overlay" hidden>
+    <div class="overlay-card">
+      <button class="close" id="journal-close" aria-label="Close">&times;</button>
+      <h2 style="margin:0 0 4px">Weight &amp; notes</h2>
+      <div id="journal-body"></div>
     </div>
   </div>
 

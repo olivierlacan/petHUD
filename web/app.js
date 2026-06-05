@@ -603,7 +603,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
         '<div class="card-value"><span class="v ok" style="font-size:14px">' +
           (lastq ? escapeHtml(qualDisplay(lastq.result_text)) : "—") + "</span></div>" +
         mid +
-        '<div class="card-foot"><span>qualitative</span>' + footMeta(qs.length + " obs", lastq ? lastq.date : null) + "</div>";
+        '<div class="card-foot"><span></span>' + footMeta(qs.length + " obs", lastq ? lastq.date : null) + "</div>";
     }
 
     if (kbAnalyte(a)) c.appendChild(el("span", "kbadge", "&#9432;")); // ⓘ: sourced context available

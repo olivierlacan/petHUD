@@ -370,6 +370,7 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 /* chart bits shared */
 .axis-label { fill: var(--text-mute); font-size: 11px; font-family: var(--mono); }
 .grid-line { stroke: var(--line); stroke-width: 1; }
+.grid-line.vgrid { opacity: 0.6; } /* vertical date gridlines — a touch fainter */
 .ref-band { fill: var(--band); }
 .ref-edge { stroke: var(--band-line); stroke-width: 1; stroke-dasharray: 3 3; }
 .series-line { fill: none; stroke: var(--accent); stroke-width: 1.6; }

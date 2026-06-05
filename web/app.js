@@ -255,7 +255,10 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     pts.forEach(function (p, i) {
       if (!label[i]) return;
       var anchor = i === 0 ? "start" : i === pts.length - 1 ? "end" : "middle";
-      out += '<text class="axis-label" x="' + s.X(ms(p.date)).toFixed(1) + '" y="' + (box.t + box.h + 16) +
+      var vx = s.X(ms(p.date)).toFixed(1);
+      // subtle vertical gridline so each labelled date traces up to its points
+      out += '<line class="grid-line vgrid" x1="' + vx + '" y1="' + box.t + '" x2="' + vx + '" y2="' + (box.t + box.h) + '"/>';
+      out += '<text class="axis-label" x="' + vx + '" y="' + (box.t + box.h + 16) +
         '" text-anchor="' + anchor + '">' + fmtDateShort(p.date) + "</text>";
     });
     if (ctx && ctx.staleFlag && ctx.latestMs > lastMs) {

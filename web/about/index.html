@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="pethud turns your pet's IDEXX bloodwork PDFs into clear trends, cited context, condition screening, and visit prep — all in your browser, nothing uploaded.">
+  <title>pethud — features</title>
+  <script>
+    (function () {
+      try {
+        var q = new URLSearchParams(location.search).get("theme");
+        var t = q || localStorage.getItem("pethud-theme") || "auto";
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
+    })();
+  </script>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%231a63d6'/%3E%3Ctext x='8' y='12.5' font-size='12' font-family='system-ui,sans-serif' font-weight='700' fill='white' text-anchor='middle'%3Ei%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    body { font-size: 15px; }
+    .about { max-width: 980px; margin: 0 auto; padding: 0 20px 80px; }
+    .a-nav { display: flex; align-items: baseline; gap: 12px; padding: 20px 0 0; }
+    .a-nav .logo { font-weight: 700; font-size: 20px; letter-spacing: -0.02em; }
+    .a-nav .logo::first-letter { color: var(--accent); }
+    .a-nav .sub { color: var(--text-mute); font-size: 13px; }
+    .a-nav .spacer { margin-left: auto; }
+    .btn { display: inline-block; background: var(--accent); color: var(--on-accent); border-radius: 7px;
+      padding: 8px 16px; font-size: 14px; font-weight: 600; text-decoration: none; }
+    .btn.ghost { background: var(--bg-3); color: var(--accent); border: 1px solid var(--line-2); }
+    .hero { padding: 54px 0 36px; border-bottom: 1px solid var(--line); }
+    .hero h1 { font-size: 34px; line-height: 1.15; margin: 0 0 14px; letter-spacing: -0.02em; max-width: 18ch; }
+    .hero p { font-size: 17px; line-height: 1.55; color: var(--text-dim); margin: 0 0 22px; max-width: 60ch; }
+    .hero .cta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .hero .note { color: var(--text-mute); font-size: 13px; }
+    .feature { display: flex; gap: 40px; align-items: center; padding: 52px 0; border-bottom: 1px solid var(--line); }
+    .feature:nth-child(even) { flex-direction: row-reverse; }
+    .ft-text { flex: 1 1 38%; min-width: 0; }
+    .ft-img { flex: 1 1 56%; min-width: 0; }
+    .ft-text .tag { color: var(--accent); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; }
+    .ft-text h2 { font-size: 23px; line-height: 1.2; margin: 7px 0 12px; letter-spacing: -0.01em; }
+    .ft-text p { color: var(--text-dim); line-height: 1.6; margin: 0; }
+    .ft-img img { width: 100%; display: block; border: 1px solid var(--line-2); border-radius: 11px;
+      box-shadow: 0 10px 40px var(--shadow); background: var(--bg-2); }
+    .closing { padding: 56px 0 0; text-align: center; }
+    .closing h2 { font-size: 26px; margin: 0 0 14px; letter-spacing: -0.01em; }
+    .closing p { color: var(--text-dim); line-height: 1.6; max-width: 62ch; margin: 0 auto 22px; }
+    .pillrow { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 0 0 26px; }
+    .pillrow span { background: var(--bg-3); border: 1px solid var(--line-2); border-radius: 20px;
+      padding: 5px 13px; font-size: 13px; color: var(--text-dim); }
+    .a-foot { color: var(--text-mute); font-size: 12px; text-align: center; padding: 40px 0 0; line-height: 1.6; }
+    @media (max-width: 720px) {
+      .feature, .feature:nth-child(even) { flex-direction: column; gap: 18px; padding: 36px 0; }
+      .hero h1 { font-size: 27px; } .ft-text, .ft-img { flex-basis: auto; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="about">
+    <nav class="a-nav">
+      <span class="logo">pethud</span>
+      <span class="sub">pet bloodwork trends</span>
+      <span class="spacer"></span>
+      <a class="btn ghost" href="../">Open the app →</a>
+    </nav>
+
+    <header class="hero">
+      <h1>Make sense of your pet's bloodwork.</h1>
+      <p>Drop your IDEXX VetConnect&nbsp;PLUS PDF reports onto the page and pethud turns
+        them into clear trends over time, plain-language explanations of every value,
+        condition screening, and a head start on your next vet visit — all in your
+        browser. Nothing is uploaded.</p>
+      <div class="cta">
+        <a class="btn" href="../">Open the app</a>
+        <span class="note">Free &amp; open source · works offline · your data never leaves your device</span>
+      </div>
+    </header>
+
+    <section class="feature">
+      <div class="ft-text">
+        <div class="tag">Trends at a glance</div>
+        <h2>Every value, every visit — in one dense view</h2>
+        <p>Each analyte becomes a compact sparkline so you can see the direction of travel
+          at a glance. Out-of-range results are flagged and color-coded, and subtle markers
+          show when a test wasn't run or when something in your pet's care changed.</p>
+      </div>
+      <div class="ft-img"><img src="img/trends.png" alt="Trends grid of sparkline cards for each analyte"></div>
+    </section>
+
+    <section class="feature">
+      <div class="ft-text">
+        <div class="tag">Cited context</div>
+        <h2>Understand what each value means</h2>
+        <p>Open any result for a plain-language, sourced explanation: what the test measures,
+          what a high or low value may suggest, what moves it, how quickly to expect change,
+          and the related metrics to read alongside it. Every statement links to references
+          like Cornell eClinpath, IRIS, and ACVIM/AAFP guidelines.</p>
+      </div>
+      <div class="ft-img"><img src="img/detail.png" alt="Analyte detail with cited context and related metrics"></div>
+    </section>
+
+    <section class="feature">
+      <div class="ft-text">
+        <div class="tag">Condition screening</div>
+        <h2>Disease-oriented panels &amp; IRIS staging</h2>
+        <p>Panels for the conditions that matter in older pets — CKD, hyperthyroidism, heart
+          disease (HCM), IBD / small-cell lymphoma, diabetes and more — gather the relevant
+          markers in one place. For chronic kidney disease, your cat's IRIS stage is computed
+          from its own creatinine and SDMA.</p>
+      </div>
+      <div class="ft-img"><img src="img/conditions.png" alt="Chronic Kidney Disease panel with IRIS staging"></div>
+    </section>
+
+    <section class="feature">
+      <div class="ft-text">
+        <div class="tag">Age-aware vigilance</div>
+        <h2>What's worth watching at your pet's age</h2>
+        <p>A life-stage banner surfaces the conditions to keep an eye on for your pet's
+          current age, split into what bloodwork can screen for versus what to watch
+          clinically — with the guidelines it's drawn from.</p>
+      </div>
+      <div class="ft-img"><img src="img/lifestage.png" alt="Life-stage vigilance banner for a senior cat"></div>
+    </section>
+
+    <section class="feature">
+      <div class="ft-text">
+        <div class="tag">Plain-language summaries</div>
+        <h2>What each visit actually means</h2>
+        <p>Every report opens with a readable synthesis: how many values are out of range,
+          what changed since the last visit, and which multi-marker patterns are worth
+          raising — each linking through to the relevant condition panel.</p>
+      </div>
+      <div class="ft-img"><img src="img/summary.png" alt="Plain-language per-report summary"></div>
+    </section>
+
+    <section class="feature">
+      <div class="ft-text">
+        <div class="tag">Visit prep</div>
+        <h2>Walk in ready for your vet</h2>
+        <p>pethud turns the latest results into a short prep list: how long it's been since
+          the last panel and the typical recheck cadence, plus specific questions to consider
+          asking — all grounded in your own pet's results.</p>
+      </div>
+      <div class="ft-img"><img src="img/vetvisit.png" alt="For your next vet visit card with questions and reminders"></div>
+    </section>
+
+    <section class="feature">
+      <div class="ft-text">
+        <div class="tag">Your own log</div>
+        <h2>Add the context only you have</h2>
+        <p>Bloodwork makes more sense alongside weight and life events. Record weight and
+          note medications, diet changes or symptoms — weight gets its own trend, and events
+          appear as markers on every chart, so cause and effect are easy to see.</p>
+      </div>
+      <div class="ft-img"><img src="img/journal.png" alt="Owner journal for weight and events"></div>
+    </section>
+
+    <section class="closing">
+      <h2>Private by design</h2>
+      <p>Your reports are parsed and stored entirely in your browser using IndexedDB —
+        nothing is ever uploaded to a server. Bring your own PDFs; clear them any time.</p>
+      <div class="pillrow">
+        <span>In your browser</span><span>No account</span><span>Works offline</span>
+        <span>Free &amp; open source</span><span>Cited sources</span>
+      </div>
+      <a class="btn" href="../">Open the app</a>
+    </section>
+
+    <p class="a-foot">pethud is an educational tool to help you read and discuss your pet's
+      bloodwork. It is not a diagnosis and does not replace veterinary care.</p>
+  </div>
+</body>
+</html>

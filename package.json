@@ -5,7 +5,8 @@
   "description": "Browser-side pipeline + tooling for pethud (parser parity test, build).",
   "scripts": {
     "parity": "node test/parity.mjs",
-    "vendor-pdfjs": "node scripts/vendor-pdfjs.mjs"
+    "vendor-pdfjs": "node scripts/vendor-pdfjs.mjs",
+    "screenshots": "node scripts/make-screenshots.mjs"
   },
   "engines": {
     "node": ">=22.13"

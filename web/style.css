@@ -135,6 +135,8 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 .section-list li .dot { width: 8px; height: 8px; border-radius: 2px; margin-right: 7px; flex: 0 0 8px; }
 .section-list li .label { display: flex; align-items: center; flex: 1; }
 .side-foot { margin-top: 16px; padding: 10px 6px 0; border-top: 1px solid var(--line); color: var(--text-mute); font-size: 11px; line-height: 1.6; }
+.side-about { display: block; margin: 14px 6px 0; color: var(--accent); font-size: 12px; text-decoration: none; }
+.side-about:hover { text-decoration: underline; }
 
 .content { flex: 1; min-width: 0; padding: 14px; }
 

@@ -40,10 +40,7 @@
     </div>
 
     <div class="controls">
-      <label class="ctl">
-        <span>Patient</span>
-        <select id="patient"></select>
-      </label>
+      <select id="patient" class="ctl-select" aria-label="Patient"></select>
 
       <div class="seg" id="view-toggle" role="tablist">
         <button data-view="trends" class="active">Trends</button>
@@ -51,10 +48,7 @@
         <button data-view="reports">Reports</button>
       </div>
 
-      <label class="ctl search">
-        <span>Search</span>
-        <input id="search" type="search" placeholder="analyte name…" autocomplete="off">
-      </label>
+      <input id="search" class="ctl-search" type="search" placeholder="Search analytes…" aria-label="Search analytes" autocomplete="off">
 
       <label class="check">
         <input type="checkbox" id="abnormal-only">

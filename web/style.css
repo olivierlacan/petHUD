@@ -76,29 +76,30 @@ body {
 .logo .hud { color: var(--accent); }
 .sub { color: var(--text-mute); font-size: 12px; }
 
-.controls { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; flex: 1; }
-.ctl { display: flex; flex-direction: column; gap: 2px; }
-.ctl > span { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-mute); }
-.ctl select, .ctl input {
+/* All controls are a single row, vertically centred (no floating labels — the
+   patient select and the search placeholder are self-describing). */
+.controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex: 1; }
+.ctl-select, .ctl-search {
   background: var(--bg-3);
   border: 1px solid var(--line-2);
   color: var(--text);
-  border-radius: 5px;
-  padding: 5px 8px;
+  border-radius: 6px;
+  padding: 6px 9px;
   font-size: 13px;
   font-family: var(--sans);
+  height: 32px;
 }
-.ctl.search input { min-width: 180px; }
-.ctl select:focus, .ctl input:focus { outline: none; border-color: var(--accent); }
+.ctl-search { min-width: 180px; flex: 1 1 180px; max-width: 320px; }
+.ctl-select:focus, .ctl-search:focus { outline: none; border-color: var(--accent); }
 
-.seg { display: inline-flex; background: var(--bg-3); border: 1px solid var(--line-2); border-radius: 6px; overflow: hidden; align-self: flex-end; }
+.seg { display: inline-flex; background: var(--bg-3); border: 1px solid var(--line-2); border-radius: 6px; overflow: hidden; height: 32px; }
 .seg button {
   background: transparent; color: var(--text-dim); border: 0;
-  padding: 6px 14px; font-size: 12px; cursor: pointer; font-family: var(--sans);
+  padding: 0 14px; font-size: 12px; cursor: pointer; font-family: var(--sans);
 }
 .seg button.active { background: var(--accent); color: var(--on-accent); font-weight: 600; }
 
-.check { display: flex; align-items: center; gap: 6px; color: var(--text-dim); cursor: pointer; align-self: flex-end; }
+.check { display: flex; align-items: center; gap: 6px; color: var(--text-dim); cursor: pointer; }
 .check input { accent-color: var(--accent); }
 
 .meta { margin-left: auto; color: var(--text-mute); font-size: 12px; text-align: right; line-height: 1.4; }

@@ -1462,8 +1462,10 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     }
 
     var p = currentPatient();
-    $("#corpus-meta").innerHTML = DATA.reports.length + " reports · " + DATA.analytes.length + " analytes" +
-      '<br><a href="about/" class="linkbtn">About</a>' +
+    // Report count + date range live in one place only: the footer (#patient-meta),
+    // which is patient-scoped and shows across all views. The sidebar is just actions.
+    $("#corpus-meta").innerHTML =
+      '<a href="about/" class="linkbtn">About</a>' +
       '<br><button id="import-reports" class="linkbtn">Import reports…</button>' +
       '<br><button id="open-journal" class="linkbtn">Weight &amp; notes…</button>' +
       '<br><button id="manage-pets" class="linkbtn">Manage pets…</button>' +
@@ -1486,7 +1488,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     DATA.patients.forEach(function (p) {
       var o = el("option");
       o.value = p.id;
-      o.textContent = p.name + " (" + p.species + ", " + p.report_count + ")";
+      o.textContent = p.name + " (" + p.species + ", " + p.report_count + " report" + (p.report_count === 1 ? "" : "s") + ")";
       sel.appendChild(o);
     });
     sel.value = state.patientId;

@@ -40,9 +40,12 @@
 /* class/id selectors with display:* otherwise beat the UA [hidden] rule */
 [hidden] { display: none !important; }
 
-html, body {
+html { height: 100%; }
+body {
   margin: 0;
-  height: 100%;
+  /* min-height (not height:100%) so the page grows with content; a fixed
+     height caps the sticky .topbar's range to one viewport and it scrolls away. */
+  min-height: 100%;
   background: var(--bg);
   color: var(--text);
   font-family: var(--sans);
@@ -435,18 +438,18 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
   color: var(--text); white-space: nowrap; box-shadow: 0 6px 20px var(--shadow);
 }
 
-/* ---- theme toggle (bottom-left) ---- */
+/* ---- theme toggle (lives in the sticky toolbar, pushed to the right) ---- */
 .theme-toggle {
-  position: fixed; bottom: 14px; left: 12px; z-index: 45;
+  margin-left: auto;
   display: inline-flex; gap: 2px; padding: 3px;
-  background: var(--bg-2); border: 1px solid var(--line-2);
-  border-radius: 9px; box-shadow: 0 2px 12px var(--shadow);
+  background: var(--bg-3); border: 1px solid var(--line-2);
+  border-radius: 9px;
 }
 .theme-toggle button {
   display: inline-flex; align-items: center; justify-content: center;
   width: 28px; height: 28px; padding: 0; border: 0; border-radius: 7px;
   background: transparent; color: var(--text-mute); cursor: pointer;
 }
-.theme-toggle button:hover { color: var(--text); background: var(--bg-3); }
+.theme-toggle button:hover { color: var(--text); background: var(--bg-2); }
 .theme-toggle button.active { color: var(--on-accent); background: var(--accent); }
 .theme-toggle svg { width: 16px; height: 16px; display: block; }

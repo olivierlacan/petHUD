@@ -1037,6 +1037,18 @@ import { givenName } from "./lib/resolver.js";
       ul.appendChild(li);
     });
 
+    // Bulk show/hide: one button that flips every visible section at once.
+    var sections = Object.keys(counts);
+    var allVisible = sections.every(function (sec) { return !state.hiddenSections[sec]; });
+    var tBtn = $("#toggle-sections");
+    if (tBtn) {
+      tBtn.textContent = allVisible ? "Hide all" : "Show all";
+      tBtn.onclick = function () {
+        sections.forEach(function (sec) { state.hiddenSections[sec] = allVisible; });
+        renderSidebar(); renderTrends();
+      };
+    }
+
     var p = currentPatient();
     $("#corpus-meta").innerHTML = DATA.reports.length + " reports · " + DATA.analytes.length + " analytes" +
       '<br><button id="reprocess" class="linkbtn">Reprocess all</button>' +

@@ -73,8 +73,15 @@ function compare(file, got, want) {
       if (!a) { diffs.push({ kind: b.numeric ? "num" : "qual", msg: `${name}: "${mn}" only in Ruby${b.numeric ? " — JS LOST a numeric value" : ""}` }); continue; }
       // JS captured an extra row — not a regression.
       if (!b) { diffs.push({ kind: "qual", msg: `${name}: "${mn}" only in JS` }); continue; }
+      // JS-ahead: Ruby's extraction captured no value for this analyte but JS did
+      // (some layouts right-align the result onto a line pdftotext splits away but
+      // pdf.js keeps together). Capturing more is an improvement, not a regression
+      // — same principle as the INFO fields — so don't fail the charted check on it.
+      // The reverse (JS null where Ruby has a value) and genuine value mismatches
+      // are still hard failures.
+      const jsAhead = b.value == null && a.value != null;
       for (const f of CHARTED) {
-        if (!eq(a[f], b[f])) diffs.push({ kind: "num", msg: `${name} "${mn}".${f}: got ${JSON.stringify(a[f])} want ${JSON.stringify(b[f])}` });
+        if (!eq(a[f], b[f])) diffs.push({ kind: jsAhead ? "qual" : "num", msg: `${name} "${mn}".${f}: got ${JSON.stringify(a[f])} want ${JSON.stringify(b[f])}${jsAhead ? " (JS ahead)" : ""}` });
       }
       for (const f of INFO) {
         if (!eq(a[f], b[f])) diffs.push({ kind: "qual", msg: `${name} "${mn}".${f}: got ${JSON.stringify(a[f])} want ${JSON.stringify(b[f])}` });

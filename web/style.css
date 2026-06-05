@@ -331,6 +331,17 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 .report-card .rmeta .k { color: var(--text-mute); }
 .report-card .svc { color: var(--text-dim); font-size: 11px; font-style: italic; margin-bottom: 8px; }
 
+/* "for your next vet visit" patient-level card */
+.vet-visit { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 8px; padding: 11px 13px; margin-bottom: 14px; font-size: 12px; line-height: 1.5; }
+.vet-visit .vv-head { font-weight: 700; color: var(--text); font-size: 13px; margin-bottom: 4px; }
+.vet-visit .vv-timing { color: var(--text-dim); margin: 0 0 8px; }
+.vet-visit .vv-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-mute); margin-bottom: 4px; }
+.vet-visit .vv-q { margin: 0 0 8px; padding-left: 18px; color: var(--text-dim); }
+.vet-visit .vv-q li { margin: 0 0 4px; }
+.vet-visit .rs-cond { color: var(--accent); cursor: pointer; }
+.vet-visit .rs-cond:hover { text-decoration: underline; }
+.vet-visit .rs-disclaimer { color: var(--text-mute); font-size: 11px; font-style: italic; margin: 0; }
+
 /* plain-language per-report summary */
 .report-summary { background: var(--bg-3); border-radius: 6px; padding: 8px 10px; margin: 4px 0 10px; font-size: 12px; line-height: 1.5; }
 .report-summary p { margin: 0 0 5px; }

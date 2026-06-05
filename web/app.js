@@ -856,6 +856,62 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
 
   // ---- reports view -------------------------------------------------------
 
+  function monthsAgo(iso) {
+    var a = new Date(iso + "T00:00:00"), b = new Date();
+    return (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth());
+  }
+
+  // Forward-looking, patient-level prompts for the next visit: recheck timing
+  // (with the relevant monitoring cadence) + questions drawn from the latest
+  // report's condition patterns and any values out of range across visits.
+  function vetVisitCard() {
+    var reps = DATA.reports.filter(function (r) { return r.patient_id === state.patientId; })
+      .sort(function (a, b) { return a.date.localeCompare(b.date); });
+    if (!reps.length) return null;
+    var latest = reps[reps.length - 1], prev = reps.length > 1 ? reps[reps.length - 2] : null;
+    var flagged = flaggedFor(latest), patterns = conditionPatterns(flagged);
+    var smap = DATA.series[String(state.patientId)] || {};
+    var persistent = flagged.filter(function (f) {
+      if (!prev) return false;
+      var p = (smap[String(f.a.id)] || []).find(function (x) { return x.report_id === prev.id; });
+      return p && flagOf(p) !== "ok";
+    });
+    var months = monthsAgo(latest.date);
+
+    var questions = [];
+    patterns.forEach(function (h) {
+      questions.push('About <span class="rs-cond" data-cond="' + h.slug + '">' + escapeHtml(h.name) + "</span>: " +
+        joinNames(h.set, 3) + " are out of range together — ask about a monitoring plan" +
+        (h.slug === "chronic-kidney-disease" ? " and IRIS staging" : "") + ".");
+    });
+    if (persistent.length) {
+      questions.push(joinNames(persistent.map(function (f) { return f.a.name; }), 3) + " " +
+        (persistent.length > 1 ? "have" : "has") + " stayed out of range across visits — is the trend worth acting on?");
+    }
+    questions = questions.slice(0, 4);
+    if (!questions.length && months < 6) return null; // nothing actionable, recent visit
+
+    var cadence = "";
+    if (patterns.length) {
+      var m0 = (conditionBySlug(patterns[0].slug).metrics || [])[0];
+      var ka = m0 && (KB().analytes || {})[m0.analyte];
+      if (ka && ka.dynamics && ka.dynamics.monitoring) cadence = " " + escapeHtml(ka.dynamics.monitoring);
+    }
+    var timing = "Last report was " + fmtDate(latest.date) + " (" +
+      (months <= 0 ? "this month" : months + " month" + (months > 1 ? "s" : "") + " ago") + ").";
+    var box = el("div", "vet-visit");
+    box.innerHTML =
+      '<div class="vv-head">For your next vet visit</div>' +
+      '<p class="vv-timing">' + timing + cadence + "</p>" +
+      (questions.length ? '<div class="vv-lbl">Questions to consider asking</div><ul class="vv-q">' +
+        questions.map(function (q) { return "<li>" + q + "</li>"; }).join("") + "</ul>" : "") +
+      '<p class="rs-disclaimer">Conversation starters, not medical advice — your veterinarian decides what to test and when.</p>';
+    box.querySelectorAll(".rs-cond[data-cond]").forEach(function (e) {
+      e.addEventListener("click", function () { goToCondition(e.getAttribute("data-cond")); });
+    });
+    return box;
+  }
+
   function renderReports() {
     var host = $("#reports");
     host.innerHTML = "";
@@ -863,6 +919,8 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
       .sort(function (a, b) { return b.date.localeCompare(a.date); });
     if (!reports.length) { host.appendChild(el("div", "empty", "No reports.")); return; }
 
+    var vv = vetVisitCard();
+    if (vv) host.appendChild(vv);
     var grid = el("div", "report-grid");
     reports.forEach(function (r) { grid.appendChild(reportCard(r)); });
     host.appendChild(grid);
@@ -889,6 +947,47 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     return u.slice(0, n).join(", ") + " +" + (u.length - n);
   }
 
+  // Out-of-range measurements for one report (sorted by section, then name).
+  function flaggedFor(r) {
+    var flagged = [], smap = DATA.series[String(state.patientId)] || {};
+    DATA.analytes.forEach(function (a) {
+      (smap[String(a.id)] || []).forEach(function (p) {
+        if (p.report_id !== r.id) return;
+        var fl = flagOf(p);
+        if (fl !== "ok") flagged.push({ a: a, p: p, fl: fl });
+      });
+    });
+    flagged.sort(function (x, y) {
+      return SECTION_ORDER.indexOf(x.a.section) - SECTION_ORDER.indexOf(y.a.section) || x.a.name.localeCompare(y.a.name);
+    });
+    return flagged;
+  }
+
+  // Conditions whose multi-marker pattern is suggested by a flagged set: a
+  // condition's primary marker (first ~2 metrics) must be off, ≥2 of its metrics
+  // flagged, and its markers not a subset of a wider kept condition.
+  function conditionPatterns(flagged) {
+    var cm = analyteConditionsMap(), hits = {};
+    flagged.forEach(function (f) {
+      (cm[f.a.section + " / " + f.a.name] || []).forEach(function (c) {
+        var h = hits[c.slug] || (hits[c.slug] = { slug: c.slug, name: c.name, screenable: c.screenable, names: [], primary: false });
+        h.names.push(f.a.name);
+        if (c.idx <= 1) h.primary = true;
+      });
+    });
+    var uniq = function (a) { return a.filter(function (x, i) { return a.indexOf(x) === i; }); };
+    var candidates = Object.keys(hits).map(function (s) { return hits[s]; })
+      .filter(function (h) { return uniq(h.names).length >= 2 && h.primary; })
+      .sort(function (a, b) { return (b.screenable === a.screenable ? 0 : b.screenable ? 1 : -1) || (uniq(b.names).length - uniq(a.names).length); });
+    var patterns = [];
+    candidates.forEach(function (h) {
+      h.set = uniq(h.names);
+      var subsumed = patterns.some(function (k) { return h.set.every(function (n) { return k.set.indexOf(n) >= 0; }); });
+      if (!subsumed) patterns.push(h);
+    });
+    return patterns.slice(0, 2);
+  }
+
   // Plain-language synthesis for one report: how many values are off, what
   // changed since last visit, and which multi-marker patterns are worth raising.
   function reportSummary(r, flagged) {
@@ -913,28 +1012,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
       if (pp && cur && flagOf(pp) !== "ok" && flagOf(cur) === "ok") improved.push(a.name);
     });
 
-    var cm = analyteConditionsMap(), hits = {};
-    flagged.forEach(function (f) {
-      (cm[f.a.section + " / " + f.a.name] || []).forEach(function (c) {
-        var h = hits[c.slug] || (hits[c.slug] = { slug: c.slug, name: c.name, screenable: c.screenable, names: [], primary: false });
-        h.names.push(f.a.name);
-        if (c.idx <= 1) h.primary = true; // one of the condition's lead markers is off
-      });
-    });
-    var uniq = function (a) { return a.filter(function (x, i) { return a.indexOf(x) === i; }); };
-    var candidates = Object.keys(hits).map(function (s) { return hits[s]; })
-      .filter(function (h) { return uniq(h.names).length >= 2 && h.primary; })
-      .sort(function (a, b) { return (b.screenable === a.screenable ? 0 : b.screenable ? 1 : -1) || (uniq(b.names).length - uniq(a.names).length); });
-    // Drop a condition whose flagged markers are a subset of one already kept
-    // (e.g. hypertension's creatinine+SDMA is subsumed by CKD's wider set), so
-    // the same values aren't pinned to two conditions.
-    var patterns = [];
-    candidates.forEach(function (h) {
-      h.set = uniq(h.names);
-      var subsumed = patterns.some(function (k) { return h.set.every(function (n) { return k.set.indexOf(n) >= 0; }); });
-      if (!subsumed) patterns.push(h);
-    });
-    patterns = patterns.slice(0, 2);
+    var patterns = conditionPatterns(flagged);
 
     var out = '<div class="report-summary">';
     out += total === 0
@@ -962,20 +1040,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
   }
 
   function reportCard(r) {
-    // collect flagged measurements for this report from the series
-    var flagged = [];
-    var smap = DATA.series[String(state.patientId)] || {};
-    DATA.analytes.forEach(function (a) {
-      (smap[String(a.id)] || []).forEach(function (p) {
-        if (p.report_id !== r.id) return;
-        var fl = flagOf(p);
-        if (fl !== "ok") flagged.push({ a: a, p: p, fl: fl });
-      });
-    });
-    flagged.sort(function (x, y) {
-      return SECTION_ORDER.indexOf(x.a.section) - SECTION_ORDER.indexOf(y.a.section) || x.a.name.localeCompare(y.a.name);
-    });
-
+    var flagged = flaggedFor(r);
     var c = el("div", "report-card");
     var rows = flagged.map(function (f) {
       var ref = (f.p.ref_low != null) ? fmtNum(f.p.ref_low) + "–" + fmtNum(f.p.ref_high) : "";

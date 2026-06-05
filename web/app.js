@@ -1463,9 +1463,10 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
 
     var p = currentPatient();
     $("#corpus-meta").innerHTML = DATA.reports.length + " reports · " + DATA.analytes.length + " analytes" +
+      '<br><a href="about/" class="linkbtn">About</a>' +
       '<br><button id="import-reports" class="linkbtn">Import reports…</button>' +
       '<br><button id="open-journal" class="linkbtn">Weight &amp; notes…</button>' +
-      '<br><button id="manage-pets" class="linkbtn">Manage pets &amp; aliases…</button>' +
+      '<br><button id="manage-pets" class="linkbtn">Manage pets…</button>' +
       '<br><button id="reprocess" class="linkbtn">Reprocess all</button>' +
       '<br><button id="clear-all" class="linkbtn">Clear all data…</button>';
     $("#open-journal").addEventListener("click", openJournal);

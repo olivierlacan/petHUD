@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "description": "Browser-side pipeline + tooling for PetHUD (parser parity test, build).",
+  "license": "MIT",
   "scripts": {
     "parity": "node test/parity.mjs",
     "vendor-pdfjs": "node scripts/vendor-pdfjs.mjs",

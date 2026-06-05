@@ -315,3 +315,9 @@ samples/                your IDEXX PDFs (gitignored — real reports stay local)
   `bin/pethud reimport && bin/pethud export && cp exports/reports/*.json test/fixtures/`
   to (re)create fixtures and run `npm run parity` locally. With no real samples
   present, the parity gate skips cleanly (CI still enforces the pinned-pdf.js check).
+
+## License
+
+[MIT](LICENSE) © Olivier Lacan. PetHUD is an educational tool to help you read
+and discuss your pet's bloodwork — it is not a diagnosis and does not replace
+veterinary care.

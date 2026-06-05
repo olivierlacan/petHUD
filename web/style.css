@@ -647,7 +647,10 @@ main { max-width: 1680px; margin-inline: auto; }
    whole controls group onto its own full-width line beneath the brand (instead
    of letting flex squeeze them into a tall, ragged column on the right). */
 @media (max-width: 1180px) {
-  .controls { flex-basis: 100%; }
+  /* Controls drop to their own line; the theme switcher rides up to the brand
+     row, pinned top-right (aligned with the logo) rather than drifting down. */
+  .controls { flex-basis: 100%; order: 2; }
+  #theme-toggle { order: 1; margin-left: auto; align-self: flex-start; }
 }
 
 @media (max-width: 760px) {

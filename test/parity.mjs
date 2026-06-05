@@ -91,7 +91,15 @@ function compare(file, got, want) {
   return diffs;
 }
 
-const files = readdirSync(SAMPLES).filter((f) => f.endsWith(".pdf")).sort();
+// samples/ and test/fixtures/ are gitignored (they hold real reports), so a
+// fresh clone / CI has none. Skip cleanly rather than crash; run locally where
+// the PDFs and fixtures are present.
+const files = (existsSync(SAMPLES) ? readdirSync(SAMPLES) : []).filter((f) => f.endsWith(".pdf")).sort();
+if (files.length === 0) {
+  console.log("No local sample PDFs (samples/*.pdf is gitignored) — parity skipped.");
+  console.log("Add your IDEXX PDFs to samples/ and fixtures to test/fixtures/ to run it.");
+  process.exit(0);
+}
 let pass = 0, fail = 0;
 for (const f of files) {
   const expPath = join(EXPORTS, basename(f, ".pdf") + ".json");

@@ -14,6 +14,12 @@
 # Upload inbox (PDFs dropped via the web UI)
 /inbox/*.pdf
 
+# Personal sample data — real IDEXX reports and their parsed parity fixtures
+# (contain owner names, clinic, values). Kept locally to run tests; never
+# committed, so the repo can be made public without exposing them.
+/samples/*.pdf
+/test/fixtures/*.json
+
 # Ruby
 /.bundle/
 /vendor/bundle/

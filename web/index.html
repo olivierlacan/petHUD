@@ -24,11 +24,22 @@
 <body>
   <header class="topbar">
     <div class="brand">
-      <div class="brand-row">
-        <span class="logo">Pet<span class="hud">HUD</span></span>
-        <span class="sub">pet bloodwork trends</span>
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <ellipse cx="6.5" cy="10.5" rx="1.8" ry="2.3"></ellipse>
+          <ellipse cx="10.2" cy="7.6" rx="1.9" ry="2.5"></ellipse>
+          <ellipse cx="13.8" cy="7.6" rx="1.9" ry="2.5"></ellipse>
+          <ellipse cx="17.5" cy="10.5" rx="1.8" ry="2.3"></ellipse>
+          <path d="M12 12.2c-3.2 0-5.8 2.2-5.8 4.9 0 2 1.7 3.2 3.5 3.2 1.1 0 1.7-.5 2.3-.5s1.2.5 2.3.5c1.8 0 3.5-1.2 3.5-3.2 0-2.7-2.6-4.9-5.8-4.9z"></path>
+        </svg>
+      </span>
+      <div class="brand-text">
+        <div class="brand-row">
+          <span class="logo">Pet<span class="hud">HUD</span></span>
+          <span class="sub">pet bloodwork trends</span>
+        </div>
+        <a class="brand-about" href="about/">About</a>
       </div>
-      <a class="brand-about" href="about/">About</a>
     </div>
 
     <div class="controls">
@@ -94,11 +105,6 @@
 
   <footer class="footer">
     <span id="patient-meta"></span>
-    <span class="foot-actions">
-      <button id="import-reports" class="linkbtn">Import reports…</button>
-      <button id="open-journal" class="linkbtn">Weight &amp; notes…</button>
-      <button id="manage-pets" class="linkbtn">Manage pets &amp; aliases…</button>
-    </span>
   </footer>
 
   <!-- Hidden file picker — the touch-friendly import path (drag-drop needs a mouse) -->

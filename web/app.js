@@ -1463,12 +1463,16 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
 
     var p = currentPatient();
     $("#corpus-meta").innerHTML = DATA.reports.length + " reports · " + DATA.analytes.length + " analytes" +
+      '<br><button id="import-reports" class="linkbtn">Import reports…</button>' +
+      '<br><button id="open-journal" class="linkbtn">Weight &amp; notes…</button>' +
+      '<br><button id="manage-pets" class="linkbtn">Manage pets &amp; aliases…</button>' +
       '<br><button id="reprocess" class="linkbtn">Reprocess all</button>' +
       '<br><button id="clear-all" class="linkbtn">Clear all data…</button>';
-    var reBtn = $("#reprocess");
-    if (reBtn) reBtn.addEventListener("click", reprocessAll);
-    var clearBtn = $("#clear-all");
-    if (clearBtn) clearBtn.addEventListener("click", clearAllData);
+    $("#open-journal").addEventListener("click", openJournal);
+    $("#manage-pets").addEventListener("click", openPetsManager);
+    $("#reprocess").addEventListener("click", reprocessAll);
+    $("#clear-all").addEventListener("click", clearAllData);
+    // ("Import reports…" is handled by the delegated click in wire().)
     var ids = (p.identities || []).map(function (i) { return escapeHtml(i.pet_name + " / " + i.owner); });
     $("#patient-meta").innerHTML = "<b>" + escapeHtml(p.name) + "</b> · " + p.report_count + " reports · " +
       fmtDate(p.date_range[0]) + " → " + fmtDate(p.date_range[1]) +
@@ -1531,8 +1535,8 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     });
     $("#detail-close").addEventListener("click", closeDetail);
     $("#detail").addEventListener("click", function (e) { if (e.target === this) closeDetail(); });
-    $("#manage-pets").addEventListener("click", openPetsManager);
-    $("#open-journal").addEventListener("click", openJournal);
+    // #manage-pets / #open-journal / #import-reports live in the sidebar foot and
+    // are (re)wired in renderSidebar, since that block is rebuilt on each render.
     $("#journal-close").addEventListener("click", closeJournal);
     $("#journal").addEventListener("click", function (e) { if (e.target === this) closeJournal(); });
     $("#pets-close").addEventListener("click", closePetsManager);
@@ -1547,7 +1551,8 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     });
 
     // File-picker import (works on touch, where drag-drop doesn't). The hidden
-    // <input> is triggered by the footer button and the welcome-screen button.
+    // <input> is triggered by the sidebar "Import reports…" button and the
+    // welcome-screen button — both delegated so dynamically-rendered ones work.
     var fileInput = $("#file-input");
     fileInput.addEventListener("change", function () {
       var files = Array.prototype.slice.call(this.files).filter(function (f) {
@@ -1556,10 +1561,8 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
       if (files.length) importFiles(files);
       this.value = ""; // allow re-picking the same file
     });
-    $("#import-reports").addEventListener("click", function () { fileInput.click(); });
-    // Delegated so it works for the dynamically-rendered welcome screen too.
     document.addEventListener("click", function (e) {
-      if (e.target.closest("#welcome-choose")) fileInput.click();
+      if (e.target.closest("#welcome-choose, #import-reports")) fileInput.click();
     });
 
     setupDropzone();

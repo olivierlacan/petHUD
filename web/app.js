@@ -550,9 +550,11 @@ import { ordinalScaleFor, qualRuns, qualKey } from "./lib/qualitative.js";
       if (ord) {
         mid = qualSpark(ord.pts, ctx, ord.levels);
       } else if (nDistinct <= 1) {
-        // every reading identical → one chip with a count
-        mid = '<div class="qual-badges"><span class="b">' + escapeHtml(lastq ? lastq.result_text : "—") +
-          (qs.length > 1 ? ' <span class="x">×' + qs.length + "</span>" : "") + "</span></div>";
+        // every reading identical: the big value already says it, so don't
+        // repeat it as a chip — just note the consistency.
+        mid = qs.length > 1
+          ? '<div class="qual-note">Unchanged · ' + qs.length + " reports</div>"
+          : "";
       } else {
         var rs = qualRuns(qs), MAXR = 7, trimmed = rs.length > MAXR;
         var chips = rs.slice(-MAXR).map(function (run, idx) {

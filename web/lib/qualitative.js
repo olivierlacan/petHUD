@@ -78,7 +78,12 @@ export function ordinalScaleFor(qs) {
   return null;
 }
 
-export function qualKey(text) { return String(text || "").trim().toUpperCase(); }
+// Normalised identity for grouping nominal readings: case/space-insensitive and
+// ignoring trailing punctuation, so "No ova or parasites seen." and
+// "No ova or parasites seen" are the same value (not a spurious change).
+export function qualKey(text) {
+  return String(text || "").trim().toUpperCase().replace(/\s+/g, " ").replace(/[.;:\s]+$/, "");
+}
 
 // Collapse consecutive identical readings into runs (case-insensitive), for the
 // nominal change-timeline.

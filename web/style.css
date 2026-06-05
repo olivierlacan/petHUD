@@ -247,6 +247,7 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 .qual-badges .x { color: var(--text-mute); margin-left: 1px; } /* ×N repeat count */
 .qual-sep { color: var(--text-mute); font-family: var(--mono); font-size: 11px; }
 .qpt { fill: var(--accent); } /* ordinal qualitative step-chart dots */
+.qual-note { color: var(--text-mute); font-size: 11px; margin-top: 4px; } /* "Unchanged · N reports" */
 
 .empty { color: var(--text-mute); padding: 40px; text-align: center; }
 

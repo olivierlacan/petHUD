@@ -63,5 +63,13 @@ check("transitions produce separate runs with counts", () => {
   const r = qualRuns(series(["1+", "1+", "TRACE", "NEGATIVE", "NEGATIVE", "NEGATIVE"]));
   assert.deepEqual(r.map((x) => x.text + "×" + x.n), ["1+×2", "TRACE×1", "NEGATIVE×3"]);
 });
+check("trailing period is not a change (Ova & Parasites)", () => {
+  const qs = series(["No ova or parasites seen.", "No ova or parasites seen", "No ova or parasites seen"]);
+  assert.equal(distinctCount(qs), 1);
+  assert.equal(qualRuns(qs).length, 1);
+});
+check("internal whitespace differences collapse", () => {
+  assert.equal(distinctCount(series(["NEGATIVE", "NEGATIVE ", " negative"])), 1);
+});
 
 console.log(`\n${pass} assertions passed.`);

@@ -1,0 +1,294 @@
+{
+  "report": {
+    "id": 21,
+    "source_file": "demo-willow-2025-02-26.pdf",
+    "patient": {
+      "slug": "willow",
+      "name": "Willow"
+    },
+    "pet_name": "WILLOW MARSH",
+    "pet_owner": "MARSH",
+    "species": "Feline",
+    "breed": "Shorthair, Domestic",
+    "gender": "Female Spayed",
+    "age_text": "14 Years",
+    "age_years": 14.0,
+    "external_id": "900118",
+    "lab_id": "70005",
+    "order_id": "70006",
+    "account_number": "10118",
+    "attending_vet": "Dana Holloway DVM",
+    "clinic_name": "Cedar Creek Animal Hospital",
+    "idexx_services": "Chem 15 CLIP + CBC + SDMA + T4 + UA",
+    "collection_date": "2025-02-26",
+    "received_date": "2025-02-26",
+    "result_date": "2025-02-26",
+    "imported_at": "2026-06-05 18:56:46"
+  },
+  "sections": [
+    {
+      "name": "Chemistry",
+      "measurements": [
+        {
+          "name": "Creatinine",
+          "result_text": "2.9",
+          "value": 2.9,
+          "qualifier": null,
+          "unit": "mg/dL",
+          "ref_low": 0.8,
+          "ref_high": 2.4,
+          "ref_text": "0.8 - 2.4 mg/dL",
+          "flag": "H",
+          "numeric": true
+        },
+        {
+          "name": "IDEXX SDMA",
+          "result_text": "26",
+          "value": 26.0,
+          "qualifier": null,
+          "unit": "µg/dL",
+          "ref_low": 0.0,
+          "ref_high": 14.0,
+          "ref_text": "0 - 14 µg/dL",
+          "flag": "H",
+          "numeric": true
+        },
+        {
+          "name": "BUN",
+          "result_text": "47",
+          "value": 47.0,
+          "qualifier": null,
+          "unit": "mg/dL",
+          "ref_low": 16.0,
+          "ref_high": 36.0,
+          "ref_text": "16 - 36 mg/dL",
+          "flag": "H",
+          "numeric": true
+        },
+        {
+          "name": "Phosphorus",
+          "result_text": "6.5",
+          "value": 6.5,
+          "qualifier": null,
+          "unit": "mg/dL",
+          "ref_low": 3.1,
+          "ref_high": 7.5,
+          "ref_text": "3.1 - 7.5 mg/dL",
+          "flag": null,
+          "numeric": true
+        },
+        {
+          "name": "Calcium",
+          "result_text": "9.8",
+          "value": 9.8,
+          "qualifier": null,
+          "unit": "mg/dL",
+          "ref_low": 8.2,
+          "ref_high": 11.8,
+          "ref_text": "8.2 - 11.8 mg/dL",
+          "flag": null,
+          "numeric": true
+        },
+        {
+          "name": "Total Protein",
+          "result_text": "7.2",
+          "value": 7.2,
+          "qualifier": null,
+          "unit": "g/dL",
+          "ref_low": 5.7,
+          "ref_high": 8.9,
+          "ref_text": "5.7 - 8.9 g/dL",
+          "flag": null,
+          "numeric": true
+        },
+        {
+          "name": "Albumin",
+          "result_text": "3.1",
+          "value": 3.1,
+          "qualifier": null,
+          "unit": "g/dL",
+          "ref_low": 2.3,
+          "ref_high": 3.9,
+          "ref_text": "2.3 - 3.9 g/dL",
+          "flag": null,
+          "numeric": true
+        },
+        {
+          "name": "Globulin",
+          "result_text": "3.8",
+          "value": 3.8,
+          "qualifier": null,
+          "unit": "g/dL",
+          "ref_low": 2.8,
+          "ref_high": 5.1,
+          "ref_text": "2.8 - 5.1 g/dL",
+          "flag": null,
+          "numeric": true
+        },
+        {
+          "name": "Glucose",
+          "result_text": "95",
+          "value": 95.0,
+          "qualifier": null,
+          "unit": "mg/dL",
+          "ref_low": 71.0,
+          "ref_high": 159.0,
+          "ref_text": "71 - 159 mg/dL",
+          "flag": null,
+          "numeric": true
+        },
+        {
+          "name": "ALT",
+          "result_text": "55",
+          "value": 55.0,
+          "qualifier": null,
+          "unit": "U/L",
+          "ref_low": 12.0,
+          "ref_high": 130.0,
+          "ref_text": "12 - 130 U/L",
+          "flag": null,
+          "numeric": true
+        },
+        {
+          "name": "ALP",
+          "result_text": "40",
+          "value": 40.0,
+          "qualifier": null,
+          "unit": "U/L",
+          "ref_low": 14.0,
+          "ref_high": 111.0,
+          "ref_text": "14 - 111 U/L",
+          "flag": null,
+          "numeric": true
+        },
+        {
+          "name": "Cholesterol",
+          "result_text": "150",
+          "value": 150.0,
+          "qualifier": null,
+          "unit": "mg/dL",
+          "ref_low": 65.0,
+          "ref_high": 225.0,
+          "ref_text": "65 - 225 mg/dL",
+          "flag": null,
+          "numeric": true
+        },
+        {
+          "name": "Potassium",
+          "result_text": "3.6",
+          "value": 3.6,
+          "qualifier": null,
+          "unit": "mmol/L",
+          "ref_low": 3.5,
+          "ref_high": 5.8,
+          "ref_text": "3.5 - 5.8 mmol/L",
+          "flag": null,
+          "numeric": true
+        },
+        {
+          "name": "Sodium",
+          "result_text": "152",
+          "value": 152.0,
+          "qualifier": null,
+          "unit": "mmol/L",
+          "ref_low": 150.0,
+          "ref_high": 165.0,
+          "ref_text": "150 - 165 mmol/L",
+          "flag": null,
+          "numeric": true
+        }
+      ],
+      "notes": []
+    },
+    {
+      "name": "Endocrinology",
+      "measurements": [
+        {
+          "name": "Total T4",
+          "result_text": "2",
+          "value": 2.0,
+          "qualifier": null,
+          "unit": "µg/dL",
+          "ref_low": 0.8,
+          "ref_high": 4.0,
+          "ref_text": "0.8 - 4 µg/dL",
+          "flag": null,
+          "numeric": true
+        }
+      ],
+      "notes": []
+    },
+    {
+      "name": "Hematology",
+      "measurements": [
+        {
+          "name": "Hematocrit",
+          "result_text": "30",
+          "value": 30.0,
+          "qualifier": null,
+          "unit": "%",
+          "ref_low": 28.0,
+          "ref_high": 49.0,
+          "ref_text": "28 - 49 %",
+          "flag": null,
+          "numeric": true
+        },
+        {
+          "name": "Hemoglobin",
+          "result_text": "9.9",
+          "value": 9.9,
+          "qualifier": null,
+          "unit": "g/dL",
+          "ref_low": 9.8,
+          "ref_high": 16.2,
+          "ref_text": "9.8 - 16.2 g/dL",
+          "flag": null,
+          "numeric": true
+        },
+        {
+          "name": "WBC",
+          "result_text": "9.5",
+          "value": 9.5,
+          "qualifier": null,
+          "unit": "K/µL",
+          "ref_low": 3.9,
+          "ref_high": 19.0,
+          "ref_text": "3.9 - 19 K/µL",
+          "flag": null,
+          "numeric": true
+        },
+        {
+          "name": "Platelets",
+          "result_text": "320",
+          "value": 320.0,
+          "qualifier": null,
+          "unit": "K/µL",
+          "ref_low": 151.0,
+          "ref_high": 600.0,
+          "ref_text": "151 - 600 K/µL",
+          "flag": null,
+          "numeric": true
+        }
+      ],
+      "notes": []
+    },
+    {
+      "name": "Urinalysis",
+      "measurements": [
+        {
+          "name": "Specific Gravity",
+          "result_text": "1.015",
+          "value": 1.015,
+          "qualifier": null,
+          "unit": null,
+          "ref_low": 1.035,
+          "ref_high": 1.06,
+          "ref_text": "1.035 - 1.06",
+          "flag": "L",
+          "numeric": true
+        }
+      ],
+      "notes": []
+    }
+  ]
+}

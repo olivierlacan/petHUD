@@ -330,6 +330,17 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 .report-card .rmeta { color: var(--text-dim); font-size: 11px; line-height: 1.6; margin-bottom: 8px; }
 .report-card .rmeta .k { color: var(--text-mute); }
 .report-card .svc { color: var(--text-dim); font-size: 11px; font-style: italic; margin-bottom: 8px; }
+
+/* plain-language per-report summary */
+.report-summary { background: var(--bg-3); border-radius: 6px; padding: 8px 10px; margin: 4px 0 10px; font-size: 12px; line-height: 1.5; }
+.report-summary p { margin: 0 0 5px; }
+.report-summary p:last-child { margin-bottom: 0; }
+.report-summary .rs-head b { color: var(--text); }
+.report-summary .rs-change, .report-summary .rs-pattern { color: var(--text-dim); }
+.report-summary .rs-cond { color: var(--accent); cursor: pointer; }
+.report-summary .rs-cond:hover { text-decoration: underline; }
+.report-summary .rs-note { color: var(--text-mute); }
+.report-summary .rs-disclaimer { color: var(--text-mute); font-size: 11px; font-style: italic; }
 .flag-table { width: 100%; border-collapse: collapse; }
 .flag-table td { padding: 2px 4px; font-size: 11px; border-bottom: 1px solid var(--line); }
 .flag-table td.name { color: var(--text-dim); }

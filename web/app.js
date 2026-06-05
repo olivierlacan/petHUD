@@ -868,6 +868,99 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     host.appendChild(grid);
   }
 
+  // analyte "Section / Name" -> [{slug,name,screenable}] it belongs to, from KB.
+  var _condMap = null;
+  function analyteConditionsMap() {
+    if (_condMap) return _condMap;
+    _condMap = {};
+    (KB().conditions || []).forEach(function (c) {
+      // metric order encodes priority: the first ~2 are the primary screen
+      // markers, the rest are supporting/context (idx kept so the summary only
+      // names a condition when one of ITS primary markers is actually off).
+      (c.metrics || []).forEach(function (m, i) {
+        (_condMap[m.analyte] || (_condMap[m.analyte] = [])).push({ slug: c.slug, name: c.name, screenable: c.screenable, idx: i });
+      });
+    });
+    return _condMap;
+  }
+  function joinNames(arr, n) {
+    var u = arr.filter(function (x, i) { return arr.indexOf(x) === i; });
+    if (u.length <= n) return u.length <= 1 ? (u[0] || "") : u.slice(0, -1).join(", ") + " and " + u[u.length - 1];
+    return u.slice(0, n).join(", ") + " +" + (u.length - n);
+  }
+
+  // Plain-language synthesis for one report: how many values are off, what
+  // changed since last visit, and which multi-marker patterns are worth raising.
+  function reportSummary(r, flagged) {
+    var pid = String(state.patientId), smap = DATA.series[pid] || {};
+    var total = 0;
+    DATA.analytes.forEach(function (a) {
+      (smap[String(a.id)] || []).forEach(function (p) { if (p.report_id === r.id && p.numeric && p.value != null) total++; });
+    });
+    var reps = DATA.reports.filter(function (x) { return x.patient_id === state.patientId; })
+      .sort(function (a, b) { return a.date.localeCompare(b.date); });
+    var idx = -1; reps.forEach(function (x, i) { if (x.id === r.id) idx = i; });
+    var prev = idx > 0 ? reps[idx - 1] : null;
+    var pt = function (aid, repId) { return (smap[String(aid)] || []).find(function (p) { return p.report_id === repId; }) || null; };
+
+    var newly = [], persistent = [], improved = [];
+    flagged.forEach(function (f) {
+      var pp = prev ? pt(f.a.id, prev.id) : null;
+      if (pp && flagOf(pp) !== "ok") persistent.push(f.a.name); else if (prev) newly.push(f.a.name);
+    });
+    if (prev) DATA.analytes.forEach(function (a) {
+      var pp = pt(a.id, prev.id), cur = pt(a.id, r.id);
+      if (pp && cur && flagOf(pp) !== "ok" && flagOf(cur) === "ok") improved.push(a.name);
+    });
+
+    var cm = analyteConditionsMap(), hits = {};
+    flagged.forEach(function (f) {
+      (cm[f.a.section + " / " + f.a.name] || []).forEach(function (c) {
+        var h = hits[c.slug] || (hits[c.slug] = { slug: c.slug, name: c.name, screenable: c.screenable, names: [], primary: false });
+        h.names.push(f.a.name);
+        if (c.idx <= 1) h.primary = true; // one of the condition's lead markers is off
+      });
+    });
+    var uniq = function (a) { return a.filter(function (x, i) { return a.indexOf(x) === i; }); };
+    var candidates = Object.keys(hits).map(function (s) { return hits[s]; })
+      .filter(function (h) { return uniq(h.names).length >= 2 && h.primary; })
+      .sort(function (a, b) { return (b.screenable === a.screenable ? 0 : b.screenable ? 1 : -1) || (uniq(b.names).length - uniq(a.names).length); });
+    // Drop a condition whose flagged markers are a subset of one already kept
+    // (e.g. hypertension's creatinine+SDMA is subsumed by CKD's wider set), so
+    // the same values aren't pinned to two conditions.
+    var patterns = [];
+    candidates.forEach(function (h) {
+      h.set = uniq(h.names);
+      var subsumed = patterns.some(function (k) { return h.set.every(function (n) { return k.set.indexOf(n) >= 0; }); });
+      if (!subsumed) patterns.push(h);
+    });
+    patterns = patterns.slice(0, 2);
+
+    var out = '<div class="report-summary">';
+    out += total === 0
+      ? '<p class="rs-head">No numeric values in this report.</p>'
+      : (flagged.length === 0
+        ? '<p class="rs-head"><b>All ' + total + ' values within range.</b></p>'
+        : '<p class="rs-head"><b>' + flagged.length + " of " + total + " values</b> outside the reference range.</p>");
+    if (prev) {
+      var parts = [];
+      if (newly.length) parts.push(newly.length + " newly out of range (" + joinNames(newly, 3) + ")");
+      if (persistent.length) parts.push(persistent.length + " still out from last visit");
+      if (improved.length) parts.push(improved.length + " back in range (" + joinNames(improved, 3) + ")");
+      if (parts.length) out += '<p class="rs-change">vs ' + fmtDate(prev.date) + ": " + parts.join("; ") + ".</p>";
+    }
+    patterns.forEach(function (h) {
+      out += '<p class="rs-pattern">' + joinNames(h.names, 3) + " out of range together — a pattern that can relate to " +
+        '<span class="rs-cond" data-cond="' + h.slug + '">' + escapeHtml(h.name) + "</span>" +
+        (h.screenable ? ", which this bloodwork helps screen for" : "") + ". Worth raising with your vet.</p>";
+    });
+    if (flagged.length === 1) {
+      out += '<p class="rs-note">A single, mildly out-of-range value is often not meaningful on its own — a trend across visits matters more than one reading.</p>';
+    }
+    out += '<p class="rs-disclaimer">Plain-language summary, not a diagnosis — discuss results with your veterinarian.</p>';
+    return out + "</div>";
+  }
+
   function reportCard(r) {
     // collect flagged measurements for this report from the series
     var flagged = [];
@@ -897,6 +990,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
       ' · <span class="k">age</span> ' + escapeHtml(r.age_text || "—") +
       (r.lab_id ? ' · <span class="k">lab</span> ' + r.lab_id : "") + "</div>" +
       (r.idexx_services ? '<div class="svc">' + escapeHtml(r.idexx_services) + "</div>" : "") +
+      reportSummary(r, flagged) +
       (flagged.length
         ? '<div class="section-tag">' + flagged.length + ' out of range</div><table class="flag-table"><tbody>' + rows + "</tbody></table>"
         : '<div class="section-tag" style="color:var(--normal)">all values within range</div>');
@@ -905,6 +999,9 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
         deleteReport(r.sha256, r.source_file || fmtDate(r.date));
       });
     }
+    c.querySelectorAll(".rs-cond[data-cond]").forEach(function (el) {
+      el.addEventListener("click", function () { goToCondition(el.getAttribute("data-cond")); });
+    });
     return c;
   }
 

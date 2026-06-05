@@ -45,7 +45,8 @@ await new Promise((r) => setTimeout(r, 2500));
 
 const emptyState = await evalJs(`(document.getElementById("trends")||{}).textContent || ""`);
 const themeWorks = await evalJs(`!!document.getElementById("theme-toggle")`);
-const booted = /No reports yet/i.test(emptyState);
+// Fresh boot shows the welcome screen with its file-picker call to action.
+const booted = await evalJs(`!!document.querySelector(".welcome #welcome-choose")`) || /No reports yet/i.test(emptyState);
 const gotConfigs = ["/knowledge.json", "/patients.json", "/analyte_aliases.json", "/app.js", "/style.css", "/lib/pdfjs.js"].filter((f) => requested.has(f));
 
 console.log("requested config/asset paths:", gotConfigs.join(", "));

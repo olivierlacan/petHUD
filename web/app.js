@@ -1488,6 +1488,16 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
   }
 
   function renderAll() {
+    // No data (fresh, or just cleared) → the welcome screen, not empty panels.
+    if (!DATA.patients || !DATA.patients.length) {
+      ["conditions", "reports"].forEach(function (v) { $("#" + v).hidden = true; });
+      $("#trends").hidden = false;
+      renderPatientSelect();
+      renderSidebar();
+      renderWelcome();
+      return;
+    }
+    document.body.classList.remove("is-empty");
     buildIndexes();
     renderPatientSelect();
     renderSidebar();
@@ -1535,7 +1545,54 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
       }
     });
 
+    // File-picker import (works on touch, where drag-drop doesn't). The hidden
+    // <input> is triggered by the footer button and the welcome-screen button.
+    var fileInput = $("#file-input");
+    fileInput.addEventListener("change", function () {
+      var files = Array.prototype.slice.call(this.files).filter(function (f) {
+        return f.name.toLowerCase().endsWith(".pdf");
+      });
+      if (files.length) importFiles(files);
+      this.value = ""; // allow re-picking the same file
+    });
+    $("#import-reports").addEventListener("click", function () { fileInput.click(); });
+    // Delegated so it works for the dynamically-rendered welcome screen too.
+    document.addEventListener("click", function (e) {
+      if (e.target.closest("#welcome-choose")) fileInput.click();
+    });
+
     setupDropzone();
+  }
+
+  // Friendly first-run screen (no reports imported yet). Touch-friendly: the
+  // primary action is a real file picker, with drag-drop offered as a hint.
+  function renderWelcome() {
+    document.body.classList.add("is-empty");
+    $("#patient-meta").textContent = "";
+    $("#trends").innerHTML =
+      '<div class="welcome">' +
+        '<div class="welcome-mark" aria-hidden="true">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">' +
+            '<circle cx="12" cy="12" r="5"></circle>' +
+            '<path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"></path>' +
+            '<path d="M5 16l3-4 3 3 4-6 4 5" stroke-linejoin="round"></path>' +
+          '</svg>' +
+        '</div>' +
+        '<h1 class="welcome-h">Welcome to Pet<span class="hud">HUD</span></h1>' +
+        '<p class="welcome-lead">Drop in your pet’s IDEXX VetConnect PLUS bloodwork PDFs and ' +
+          'see them as clear trends over time, with plain-language context and a head start ' +
+          'on your next vet visit.</p>' +
+        '<div class="welcome-actions">' +
+          '<button class="welcome-btn" id="welcome-choose" type="button">Choose PDF reports</button>' +
+          '<span class="welcome-or">or drag &amp; drop them anywhere on this page</span>' +
+        '</div>' +
+        '<ul class="welcome-points">' +
+          '<li><span class="wp-ic">🔒</span> Private by design — parsed and stored only in your browser, never uploaded</li>' +
+          '<li><span class="wp-ic">📈</span> Trends, condition screening, IRIS kidney staging and visit prep</li>' +
+          '<li><span class="wp-ic">⚡</span> Works offline · free &amp; open source</li>' +
+        '</ul>' +
+        '<p class="welcome-foot">New to bloodwork? <a href="about/">See how PetHUD works →</a></p>' +
+      '</div>';
   }
 
   // ---- drag & drop import -------------------------------------------------
@@ -1716,9 +1773,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
       .then(rebuildFromDb)
       .then(function () {
         if (!DATA.patients || !DATA.patients.length) {
-          $("#trends").innerHTML = '<div class="empty">No reports yet. Drag IDEXX PDF report(s) onto this page to import them — ' +
-            "everything is processed and stored locally in your browser.</div>";
-          $("#patient-meta").textContent = "";
+          renderWelcome();
           return;
         }
         ensurePatient();

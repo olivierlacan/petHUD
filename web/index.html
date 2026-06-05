@@ -95,10 +95,14 @@
   <footer class="footer">
     <span id="patient-meta"></span>
     <span class="foot-actions">
+      <button id="import-reports" class="linkbtn">Import reports…</button>
       <button id="open-journal" class="linkbtn">Weight &amp; notes…</button>
       <button id="manage-pets" class="linkbtn">Manage pets &amp; aliases…</button>
     </span>
   </footer>
+
+  <!-- Hidden file picker — the touch-friendly import path (drag-drop needs a mouse) -->
+  <input id="file-input" type="file" accept="application/pdf,.pdf" multiple hidden>
 
   <!-- Pets & aliases manager -->
   <div id="pets" class="overlay" hidden>

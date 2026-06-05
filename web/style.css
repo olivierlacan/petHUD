@@ -589,3 +589,75 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 64px); }
 .theme-toggle button:hover { color: var(--text); background: var(--bg-2); }
 .theme-toggle button.active { color: var(--on-accent); background: var(--accent); }
 .theme-toggle svg { width: 16px; height: 16px; display: block; }
+
+/* ============================================================
+   Welcome / first-run screen (no reports imported yet)
+   ============================================================ */
+.welcome {
+  max-width: 560px;
+  margin: clamp(20px, 7vh, 80px) auto 48px;
+  padding: 0 20px;
+  text-align: center;
+}
+.welcome-mark {
+  width: 62px; height: 62px; margin: 0 auto 22px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent);
+  background: var(--bg-3); border: 1px solid var(--line-2); border-radius: 16px;
+}
+.welcome-mark svg { width: 34px; height: 34px; }
+.welcome-h { font-size: 28px; line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 12px; color: var(--text); font-weight: 700; }
+.welcome-h .hud { color: var(--accent); }
+.welcome-lead { font-size: 15.5px; line-height: 1.6; color: var(--text-dim); margin: 0 auto 26px; max-width: 48ch; }
+.welcome-actions { display: flex; flex-direction: column; align-items: center; gap: 11px; margin-bottom: 30px; }
+.welcome-btn {
+  background: var(--accent); color: var(--on-accent); border: 0; border-radius: 9px;
+  padding: 12px 28px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: var(--sans);
+  box-shadow: 0 6px 20px var(--shadow); transition: transform 0.12s, box-shadow 0.12s;
+}
+.welcome-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 28px var(--shadow); }
+.welcome-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.welcome-or { font-size: 12.5px; color: var(--text-mute); }
+.welcome-points {
+  list-style: none; margin: 0 auto 24px; padding: 18px 20px; max-width: 470px;
+  text-align: left; display: grid; gap: 12px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+}
+.welcome-points li { display: flex; gap: 11px; align-items: flex-start; font-size: 13.5px; line-height: 1.5; color: var(--text-dim); }
+.welcome-points .wp-ic { flex: 0 0 auto; font-size: 15px; line-height: 1.4; }
+.welcome-foot { font-size: 13px; color: var(--text-mute); margin: 0; }
+.welcome-foot a { color: var(--accent); text-decoration: none; }
+.welcome-foot a:hover { text-decoration: underline; }
+
+/* When there's no data, hide the chrome that only makes sense with reports
+   loaded, so the welcome screen reads as a clean landing page. */
+.is-empty .sidebar { display: none; }
+.is-empty #view-toggle,
+.is-empty .controls .ctl,
+.is-empty .controls .check { display: none; }
+.is-empty #open-journal,
+.is-empty #manage-pets { display: none; }
+
+/* ============================================================
+   Responsive: center on large viewports, reflow on small ones
+   ============================================================ */
+/* Keep the working area from sprawling on ultra-wide monitors. The sticky top
+   bar and footer stay full-width; only the sidebar+content block is centered. */
+main { max-width: 1680px; margin-inline: auto; }
+
+@media (max-width: 760px) {
+  .topbar { gap: 10px 14px; padding: 8px 12px; }
+  .controls { gap: 10px 14px; width: 100%; }
+  .ctl.search { flex: 1 1 140px; }
+  .ctl.search input { min-width: 0; width: 100%; }
+  main { flex-direction: column; min-height: 0; }
+  .sidebar {
+    position: static; width: auto; flex: 0 0 auto; height: auto; max-height: 42vh;
+    border-right: 0; border-bottom: 1px solid var(--line);
+  }
+  .content { padding: 12px; }
+  .welcome { margin-top: 24px; }
+  .welcome-h { font-size: 24px; }
+  .welcome-btn { width: 100%; max-width: 320px; }
+  .footer { font-size: 11.5px; padding: 9px 12px; }
+}

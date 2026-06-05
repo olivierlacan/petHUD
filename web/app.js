@@ -495,6 +495,27 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
       block.appendChild(grid);
       host.appendChild(block);
     });
+
+    host.appendChild(trendsLegend());
+  }
+
+  // Key explaining the sparkline glyphs (the dashed "gap" line especially isn't
+  // self-evident). Swatches reuse the real chart classes so they always match.
+  function trendsLegend() {
+    var box = function (vb, inner) { return '<svg class="lg-swatch" viewBox="0 0 ' + vb + '">' + inner + "</svg>"; };
+    var item = function (svg, label) { return '<span class="lg-item">' + svg + "<span>" + label + "</span></span>"; };
+    var dot = function (cls) { return box("14 14", '<circle class="pt ' + cls + '" cx="7" cy="7" r="3.5"/>'); };
+    var bandTrend = box("26 14", '<rect class="ref-band" x="0" y="3" width="26" height="8"/>' +
+      '<path class="series-line" d="M0 9 L9 6 L17 7 L26 5"/>');
+    var gap = box("14 16", '<line class="gap-line" x1="7" y1="1" x2="7" y2="15"/><circle class="gap-pt" cx="7" cy="14" r="2"/>');
+    var lg = el("div", "trends-legend");
+    lg.innerHTML = '<span class="lg-title">Chart key</span>' +
+      item(bandTrend, "Reference range &amp; trend") +
+      item(dot("ok"), "In range") +
+      item(dot("H"), "Above range") +
+      item(dot("L"), "Below range") +
+      item(gap, "Report had no result for this test");
+    return lg;
   }
 
   // The unit is redundant when the analyte name already carries it (e.g.

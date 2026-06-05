@@ -251,6 +251,19 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 
 .empty { color: var(--text-mute); padding: 40px; text-align: center; }
 
+/* ---- trends chart key ---- */
+.trends-legend {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px;
+  margin-top: 20px; padding: 11px 14px;
+  border-top: 1px solid var(--line); color: var(--text-dim); font-size: 12px;
+}
+.trends-legend .lg-title {
+  color: var(--text-mute); text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px;
+}
+.lg-item { display: inline-flex; align-items: center; gap: 6px; }
+.lg-swatch { flex: 0 0 auto; height: 14px; width: auto; display: block; overflow: visible; }
+.lg-swatch .gap-line { opacity: 0.7; } /* nudge up from the in-chart 0.45 so it reads at swatch size */
+
 /* ---- life-stage vigilance banner (top of Trends) ---- */
 .lifestage {
   background: var(--panel); border: 1px solid var(--line);

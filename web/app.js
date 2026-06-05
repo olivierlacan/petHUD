@@ -625,13 +625,16 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
 
   function openDetail(analyteId) {
     var a = DATA.analytes.find(function (x) { return x.id === analyteId; });
+    if (!a) return;
+    state.openAnalyte = analyteId; // track for arrow-key cycling + deep-link reopen
     var pts = seriesFor(analyteId);
     var body = $("#detail-body");
     var color = SECTION_COLOR[a.section] || "#8b949e";
 
     var head = '<div class="detail-head"><span class="bar" style="display:inline-block;width:4px;height:18px;background:' +
       color + ';border-radius:2px"></span><h2>' + a.name + '</h2><span class="sec">' + a.section +
-      (a.unit ? " · " + a.unit : "") + "</span></div>";
+      (a.unit ? " · " + a.unit : "") + "</span>" +
+      '<span class="detail-nav-hint" title="Use ← / → to browse analytes">←&nbsp;→ browse</span></div>';
 
     var num = numericSeries(pts);
     var ctx = reportContext(analyteId);
@@ -812,6 +815,43 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     d.dispatchEvent(new Event("close-detail"));
     d.hidden = true;
     $("#detail-body").innerHTML = "";
+    state.openAnalyte = null;
+  }
+
+  // Analyte ids in the order they appear on the Trends page (same section sort
+  // and search/section/abnormal filters), so arrow-key browsing matches what's
+  // on screen.
+  function visibleAnalyteOrder() {
+    var q = state.search.toLowerCase();
+    var bySection = {};
+    patientAnalytes().forEach(function (a) {
+      if (state.hiddenSections[a.section]) return;
+      if (q && a.name.toLowerCase().indexOf(q) < 0) return;
+      if (state.abnormalOnly) {
+        var num = numericSeries(seriesFor(a.id));
+        if (!num.some(function (p) { return flagOf(p) !== "ok"; })) return;
+      }
+      (bySection[a.section] || (bySection[a.section] = [])).push(a.id);
+    });
+    var ids = [];
+    Object.keys(bySection)
+      .sort(function (x, y) { return SECTION_ORDER.indexOf(x) - SECTION_ORDER.indexOf(y); })
+      .forEach(function (sec) { ids.push.apply(ids, bySection[sec]); });
+    return ids;
+  }
+
+  // Step to the previous/next analyte's detail (wraps around). Falls back to the
+  // full patient analyte order if the current one is filtered out of the view.
+  function cycleDetail(dir) {
+    if (state.openAnalyte == null) return;
+    var order = visibleAnalyteOrder();
+    var i = order.indexOf(state.openAnalyte);
+    if (i < 0) {
+      order = patientAnalytes().map(function (a) { return a.id; });
+      i = order.indexOf(state.openAnalyte);
+    }
+    if (i < 0 || order.length < 2) return;
+    openDetail(order[(i + dir + order.length) % order.length]);
   }
 
   // ---- reports view -------------------------------------------------------
@@ -1205,7 +1245,14 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     $("#manage-pets").addEventListener("click", openPetsManager);
     $("#pets-close").addEventListener("click", closePetsManager);
     $("#pets").addEventListener("click", function (e) { if (e.target === this) closePetsManager(); });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape") { closeDetail(); closePetsManager(); } });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") { closeDetail(); closePetsManager(); return; }
+      // ← / → browse analytes while the detail modal is open.
+      if (!$("#detail").hidden && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
+        e.preventDefault();
+        cycleDetail(e.key === "ArrowRight" ? 1 : -1);
+      }
+    });
 
     setupDropzone();
   }

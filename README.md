@@ -295,9 +295,19 @@ db/pethud.sqlite3       generated database
 samples/                your IDEXX PDFs (gitignored — real reports stay local)
 ```
 
-**Sample data is local-only.** `samples/*.pdf` and `test/fixtures/*.json` hold
-real reports (owner names, clinic, values) and are gitignored, so the repo can
-be public without exposing them. Drop your own PDFs in `samples/`, then
-`bin/pethud reimport && bin/pethud export && cp exports/reports/*.json test/fixtures/`
-to (re)create fixtures and run `npm run parity` locally. With no samples present,
-the parity gate skips cleanly (CI still enforces the pinned-pdf.js check).
+**Sample data.** Two kinds live in `samples/`:
+
+- `samples/demo-*.pdf` — **committed, fully synthetic** reports (fictional pets,
+  owners, and clinics) with designed value trends for the conditions pethud
+  highlights: CKD progression (Willow), treated hyperthyroidism (Otis), a stable
+  healthy cat (Cleo), controlled diabetes (Mochi), and a healthy dog with canine
+  reference intervals (Baxter). Drag them onto the web app, or `bin/pethud import
+  samples/`. Regenerate with `bundle install --with tools && ruby scripts/make_sample_pdfs.rb`
+  (uses Prawn to place text at the exact point coordinates a real report uses, so
+  the parser ingests them unchanged).
+- `samples/*.pdf` (your own real reports) and `test/fixtures/*.json` are
+  **gitignored** — they hold real owner names/clinic/values, so the repo can be
+  public without exposing them. Drop your PDFs in `samples/`, then
+  `bin/pethud reimport && bin/pethud export && cp exports/reports/*.json test/fixtures/`
+  to (re)create fixtures and run `npm run parity` locally. With no real samples
+  present, the parity gate skips cleanly (CI still enforces the pinned-pdf.js check).

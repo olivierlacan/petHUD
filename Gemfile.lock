@@ -1,6 +1,13 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    bigdecimal (3.1.9)
+    matrix (0.4.2)
+    pdf-core (0.10.0)
+    prawn (2.5.0)
+      matrix (~> 0.4)
+      pdf-core (~> 0.10.0)
+      ttfunk (~> 1.8)
     sqlite3 (2.9.4-aarch64-linux-gnu)
     sqlite3 (2.9.4-aarch64-linux-musl)
     sqlite3 (2.9.4-arm-linux-gnu)
@@ -11,6 +18,8 @@ GEM
     sqlite3 (2.9.4-x86_64-darwin)
     sqlite3 (2.9.4-x86_64-linux-gnu)
     sqlite3 (2.9.4-x86_64-linux-musl)
+    ttfunk (1.8.0)
+      bigdecimal (~> 3.1)
 
 PLATFORMS
   aarch64-linux-gnu
@@ -25,6 +34,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  prawn (~> 2.5)
   sqlite3 (~> 2.0)
 
 RUBY VERSION

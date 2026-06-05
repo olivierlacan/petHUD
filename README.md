@@ -1,4 +1,4 @@
-# pethud
+# PetHUD
 
 An analyzer for **IDEXX VetConnect PLUS** pet bloodwork PDFs. It parses lab
 reports and shows trends in each value over time. It runs **two ways from one
@@ -56,7 +56,7 @@ publishes `web/`. (Enable Pages with source "GitHub Actions".) Any static host
 works: Netlify, Cloudflare Pages, S3, etc. — just serve `web/`.
 
 **The one dependency, handled responsibly.** Client-side PDF parsing needs a PDF
-library; pethud vendors a **pinned** pdf.js in `web/vendor/` (offline, no CDN).
+library; PetHUD vendors a **pinned** pdf.js in `web/vendor/` (offline, no CDN).
 Updates aren't auto-pulled at runtime (a floating version could silently break
 parsing or ship unreviewed code). Instead, Dependabot opens a PR when pdf.js
 updates and the **parity test** (below) runs in CI to prove the new version still
@@ -213,17 +213,19 @@ clinical authority.
 ## Patient aliasing
 
 `config/patients.json` maps report identities to a canonical patient. A report
-matches a patient if **any** of: its patient external id is in `external_ids`,
-its (uppercased) pet name is in `names`, or its owner is in `owners`.
+matches a patient if **either** its patient external id is in `external_ids`, or
+its (uppercased) given name is in `names` — matched as the leading word of the
+report's `<NAME> <OWNER SURNAME>` pet name. Owner is intentionally **not** a
+match key: one household may have several pets, so matching on owner would merge
+different animals. The shipped config is empty; add your own rules:
 
 ```json
 {
   "patients": [
     {
-      "slug": "iris", "name": "Iris", "species": "Feline",
+      "slug": "nimbus", "name": "Nimbus", "species": "Feline",
       "match": {
-        "names": ["IRIS"],
-        "owners": ["REED", "PARK", "MAYA PARK"],
+        "names": ["NIMBUS"],
         "external_ids": ["900901", "900902"]
       }
     }
@@ -298,7 +300,7 @@ samples/                your IDEXX PDFs (gitignored — real reports stay local)
 **Sample data.** Two kinds live in `samples/`:
 
 - `samples/demo-*.pdf` — **committed, fully synthetic** reports (fictional pets,
-  owners, and clinics) with designed value trends for the conditions pethud
+  owners, and clinics) with designed value trends for the conditions PetHUD
   highlights: CKD progression (Willow), treated hyperthyroidism (Otis), a stable
   healthy cat (Cleo), controlled diabetes (Mochi), HCM screening with a rising
   Cardiopet proBNP (Juniper), IBD / small-cell lymphoma with falling albumin +

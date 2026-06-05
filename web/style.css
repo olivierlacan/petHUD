@@ -1,4 +1,4 @@
-/* pethud viewer — dense, dark, zero-dependency. */
+/* PetHUD viewer — dense, dark, zero-dependency. */
 /* Each token is defined once as light-dark(<light>, <dark>). The active side is
    chosen by `color-scheme`, which the data-theme attribute sets below:
      data-theme="auto"  -> light dark  (follows the OS / browser preference)
@@ -73,7 +73,7 @@ body {
 .brand-about { color: var(--accent); font-size: 11px; text-decoration: none; line-height: 1.2; }
 .brand-about:hover { text-decoration: underline; }
 .logo { font-weight: 700; font-size: 17px; letter-spacing: -0.02em; color: var(--text); }
-.logo::first-letter { color: var(--accent); }
+.logo .hud { color: var(--accent); }
 .sub { color: var(--text-mute); font-size: 12px; }
 
 .controls { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; flex: 1; }

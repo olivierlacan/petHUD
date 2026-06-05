@@ -10,7 +10,7 @@
     (function () {
       try {
         var q = new URLSearchParams(location.search).get("theme");
-        var t = q || localStorage.getItem("pethud-theme") || localStorage.getItem("pethud-theme") || "auto";
+        var t = q || localStorage.getItem("pethud-theme") || localStorage.getItem("indexx-theme") || "auto";
         document.documentElement.setAttribute("data-theme", t);
       } catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
     })();

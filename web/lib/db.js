@@ -8,14 +8,16 @@
 // (aggregate.js); nothing else persists.
 
 const DB_NAME = "pethud";
+const LEGACY_DB_NAME = "indexx"; // pre-rename database; migrated once, then left as a backup
 const DB_VERSION = 2;
+const STORES = ["pdfs", "reports", "settings"];
 
 let dbPromise = null;
 
-export function open() {
-  if (dbPromise) return dbPromise;
-  dbPromise = new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
+// Open DB_NAME, creating the object stores on first use (or version bump).
+function openWithStores(name) {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(name, DB_VERSION);
     req.onupgradeneeded = () => {
       const db = req.result;
       if (!db.objectStoreNames.contains("pdfs")) db.createObjectStore("pdfs", { keyPath: "sha256" });
@@ -25,6 +27,71 @@ export function open() {
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
   });
+}
+
+function txDone(t) {
+  return new Promise((resolve, reject) => {
+    t.oncomplete = () => resolve();
+    t.onerror = () => reject(t.error);
+    t.onabort = () => reject(t.error);
+  });
+}
+
+// One-time copy of the pre-rename "indexx" database into "pethud" (PDFs, parsed
+// reports, journal, patient aliases, theme — everything). Non-destructive: the
+// legacy DB is left untouched as a safety net. No-op for fresh installs.
+async function migrateLegacy() {
+  if (typeof indexedDB === "undefined") return;
+  // Where supported, databases() lets us leave brand-new installs entirely alone.
+  if (indexedDB.databases) {
+    let names = [];
+    try { names = (await indexedDB.databases()).map((d) => d.name); } catch (e) { return; }
+    if (!names.includes(LEGACY_DB_NAME) || names.includes(DB_NAME)) return;
+  }
+  // Open the legacy DB without forcing a version; detect a freshly-created (empty) one.
+  let legacy, created = false;
+  try {
+    legacy = await new Promise((resolve, reject) => {
+      const req = indexedDB.open(LEGACY_DB_NAME);
+      req.onupgradeneeded = () => { created = true; };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (e) { return; }
+  const hasData = !created && STORES.some((s) => legacy.objectStoreNames.contains(s));
+  if (!hasData) {
+    legacy.close();
+    if (created) { try { indexedDB.deleteDatabase(LEGACY_DB_NAME); } catch (e) { /* ignore */ } }
+    return;
+  }
+  // Read every store out of the legacy DB.
+  const data = {};
+  for (const s of STORES) {
+    data[s] = legacy.objectStoreNames.contains(s)
+      ? await reqToPromise(legacy.transaction(s, "readonly").objectStore(s).getAll())
+      : [];
+  }
+  legacy.close();
+  // Write into the new DB, but never clobber data already there.
+  const ndb = await openWithStores(DB_NAME);
+  const reportCount = await reqToPromise(ndb.transaction("reports", "readonly").objectStore("reports").count());
+  if (reportCount === 0) {
+    for (const s of STORES) {
+      if (!data[s].length) continue;
+      const t = ndb.transaction(s, "readwrite");
+      data[s].forEach((rec) => t.objectStore(s).put(rec));
+      await txDone(t);
+    }
+  }
+  ndb.close();
+}
+
+export function open() {
+  if (dbPromise) return dbPromise;
+  dbPromise = (async () => {
+    try { await migrateLegacy(); } catch (e) { /* migration is best-effort; never block startup */ }
+    return openWithStores(DB_NAME);
+  })();
   return dbPromise;
 }
 

@@ -1,4 +1,4 @@
-/* pethud viewer — vanilla JS, no framework.
+/* PetHUD viewer — vanilla JS, no framework.
    Runs fully in the browser: parses dropped IDEXX PDFs with pdf.js + lib/*,
    stores originals + parsed docs in IndexedDB, and renders the rebuilt payload.
    The Ruby CLI remains available and produces the identical data shape. */
@@ -1597,7 +1597,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
         });
       }).then(function () { imported++; next(); })
         .catch(function (err) {
-          console.error("pethud import failed for " + f.name, err); // full stack in the console
+          console.error("PetHUD import failed for " + f.name, err); // full stack in the console
           toast("Failed: " + f.name + " (" + err.message + ")", "err", 5000);
           next();
         });
@@ -1692,7 +1692,22 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     });
   }
 
+  // One-time copy of pre-rename localStorage keys (pethud-* -> pethud-*), so a
+  // returning user keeps their theme and sidebar state. The IndexedDB data is
+  // migrated separately in db.js.
+  function migrateLegacyPrefs() {
+    try {
+      [["pethud-theme", "indexx-theme"], ["pethud-ls", "indexx-ls"]].forEach(function (pair) {
+        if (localStorage.getItem(pair[0]) == null) {
+          var old = localStorage.getItem(pair[1]);
+          if (old != null) localStorage.setItem(pair[0], old);
+        }
+      });
+    } catch (e) { /* private mode */ }
+  }
+
   function boot() {
+    migrateLegacyPrefs();
     setupTheme();
     wire(); // includes the dropzone, needed even before any data exists
     loadStaticConfig()

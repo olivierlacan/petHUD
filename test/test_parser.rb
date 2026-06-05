@@ -89,6 +89,23 @@ class TestReportParser < Minitest::Test
     assert para[:notes].any? { |n| n[:name].to_s.start_with?("Key") || n[:text].to_s =~ /reference interval/ }
   end
 
+  def test_wrapped_urinalysis_names_are_stitched
+    # This report's UA layout wraps long names onto a second line ("Blood /" +
+    # "Hemoglobin", "White Blood" + "Cells"); the parser must rejoin them rather
+    # than emit fragment rows.
+    r = parse("2023-09-13-IRIS-REED-1538.pdf")
+    names = r[:sections].find { |s| s[:name] == "Urinalysis" }[:measurements].map { |m| m[:name] }
+    assert_includes names, "Blood / Hemoglobin"
+    assert_includes names, "White Blood Cells"
+    %w[Blood\ / Hemoglobin White\ Blood Cells].each { |frag| refute_includes names, frag }
+  end
+
+  def test_remarks_routed_to_notes_not_measurements
+    r = parse("2026-02-27-IRIS-PARK-7000000002.pdf")
+    heme = r[:sections].find { |s| s[:name] == "Hematology" }
+    refute_includes heme[:measurements].map { |m| m[:name] }, "Remarks"
+  end
+
   def test_all_samples_parse_without_error
     Dir[File.join(SAMPLES, "*.pdf")].each do |f|
       r = PetHUD::ReportParser.parse(f)

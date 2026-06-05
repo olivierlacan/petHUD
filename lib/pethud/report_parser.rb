@@ -146,6 +146,8 @@ module PetHUD
 
     NAME_ANCHOR_SLACK = 48  # a row's leftmost word must start within this of name_x
     CONT_GAP = 16.0         # max vertical gap (pts) for a wrapped name fragment
+    WRAP_GAP_TIGHT = 15.0   # stricter gap when the previous line's value wasn't captured
+                            # (observed: wraps ~11pt, distinct rows ~25pt)
 
     def parse_sections(meta)
       sections = []
@@ -203,13 +205,16 @@ module PetHUD
         next if row[:type] == :noise
 
         # A row with its own value is always a new measurement. A value-less row
-        # is a wrapped name fragment only when it hugs the previous line AND that
-        # previous line actually carried a value (the value never wraps). That
-        # distinguishes "Bilirubin -" + "Conjugated" (a wrap) from value-less
-        # urinalysis rows like "Color"/"Clarity" (distinct qualitative tests).
+        # is a wrapped name fragment when it hugs the previous line. The gap is
+        # what distinguishes a wrap ("Blood /" + "Hemoglobin", ~11pt) from two
+        # distinct qualitative tests ("Color" / "Clarity", ~25pt). When the
+        # previous line's value was captured we allow the normal gap; when it
+        # wasn't (some urinalysis layouts right-align the result so it isn't read)
+        # we require a tighter gap, so we still only ever absorb a genuine wrap.
+        gap = last_y && (line.y - last_y)
         prev_valued = last_measurement && !last_measurement[:result_text].to_s.strip.empty?
-        continuation = !row[:has_value] && prev_valued &&
-                       last_y && (line.y - last_y) <= CONT_GAP
+        continuation = !row[:has_value] && last_measurement && gap &&
+                       gap <= (prev_valued ? CONT_GAP : WRAP_GAP_TIGHT)
 
         if continuation
           last_measurement[:name] = "#{last_measurement[:name]} #{row[:name]}".strip
@@ -232,7 +237,7 @@ module PetHUD
 
     # Free-text annotations that ride in the result table but aren't analytes:
     # clinical-history blurbs, legends, "info needed" prose, etc.
-    NOTE_NAME_RE = /\A\*|Clinical History|INFO NEEDED|Fecal Note|\AOther\z|\ANote\b|\AKey\b/i
+    NOTE_NAME_RE = /\A\*|Clinical History|INFO NEEDED|Fecal Note|\AOther\z|\ANote\b|\AKey\b|\ARemarks\b/i
 
     def note?(name, result_text)
       return true if name =~ NOTE_NAME_RE

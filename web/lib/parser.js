@@ -18,10 +18,11 @@ const SECTIONS = [
 const SECTION_RE = new RegExp(`^(${SECTIONS.map(escapeRegex).join("|")})(?:\\s*\\(continued\\))?$`);
 
 const NOISE_RE = /PET\sOWNER:|DATE\sOF\sRESULT:|LAB\sID:|Generated\sby\sVetConnect|Page\s\d+\sof\s\d+|^1\s8\d\d|^\d{3}-\d{3}-\d{4}$/;
-const NOTE_NAME_RE = /^\*|Clinical History|INFO NEEDED|Fecal Note|^Other$|^Note\b|^Key\b/i;
+const NOTE_NAME_RE = /^\*|Clinical History|INFO NEEDED|Fecal Note|^Other$|^Note\b|^Key\b|^Remarks\b/i;
 
 const NAME_ANCHOR_SLACK = 48;
 const CONT_GAP = 16.0;
+const WRAP_GAP_TIGHT = 15.0; // stricter gap when the previous line's value wasn't captured
 const NUMBER = "-?\\d+(?:\\.\\d+)?";
 
 function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
@@ -164,8 +165,16 @@ function parseSections(lines, meta) {
     const row = classifyRow(line, cols);
     if (row.type === "noise") continue;
 
+    // A value-less row hugging the previous measurement is a wrapped name
+    // fragment. The gap distinguishes a wrap ("Blood /" + "Hemoglobin", ~11pt)
+    // from two distinct tests ("Color" / "Clarity", ~25pt). When the previous
+    // line's value was captured we allow the normal gap; when it wasn't (some
+    // urinalysis layouts right-align the result so it isn't read) we require a
+    // tighter gap, so we only ever absorb a genuine wrap. Mirrors report_parser.rb.
+    const gap = lastY != null ? line.y - lastY : null;
     const prevValued = lastMeasurement && (lastMeasurement.result_text || "").trim() !== "";
-    const continuation = !row.has_value && prevValued && lastY != null && (line.y - lastY) <= CONT_GAP;
+    const continuation = !row.has_value && lastMeasurement && gap != null &&
+      gap <= (prevValued ? CONT_GAP : WRAP_GAP_TIGHT);
 
     if (continuation) {
       lastMeasurement.name = `${lastMeasurement.name} ${row.name}`.trim();

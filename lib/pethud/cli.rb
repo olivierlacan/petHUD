@@ -152,10 +152,14 @@ module PetHUD
 
       knowledge_path = File.join(PetHUD.web_dir, "knowledge.json")
       patients_path = File.join(PetHUD.web_dir, "patients.json")
+      aliases_src = File.join(PetHUD::ROOT.to_s, "config", "analyte_aliases.json")
+      aliases_path = File.join(PetHUD.web_dir, "analyte_aliases.json")
       File.write(knowledge_path, JSON.pretty_generate(kb.payload) + "\n")
       FileUtils.cp(PetHUD.config_path, patients_path)
+      FileUtils.cp(aliases_src, aliases_path) if File.exist?(aliases_src)
       puts "Wrote #{knowledge_path}"
       puts "Wrote #{patients_path}"
+      puts "Wrote #{aliases_path}" if File.exist?(aliases_path)
     end
 
     # Analyte keys from the DB if it exists, for validation; empty otherwise.

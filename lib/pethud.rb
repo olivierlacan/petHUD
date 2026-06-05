@@ -19,6 +19,7 @@ end
 require_relative "pethud/pdf_extractor"
 require_relative "pethud/report_parser"
 require_relative "pethud/patient_resolver"
+require_relative "pethud/analyte_aliases"
 require_relative "pethud/database"
 require_relative "pethud/knowledge"
 require_relative "pethud/importer"

@@ -206,6 +206,9 @@ module PetHUD
     end
 
     def upsert_analyte(section, name, unit)
+      # Fold wrapped/fragmented variants into one canonical analyte; the raw
+      # measurement name is still stored separately by insert_measurements.
+      name = AnalyteAliases.canonical(section, name)
       existing = @db.get_first_row("SELECT id, canonical_unit FROM analytes WHERE section = ? AND name = ?", [section, name])
       if existing
         if existing["canonical_unit"].nil? && unit

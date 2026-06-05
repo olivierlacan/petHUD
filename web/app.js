@@ -15,6 +15,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
   var patientsConfig = { patients: [] }; // static aliasing rules (patients.json)
   var userConfig = { patients: [] };     // user overrides (renames/merges, in IndexedDB)
   var knowledge = null;                  // medical-context payload (knowledge.json)
+  var analyteAliases = null;             // analyte-name aliases (analyte_aliases.json)
 
   var SECTION_ORDER = ["Hematology", "Chemistry", "Urinalysis", "Urine Chemistry",
     "Endocrinology", "Serology", "Immunology", "Parasitology", "Microbiology",
@@ -1281,17 +1282,19 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
   function rebuildFromDb() {
     return db.getAllReports().then(function (records) {
       var docs = records.map(function (r) { return r.reportDoc; });
-      DATA = buildPayload(docs, { patientsConfig: mergedPatientsConfig(), knowledge: knowledge, generatedAt: new Date().toISOString() });
+      DATA = buildPayload(docs, { patientsConfig: mergedPatientsConfig(), knowledge: knowledge, analyteAliases: analyteAliases, generatedAt: new Date().toISOString() });
       window.PETHUD_DATA = DATA;
     });
   }
 
-  // Fetch the static aliasing rules + medical-context knowledge once.
+  // Fetch the static aliasing rules + medical-context knowledge + analyte
+  // aliases once.
   function loadStaticConfig() {
     return Promise.all([
       fetch("patients.json").then(function (r) { return r.ok ? r.json() : { patients: [] }; }).catch(function () { return { patients: [] }; }),
       fetch("knowledge.json").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
-    ]).then(function (res) { patientsConfig = res[0]; knowledge = res[1]; });
+      fetch("analyte_aliases.json").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
+    ]).then(function (res) { patientsConfig = res[0]; knowledge = res[1]; analyteAliases = res[2]; });
   }
 
   function loadUserConfig() {

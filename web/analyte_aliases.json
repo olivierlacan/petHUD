@@ -1,0 +1,12 @@
+{
+  "_comment": "Section-scoped analyte-name aliases. Some IDEXX report layouts wrap a long analyte name across two lines, which the parser emits as truncated/fragmented names (e.g. 'Blood /' + 'Hemoglobin' for 'Blood / Hemoglobin', or 'White Blood' + 'Cells'). Each rule below maps a confirmed-identical variant ('from') to its canonical name ('to') WITHIN a section, so the catalog and trend series unify instead of showing duplicate/empty cards. Applied at the catalog/aggregation layer only — per-report parse output is left untouched. Note: 'Cells' alone is intentionally NOT aliased because it is ambiguous (it pairs with 'White Blood' in some reports and 'Red Blood' in others); disambiguating it requires a parser-level name-stitch, not a static alias.",
+  "aliases": [
+    { "section": "Hematology",   "from": "% Reticulocyte",                 "to": "% Reticulocytes" },
+    { "section": "Urinalysis",   "from": "Collection",                     "to": "Collection Method" },
+    { "section": "Urinalysis",   "from": "Blood /",                        "to": "Blood / Hemoglobin" },
+    { "section": "Urinalysis",   "from": "Hemoglobin",                     "to": "Blood / Hemoglobin" },
+    { "section": "Urinalysis",   "from": "White Blood",                    "to": "White Blood Cells" },
+    { "section": "Urinalysis",   "from": "Red Blood",                      "to": "Red Blood Cells" },
+    { "section": "Parasitology", "from": "Ova & Parasites - Zinc Sulfate", "to": "Ova & Parasites - Zinc Sulfate Centrifugation" }
+  ]
+}

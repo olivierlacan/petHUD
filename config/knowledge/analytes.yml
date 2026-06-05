@@ -536,20 +536,8 @@ analytes:
       or inadequate depending on how anemic the cat is.
     sources: [eclinpath_regeneration, eclinpath_anemia]
 
-  "Hematology / % Reticulocyte":
-    summary: >
-      The percentage of red cells that are reticulocytes (young red cells). The
-      absolute reticulocyte count is the more reliable measure of regeneration.
-    high: >
-      A higher percentage suggests the marrow is producing new red cells, but a
-      percentage can look high simply because the total red cell count is low.
-    low: >
-      A low percentage with anemia points to a non-regenerative process.
-    isolation: >
-      Prefer the absolute reticulocyte count, and read it against how anemic the
-      cat actually is.
-    sources: [eclinpath_regeneration]
-
+  # "% Reticulocyte" (singular) is aliased to "% Reticulocytes" in
+  # config/analyte_aliases.json, so only the canonical key needs an entry.
   "Hematology / % Reticulocytes":
     summary: >
       The percentage of red cells that are reticulocytes (young red cells). The

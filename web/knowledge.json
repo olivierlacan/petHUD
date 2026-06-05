@@ -720,15 +720,6 @@
         "eclinpath_anemia"
       ]
     },
-    "Hematology / % Reticulocyte": {
-      "summary": "The percentage of red cells that are reticulocytes (young red cells). The absolute reticulocyte count is the more reliable measure of regeneration.\n",
-      "high": "A higher percentage suggests the marrow is producing new red cells, but a percentage can look high simply because the total red cell count is low.\n",
-      "low": "A low percentage with anemia points to a non-regenerative process.\n",
-      "isolation": "Prefer the absolute reticulocyte count, and read it against how anemic the cat actually is.\n",
-      "sources": [
-        "eclinpath_regeneration"
-      ]
-    },
     "Hematology / % Reticulocytes": {
       "summary": "The percentage of red cells that are reticulocytes (young red cells). The absolute reticulocyte count is the more reliable measure of regeneration.\n",
       "high": "A higher percentage suggests the marrow is producing new red cells, but a percentage can look high simply because the total red cell count is low.\n",

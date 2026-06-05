@@ -132,10 +132,20 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 47px); }
 /* ---- footer ---- */
 .footer {
   display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
-  padding: 8px 16px; border-top: 1px solid var(--line); background: var(--bg-2);
+  min-height: 48px; padding: 10px 16px;
+  border-top: 1px solid var(--line); background: var(--bg-2);
   color: var(--text-mute); font-size: 12px;
 }
-.footer #patient-meta b { color: var(--text-dim); }
+.footer #patient-meta { line-height: 1.5; }
+.footer #patient-meta b { color: var(--text-dim); font-weight: 600; }
+/* Make the manager a tidy pill (overrides the bare-link .linkbtn padding that
+   threw the baseline off against the meta text). */
+.footer #manage-pets {
+  flex: 0 0 auto; align-self: center;
+  padding: 6px 12px; border: 1px solid var(--line-2); border-radius: 6px;
+  background: var(--bg-3); color: var(--accent); font-size: 12px; line-height: 1;
+}
+.footer #manage-pets:hover { background: var(--bg-2); border-color: var(--accent); text-decoration: none; }
 
 /* ---- pets & aliases manager ---- */
 .pets-intro { color: var(--text-dim); font-size: 12px; line-height: 1.5; margin: 0 0 14px; max-width: 64ch; }

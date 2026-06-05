@@ -1108,9 +1108,15 @@ import { givenName } from "./lib/resolver.js";
 
   // Parse dropped PDFs entirely in the browser, persist them, and rebuild.
   function importFiles(files) {
-    var imported = 0, i = 0;
+    var imported = 0, i = 0, lastSha = null;
     function finish() {
       rebuildFromDb().then(function () {
+        // Jump to the patient whose report was just imported, so a dropped
+        // report for a different pet is visible immediately.
+        if (lastSha) {
+          var rep = DATA.reports.find(function (r) { return r.sha256 === lastSha; });
+          if (rep) state.patientId = rep.patient_id;
+        }
         ensurePatient();
         renderAll();
         toast(imported + " report(s) imported.", imported ? "ok" : null, 3500);
@@ -1126,6 +1132,7 @@ import { givenName } from "./lib/resolver.js";
         // ArrayBuffer to its worker during processPdf, so a Blob made from `buf`
         // afterward would be empty. The File is independent of that.
         return processPdf(buf, f.name).then(function (res) {
+          lastSha = res.sha;
           return Promise.all([
             db.putPdf({ sha256: res.sha, filename: f.name, blob: f, importedAt: new Date().toISOString() }),
             db.putReport({ sha256: res.sha, reportDoc: res.reportDoc, patientSlug: null }),

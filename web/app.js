@@ -1573,10 +1573,12 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     $("#trends").innerHTML =
       '<div class="welcome">' +
         '<div class="welcome-mark" aria-hidden="true">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">' +
-            '<circle cx="12" cy="12" r="5"></circle>' +
-            '<path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"></path>' +
-            '<path d="M5 16l3-4 3 3 4-6 4 5" stroke-linejoin="round"></path>' +
+          '<svg viewBox="0 0 24 24" fill="currentColor">' +
+            '<ellipse cx="6.5" cy="10.5" rx="1.8" ry="2.3"></ellipse>' +
+            '<ellipse cx="10.2" cy="7.6" rx="1.9" ry="2.5"></ellipse>' +
+            '<ellipse cx="13.8" cy="7.6" rx="1.9" ry="2.5"></ellipse>' +
+            '<ellipse cx="17.5" cy="10.5" rx="1.8" ry="2.3"></ellipse>' +
+            '<path d="M12 12.2c-3.2 0-5.8 2.2-5.8 4.9 0 2 1.7 3.2 3.5 3.2 1.1 0 1.7-.5 2.3-.5s1.2.5 2.3.5c1.8 0 3.5-1.2 3.5-3.2 0-2.7-2.6-4.9-5.8-4.9z"></path>' +
           '</svg>' +
         '</div>' +
         '<h1 class="welcome-h">Welcome to Pet<span class="hud">HUD</span></h1>' +

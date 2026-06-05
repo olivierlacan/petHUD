@@ -101,3 +101,14 @@ export function qualRuns(qs) {
 export function distinctCount(qs) {
   return new Set(qs.map((p) => qualKey(p.result_text))).size;
 }
+
+// Display form for a reading: uppercase short categorical/boolean results
+// (NEGATIVE/Negative -> NEGATIVE, "none seen" -> "NONE SEEN") so casing is
+// consistent across panels, but leave prose sentences ("No ova or parasites
+// seen") in their original case so they don't read as shouting.
+export function qualDisplay(text) {
+  const t = String(text || "").trim();
+  if (!t) return t;
+  const words = t.split(/\s+/);
+  return (words.length <= 2 && t.length <= 16) ? t.toUpperCase() : t;
+}

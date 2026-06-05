@@ -6,7 +6,7 @@ import * as db from "./lib/db.js";
 import { processPdf, looksLikePdf } from "./lib/process.js";
 import { buildPayload } from "./lib/aggregate.js";
 import { givenName } from "./lib/resolver.js";
-import { ordinalScaleFor, qualRuns, qualKey } from "./lib/qualitative.js";
+import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitative.js";
 
 (function () {
   "use strict";
@@ -561,14 +561,14 @@ import { ordinalScaleFor, qualRuns, qualKey } from "./lib/qualitative.js";
           var span = run.from === run.to ? fmtDate(run.to) : fmtDate(run.from) + " – " + fmtDate(run.to);
           var x = run.n > 1 ? ' <span class="x">×' + run.n + "</span>" : "";
           return (idx ? '<span class="qual-sep">›</span>' : "") +
-            '<span class="b" title="' + span + '">' + escapeHtml(run.text) + x + "</span>";
+            '<span class="b" title="' + span + '">' + escapeHtml(qualDisplay(run.text)) + x + "</span>";
         }).join("");
         mid = '<div class="qual-badges">' + (trimmed ? '<span class="qual-sep">…</span>' : "") + chips + "</div>";
       }
       c.innerHTML =
         '<div class="card-top"><span class="card-name">' + a.name + "</span></div>" +
         '<div class="card-value"><span class="v ok" style="font-size:14px">' +
-          (lastq ? escapeHtml(lastq.result_text) : "—") + "</span></div>" +
+          (lastq ? escapeHtml(qualDisplay(lastq.result_text)) : "—") + "</span></div>" +
         mid +
         '<div class="card-foot"><span>qualitative</span>' + footMeta(qs.length + " obs", lastq ? lastq.date : null) + "</div>";
     }
@@ -726,7 +726,7 @@ import { ordinalScaleFor, qualRuns, qualKey } from "./lib/qualitative.js";
       seen[p.date] = true;
       var fl = flagOf(p);
       var ref = (p.ref_low != null && p.ref_high != null) ? fmtNum(p.ref_low) + "–" + fmtNum(p.ref_high) : (p.ref_low != null || p.ref_high != null ? "" : "");
-      var val = p.value != null ? (p.qualifier ? p.qualifier + " " : "") + fmtNum(p.value) : escapeHtml(p.result_text);
+      var val = p.value != null ? (p.qualifier ? p.qualifier + " " : "") + fmtNum(p.value) : escapeHtml(qualDisplay(p.result_text));
       var flBadge = fl === "ok" ? "" : '<span class="pill ' + fl + '">' + fl + "</span>";
       html += '<tr class="' + fl + '"><td class="dt">' + fmtDate(p.date) + '</td><td class="value">' + val +
         (p.unit ? " " + p.unit : "") + '</td><td>' + ref + "</td><td>" + flBadge + "</td></tr>";

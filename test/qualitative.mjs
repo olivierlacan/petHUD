@@ -1,7 +1,7 @@
 // Unit test for the qualitative-evolution logic, using the real readings seen
 // in sample urinalysis panels. Run: node test/qualitative.mjs
 import assert from "node:assert";
-import { ordinalScaleFor, qualRuns, distinctCount, ordRank, ORD_SCALES } from "../web/lib/qualitative.js";
+import { ordinalScaleFor, qualRuns, distinctCount, ordRank, qualDisplay, ORD_SCALES } from "../web/lib/qualitative.js";
 
 const ABUND = ORD_SCALES[2]; // NONE SEEN..MANY
 const DIP = ORD_SCALES[0];   // NEGATIVE..4+
@@ -70,6 +70,16 @@ check("trailing period is not a change (Ova & Parasites)", () => {
 });
 check("internal whitespace differences collapse", () => {
   assert.equal(distinctCount(series(["NEGATIVE", "NEGATIVE ", " negative"])), 1);
+});
+
+console.log("display casing:");
+check("short boolean results uppercase consistently", () => {
+  assert.equal(qualDisplay("Negative"), "NEGATIVE");
+  assert.equal(qualDisplay("NEGATIVE"), "NEGATIVE");
+  assert.equal(qualDisplay("none seen"), "NONE SEEN");
+});
+check("prose sentences keep their case (no shouting)", () => {
+  assert.equal(qualDisplay("No ova or parasites seen"), "No ova or parasites seen");
 });
 
 console.log(`\n${pass} assertions passed.`);

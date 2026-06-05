@@ -31,7 +31,12 @@ import { givenName } from "./lib/resolver.js";
     view: "trends",
     search: "",
     hiddenSections: {},
-    abnormalOnly: false
+    abnormalOnly: false,
+    // Compact the age/vigilance banner by default — the full per-condition
+    // detail lives in the Conditions view; persisted so the choice sticks.
+    lsCollapsed: (function () {
+      try { return localStorage.getItem("pethud-ls") !== "open"; } catch (e) { return true; }
+    })()
   };
 
   var $ = function (sel) { return document.querySelector(sel); };
@@ -366,18 +371,36 @@ import { givenName } from "./lib/resolver.js";
       return s ? '<a class="src-link" href="' + s.url + '" target="_blank" rel="noopener">' + escapeHtml(s.name) + "</a>" : "";
     }).filter(Boolean).join(" · ");
 
-    var box = el("div", "lifestage");
+    // Compact hook shown when collapsed: the headline conditions to screen for.
+    var hookNames = screenable.map(function (w) { var c = conditionBySlug(w.condition); return c ? c.name : w.condition; });
+    var hook = hookNames.length
+      ? "Screen for " + escapeHtml(hookNames.slice(0, 3).join(", ")) + (hookNames.length > 3 ? " +" + (hookNames.length - 3) : "")
+      : escapeHtml((stage.summary || "").split(". ")[0]);
+
+    var box = el("div", "lifestage" + (state.lsCollapsed ? " collapsed" : ""));
     box.innerHTML =
-      '<div class="ls-head"><span class="ls-icon">' + stageIcon(stage.slug) + "</span>" +
+      '<button class="ls-head" type="button" aria-expanded="' + (state.lsCollapsed ? "false" : "true") + '">' +
+        '<span class="ls-icon">' + stageIcon(stage.slug) + "</span>" +
         '<div class="ls-titlewrap"><div class="ls-title">' + escapeHtml(stage.name) + " cat · " +
           escapeHtml(p.age_text || (p.age_years + " yr")) + "</div>" +
-          '<div class="ls-sub">' + escapeHtml(stage.summary || "") + "</div></div></div>" +
-      (screenable.length ? '<div class="ls-watch"><span class="ls-lbl">Screen for with the labs</span><div class="ls-chips">' + screenable.map(chip).join("") + "</div></div>" : "") +
-      (clinical.length ? '<div class="ls-watch"><span class="ls-lbl">Watch clinically (not on bloodwork)</span><div class="ls-chips">' + clinical.map(chip).join("") + "</div></div>" : "") +
-      (textItems ? '<div class="ls-text">' + textItems + "</div>" : "") +
-      (stage.screening ? '<div class="ls-screen"><b>Screening:</b> ' + escapeHtml(stage.screening) + "</div>" : "") +
-      '<div class="ls-foot"><span class="src">' + srcLinks + '</span><span class="note">Educational vigilance, not a diagnosis or prediction.</span></div>';
+          '<div class="ls-hook">' + hook + "</div>" +
+          '<div class="ls-sub">' + escapeHtml(stage.summary || "") + "</div></div>" +
+        '<span class="ls-toggle"><span class="ls-toggle-lbl"></span><span class="ls-chev" aria-hidden="true">▾</span></span>' +
+      "</button>" +
+      '<div class="ls-body">' +
+        (screenable.length ? '<div class="ls-watch"><span class="ls-lbl">Screen for with the labs</span><div class="ls-chips">' + screenable.map(chip).join("") + "</div></div>" : "") +
+        (clinical.length ? '<div class="ls-watch"><span class="ls-lbl">Watch clinically (not on bloodwork)</span><div class="ls-chips">' + clinical.map(chip).join("") + "</div></div>" : "") +
+        (textItems ? '<div class="ls-text">' + textItems + "</div>" : "") +
+        (stage.screening ? '<div class="ls-screen"><b>Screening:</b> ' + escapeHtml(stage.screening) + "</div>" : "") +
+        '<div class="ls-foot"><span class="src">' + srcLinks + '</span><span class="note">Educational vigilance, not a diagnosis or prediction.</span></div>' +
+      "</div>";
 
+    box.querySelector(".ls-head").addEventListener("click", function () {
+      state.lsCollapsed = !state.lsCollapsed;
+      try { localStorage.setItem("pethud-ls", state.lsCollapsed ? "closed" : "open"); } catch (e) { /* private mode */ }
+      box.classList.toggle("collapsed", state.lsCollapsed);
+      box.querySelector(".ls-head").setAttribute("aria-expanded", String(!state.lsCollapsed));
+    });
     box.querySelectorAll(".ls-chip[data-cond]").forEach(function (ch) {
       ch.addEventListener("click", function () { goToCondition(ch.getAttribute("data-cond")); });
     });

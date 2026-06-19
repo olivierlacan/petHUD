@@ -110,7 +110,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
   // Stepped sparkline for an ordinal qualitative series (HV steps = discrete
   // states). `levels` low->high becomes the chart's <title> for context.
   function qualSpark(pts, ctx, levels) {
-    var W = 208, H = 46, box = { l: 2, t: 6, w: W - 4, h: H - 12 };
+    var W = 208, H = 46, box = { l: 5, t: 6, w: W - 10, h: H - 12 };
     var firstMs = ms(pts[0].date), lastMs = ms(pts[pts.length - 1].date);
     var domainMax = ctx ? Math.max(lastMs, ctx.latestMs || lastMs) : lastMs;
     var gaps = ctx ? ctx.missingDates.filter(function (d) { return d >= firstMs && d <= domainMax; }) : [];
@@ -174,7 +174,9 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     var W = 208, H = 46;
     if (pts.length === 0) return svgEl(W, H, "spark") + "</svg>";
     var ref = latestRef(pts);
-    var box = { l: 2, t: 4, w: W - 4, h: H - 8 };
+    // Inset enough that point markers (r≈3 + stroke) never reach the viewBox edge
+    // and get clipped, even at the first/last/min/max positions.
+    var box = { l: 5, t: 5, w: W - 10, h: H - 10 };
     var firstMs = ms(pts[0].date), lastMs = ms(pts[pts.length - 1].date);
     // Extend the time axis to the latest report so a trailing gap is visible.
     var domainMax = ctx ? Math.max(lastMs, ctx.latestMs || lastMs) : lastMs;

@@ -226,7 +226,7 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 64px); }
 
 /* aspect-ratio matches the SVG viewBox (208x46) so the (preserveAspectRatio=none)
    scaling stays uniform — point markers render as true circles, not ellipses. */
-.spark { width: 100%; aspect-ratio: 208 / 46; height: auto; display: block; margin-top: 2px; }
+.spark { width: 100%; aspect-ratio: 208 / 46; height: auto; display: block; margin-top: 2px; overflow: visible; }
 .card-foot {
   display: flex; justify-content: space-between;
   font-family: var(--mono); font-size: 11px; color: var(--text-mute);

@@ -661,6 +661,7 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 64px); }
    loaded, so the welcome screen reads as a clean landing page. */
 .is-empty .sidebar { display: none; }
 .is-empty #view-toggle,
+.is-empty #range-toggle,
 .is-empty .controls .ctl-select,
 .is-empty .controls .ctl-search,
 .is-empty .controls .check { display: none; }

@@ -35,6 +35,8 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     search: "",
     hiddenSections: {},
     abnormalOnly: false,
+    // Chart time range (sticky across charts): "all" | "1y" | "180d" | "30d".
+    range: (function () { try { return localStorage.getItem("pethud-range") || "all"; } catch (e) { return "all"; } })(),
     // Compact the age/vigilance banner by default — the full per-condition
     // detail lives in the Conditions view; persisted so the choice sticks.
     lsCollapsed: (function () {
@@ -102,6 +104,14 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     return Object.keys(byDate).sort().map(function (d) { return byDate[d]; });
   }
 
+  // Cutoff timestamp for the current sticky time range, anchored to a chart's own
+  // last point — so every metric shows its most recent <range> of data and a chart
+  // never ends up empty. Returns null for "all time".
+  function chartWindow(lastMs) {
+    var days = { "30d": 30, "180d": 180, "1y": 365 }[state.range];
+    return days ? lastMs - days * 86400000 : null;
+  }
+
   // ---- qualitative evolution ---------------------------------------------
   // Ordinal detection + run collapsing live in ./lib/qualitative.js (pure,
   // unit-tested). qualSpark renders the ordinal series and stays here because
@@ -111,8 +121,10 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
   // states). `levels` low->high becomes the chart's <title> for context.
   function qualSpark(pts, ctx, levels) {
     var W = 208, H = 46, box = { l: 5, t: 6, w: W - 10, h: H - 12 };
+    var cut = chartWindow(ms(pts[pts.length - 1].date));
+    if (cut != null) pts = pts.filter(function (p) { return ms(p.date) >= cut; });
     var firstMs = ms(pts[0].date), lastMs = ms(pts[pts.length - 1].date);
-    var domainMax = ctx ? Math.max(lastMs, ctx.latestMs || lastMs) : lastMs;
+    var domainMax = cut != null ? lastMs : (ctx ? Math.max(lastMs, ctx.latestMs || lastMs) : lastMs);
     var gaps = ctx ? ctx.missingDates.filter(function (d) { return d >= firstMs && d <= domainMax; }) : [];
     var s = scales(pts, box, null, null, gaps.concat([domainMax]));
     var out = svgEl(W, H, "spark");
@@ -173,13 +185,16 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
   function sparkline(pts, ctx) {
     var W = 208, H = 46;
     if (pts.length === 0) return svgEl(W, H, "spark") + "</svg>";
+    var cut = chartWindow(ms(pts[pts.length - 1].date));
+    if (cut != null) pts = pts.filter(function (p) { return ms(p.date) >= cut; });
     var ref = latestRef(pts);
     // Inset enough that point markers (r≈3 + stroke) never reach the viewBox edge
     // and get clipped, even at the first/last/min/max positions.
     var box = { l: 5, t: 5, w: W - 10, h: H - 10 };
     var firstMs = ms(pts[0].date), lastMs = ms(pts[pts.length - 1].date);
-    // Extend the time axis to the latest report so a trailing gap is visible.
-    var domainMax = ctx ? Math.max(lastMs, ctx.latestMs || lastMs) : lastMs;
+    // Extend the time axis to the latest report so a trailing gap is visible
+    // (only in "all time"; a chosen range zooms to its own window).
+    var domainMax = cut != null ? lastMs : (ctx ? Math.max(lastMs, ctx.latestMs || lastMs) : lastMs);
     var gaps = ctx ? ctx.missingDates.filter(function (d) { return d >= firstMs && d <= domainMax; }) : [];
     var s = scales(pts, box, ref.low, ref.high, gaps.concat([domainMax]));
     var out = svgEl(W, H, "spark");
@@ -219,9 +234,11 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
   function bigChart(pts, ctx) {
     var W = 820, H = 280;
     var box = { l: 52, t: 16, w: W - 70, h: H - 52 };
+    var cut = chartWindow(ms(pts[pts.length - 1].date));
+    if (cut != null) pts = pts.filter(function (p) { return ms(p.date) >= cut; });
     var ref = latestRef(pts);
     var firstMs = ms(pts[0].date), lastMs = ms(pts[pts.length - 1].date);
-    var domainMax = ctx ? Math.max(lastMs, ctx.latestMs || lastMs) : lastMs;
+    var domainMax = cut != null ? lastMs : (ctx ? Math.max(lastMs, ctx.latestMs || lastMs) : lastMs);
     var gaps = ctx ? ctx.missingDates.filter(function (d) { return d >= firstMs && d <= domainMax; }) : [];
     var s = scales(pts, box, ref.low, ref.high, gaps.concat([domainMax]));
     var out = svgEl(W, H, "bigchart");
@@ -257,7 +274,8 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
       out += '<circle class="event-pt" cx="' + ex + '" cy="' + box.t + '" r="3"><title>' + escapeHtml(m.label) + "</title></circle>";
     });
     // when meaningfully stale, label the latest report so the trailing gap reads
-    if (ctx && ctx.staleFlag && ctx.latestMs > lastMs) {
+    // (only in "all time" — a chosen range zooms past the trailing gap)
+    if (cut == null && ctx && ctx.staleFlag && ctx.latestMs > lastMs) {
       out += '<text class="axis-label gap-label" x="' + s.X(ctx.latestMs).toFixed(1) + '" y="' + (box.t - 5) +
         '" text-anchor="end">latest report · not tested</text>';
     }
@@ -1610,6 +1628,20 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     });
     $("#abnormal-only").addEventListener("change", function (e) {
       state.abnormalOnly = e.target.checked; renderTrends();
+    });
+    // Chart time range (sticky): re-renders the trends charts + the open detail.
+    $("#range-toggle").addEventListener("click", function (e) {
+      var btn = e.target.closest("button[data-range]");
+      if (!btn) return;
+      state.range = btn.getAttribute("data-range");
+      try { localStorage.setItem("pethud-range", state.range); } catch (err) { /* private mode */ }
+      Array.prototype.forEach.call(this.children, function (b) { b.classList.toggle("active", b === btn); });
+      renderTrends();
+      if (!$("#detail").hidden && state.openAnalyte != null) openDetail(state.openAnalyte);
+    });
+    // Reflect the persisted range on the control.
+    Array.prototype.forEach.call($("#range-toggle").children, function (b) {
+      b.classList.toggle("active", b.getAttribute("data-range") === state.range);
     });
     $("#detail-close").addEventListener("click", closeDetail);
     $("#detail").addEventListener("click", function (e) { if (e.target === this) closeDetail(); });

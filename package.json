@@ -13,6 +13,6 @@
     "node": ">=22.13"
   },
   "devDependencies": {
-    "pdfjs-dist": "^6.0.0"
+    "pdfjs-dist": "^6.2.108"
   }
 }

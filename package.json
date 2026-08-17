@@ -5,6 +5,7 @@
   "description": "Browser-side pipeline + tooling for PetHUD (parser parity test, build).",
   "license": "MIT",
   "scripts": {
+    "test": "node test/import-errors.mjs && node test/aliases.mjs && node test/qualitative.mjs",
     "parity": "node test/parity.mjs",
     "vendor-pdfjs": "node scripts/vendor-pdfjs.mjs",
     "screenshots": "node scripts/make-screenshots.mjs"

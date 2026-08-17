@@ -3,8 +3,9 @@
    stores originals + parsed docs in IndexedDB, and renders the rebuilt payload.
    The Ruby CLI remains available and produces the identical data shape. */
 import * as db from "./lib/db.js";
-import { processPdf, looksLikePdf } from "./lib/process.js";
+import { processPdf } from "./lib/process.js";
 import { buildPayload } from "./lib/aggregate.js";
+import { docShapeError, reportWarnings, measurementCount } from "./lib/diagnose.js";
 import { givenName } from "./lib/resolver.js";
 import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitative.js";
 
@@ -66,10 +67,15 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     return mon[+p[1] - 1] + " " + (+p[2]) + " '" + p[0].slice(2);
   }
   function fmtDateShort(iso) {
+    if (!iso) return "?";
     var p = iso.split("-");
     return p[1] + "/" + p[2] + "/" + p[0].slice(2);
   }
   function ms(iso) { return Date.parse(iso + "T00:00:00Z"); }
+  // Date compare that tolerates a report whose date didn't parse (it sorts
+  // first). A single unreadable header must never take a whole view down —
+  // the report is instead flagged by name in the problems panel.
+  function cmpDate(a, b) { return String(a || "").localeCompare(String(b || "")); }
 
   function flagOf(point) {
     if (point.flag === "H" || point.flag === "L") return point.flag;
@@ -82,10 +88,14 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
 
   // One numeric point per date (collapse reprints of the same order); keep the
   // point from the most recently imported report when a date repeats.
+  // Undated points are dropped from both series builders: every chart plots on a
+  // time axis, so a point with no date has nowhere to go. It stays visible in
+  // the per-report views (which key off report ids), and its report is named in
+  // the problems panel.
   function numericSeries(points) {
     var byDate = {};
     points.forEach(function (p) {
-      if (p.value == null) return;
+      if (p.value == null || p.date == null) return;
       var cur = byDate[p.date];
       if (!cur || p.report_id > cur.report_id) byDate[p.date] = p;
     });
@@ -97,7 +107,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     var byDate = {};
     points.forEach(function (p) {
       var txt = (p.result_text || "").trim();
-      if (!txt) return;
+      if (!txt || p.date == null) return;
       var cur = byDate[p.date];
       if (!cur || p.report_id > cur.report_id) byDate[p.date] = p;
     });
@@ -348,7 +358,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
   // recent report (i.e. it wasn't re-checked and may be outdated).
   function reportContext(analyteId) {
     var reports = DATA.reports.filter(function (r) { return r.patient_id === state.patientId; })
-      .slice().sort(function (a, b) { return a.date.localeCompare(b.date) || a.id - b.id; });
+      .slice().sort(function (a, b) { return cmpDate(a.date, b.date) || a.id - b.id; });
     var present = {};
     var measured = [];
     seriesFor(analyteId).forEach(function (p) { present[p.report_id] = true; measured.push(p.date); });
@@ -360,7 +370,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     var newerCount = lastMeasured ? reports.filter(function (r) { return r.date > lastMeasured; }).length : 0;
     return {
       reports: reports,
-      missingDates: missing.map(function (r) { return ms(r.date); }),
+      missingDates: missing.filter(function (r) { return r.date; }).map(function (r) { return ms(r.date); }),
       latestDate: latest ? latest.date : null,
       latestMs: latest ? ms(latest.date) : null,
       lastMeasured: lastMeasured,
@@ -793,7 +803,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
 
   function detailTable(pts, a) {
     var rows = pts.slice().sort(function (x, y) {
-      return y.date.localeCompare(x.date) || y.report_id - x.report_id;
+      return cmpDate(y.date, x.date) || y.report_id - x.report_id;
     });
     var seen = {};
     var html = '<table class="detail-table"><thead><tr><th>Date</th><th>Result</th><th>Reference</th><th>Flag</th></tr></thead><tbody>';
@@ -902,7 +912,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
   // report's condition patterns and any values out of range across visits.
   function vetVisitCard() {
     var reps = DATA.reports.filter(function (r) { return r.patient_id === state.patientId; })
-      .sort(function (a, b) { return a.date.localeCompare(b.date); });
+      .sort(function (a, b) { return cmpDate(a.date, b.date); });
     if (!reps.length) return null;
     var latest = reps[reps.length - 1], prev = reps.length > 1 ? reps[reps.length - 2] : null;
     var flagged = flaggedFor(latest), patterns = conditionPatterns(flagged);
@@ -952,7 +962,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     var host = $("#reports");
     host.innerHTML = "";
     var reports = DATA.reports.filter(function (r) { return r.patient_id === state.patientId; })
-      .sort(function (a, b) { return b.date.localeCompare(a.date); });
+      .sort(function (a, b) { return cmpDate(b.date, a.date); });
     if (!reports.length) { host.appendChild(el("div", "empty", "No reports.")); return; }
 
     var vv = vetVisitCard();
@@ -1033,7 +1043,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
       (smap[String(a.id)] || []).forEach(function (p) { if (p.report_id === r.id && p.numeric && p.value != null) total++; });
     });
     var reps = DATA.reports.filter(function (x) { return x.patient_id === state.patientId; })
-      .sort(function (a, b) { return a.date.localeCompare(b.date); });
+      .sort(function (a, b) { return cmpDate(a.date, b.date); });
     var idx = -1; reps.forEach(function (x, i) { if (x.id === r.id) idx = i; });
     var prev = idx > 0 ? reps[idx - 1] : null;
     var pt = function (aid, repId) { return (smap[String(aid)] || []).find(function (p) { return p.report_id === repId; }) || null; };
@@ -1084,9 +1094,14 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
         fmtNum(f.p.value) + '</td><td class="ref">' + ref + '</td><td><span class="pill ' + f.fl + '">' + f.fl + "</span></td></tr>";
     }).join("");
 
+    var warn = (r.warnings || []).length
+      ? '<div class="report-warn" title="This report didn’t parse cleanly">⚠ ' +
+          escapeHtml(r.warnings.map(function (w) { return w.message; }).join("; ")) + "</div>"
+      : "";
     c.innerHTML =
       '<button class="report-del" title="Delete this report from your browser" aria-label="Delete report">&times;</button>' +
-      "<h3>" + fmtDate(r.date) + "</h3>" +
+      "<h3>" + fmtDate(r.date) + (r.source_file ? ' <span class="rc-file">' + escapeHtml(r.source_file) + "</span>" : "") + "</h3>" +
+      warn +
       '<div class="rmeta"><span class="k">clinic</span> ' + escapeHtml(r.clinic_name || "—") +
       ' · <span class="k">age</span> ' + escapeHtml(r.age_text || "—") +
       (r.lab_id ? ' · <span class="k">lab</span> ' + r.lab_id : "") + "</div>" +
@@ -1175,12 +1190,189 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
   }
   function closeReportDetail() { $("#report-detail").hidden = true; }
 
+  // ---- problem reports ----------------------------------------------------
+  // Every failure in this app is attributable to one file. Import failures never
+  // reach the payload (nothing was stored), while unreadable or thin stored
+  // reports come back from buildPayload as DATA.problems — both are listed here,
+  // by filename, with a way to remove the offender.
+
+  var importIssues = [];      // this session's import failures: {kind, file, sha256, message}
+  var dismissedIssues = {};   // problem key -> true (hidden until it recurs)
+
+  function addIssue(issue) {
+    importIssues = importIssues.filter(function (x) { return x.file !== issue.file; });
+    importIssues.push(issue);
+    renderProblems();
+  }
+
+  function problemKey(p) { return (p.sha256 || "") + "|" + (p.file || "") + "|" + p.message; }
+
+  // Import failures first (nothing was stored — action needed), then stored
+  // reports that are unreadable, then ones that imported but came out thin.
+  function allProblems() {
+    var out = importIssues.slice();
+    (DATA.problems || []).forEach(function (p) {
+      out.push({
+        kind: p.kind,
+        file: p.source_file || (p.sha256 ? "report " + p.sha256.slice(0, 8) : "an unnamed report"),
+        sha256: p.sha256,
+        message: p.message,
+      });
+    });
+    var rank = { failed: 0, unreadable: 1, degraded: 2 };
+    var rankOf = function (kind) { return rank[kind] == null ? 3 : rank[kind]; };
+    out.sort(function (a, b) { return rankOf(a.kind) - rankOf(b.kind); });
+    return out.filter(function (p) { return !dismissedIssues[problemKey(p)]; });
+  }
+
+  var PROBLEM_LABEL = {
+    failed: "Not imported",
+    unreadable: "Stored but unreadable",
+    degraded: "Imported with gaps",
+  };
+
+  function renderProblems() {
+    var host = $("#problems");
+    if (!host) return;
+    var problems = allProblems();
+    host.innerHTML = "";
+    host.hidden = problems.length === 0;
+    if (!problems.length) return;
+
+    var head = el("div", "prob-head");
+    head.innerHTML = '<span class="prob-title">' + problems.length +
+      " report" + (problems.length === 1 ? "" : "s") + " need" + (problems.length === 1 ? "s" : "") + " attention</span>";
+    var dismiss = el("button", "prob-dismiss", "Dismiss");
+    dismiss.type = "button";
+    dismiss.title = "Hide these until they happen again";
+    dismiss.addEventListener("click", function () {
+      problems.forEach(function (p) { dismissedIssues[problemKey(p)] = true; });
+      importIssues = [];
+      renderProblems();
+    });
+    head.appendChild(dismiss);
+    host.appendChild(head);
+
+    problems.forEach(function (p) {
+      var row = el("div", "prob-row " + p.kind);
+      row.innerHTML =
+        '<span class="prob-kind">' + escapeHtml(PROBLEM_LABEL[p.kind] || "Problem") + "</span>" +
+        '<span class="prob-file">' + escapeHtml(p.file) + "</span>" +
+        '<span class="prob-msg">' + escapeHtml(p.message) + "</span>";
+      var acts = el("div", "prob-acts");
+      if (p.sha256) {
+        var del = el("button", "prob-btn", "Delete report");
+        del.type = "button";
+        del.title = "Remove this report from your browser";
+        del.addEventListener("click", function () { deleteReport(p.sha256, p.file); });
+        acts.appendChild(del);
+      }
+      var copy = el("button", "prob-btn", "Copy details");
+      copy.type = "button";
+      copy.title = "Copy the diagnostic details (to file a bug)";
+      copy.addEventListener("click", function () { copyDetails(p, copy); });
+      acts.appendChild(copy);
+      row.appendChild(acts);
+      host.appendChild(row);
+    });
+  }
+
+  // Diagnostics for a bug report: what failed, in which file, and what the
+  // parser did manage to read — no measurement values, so it stays shareable.
+  function copyDetails(p, btn) {
+    var lines = [
+      "PetHUD import problem",
+      "file:    " + p.file,
+      "status:  " + (PROBLEM_LABEL[p.kind] || p.kind),
+      "sha256:  " + (p.sha256 || "(not stored)"),
+      "detail:  " + p.message,
+      "agent:   " + navigator.userAgent,
+    ];
+    var rep = p.sha256 && (DATA.reports || []).find(function (r) { return r.sha256 === p.sha256; });
+    if (rep) {
+      lines.push("parsed:  date=" + (rep.date || "none") + " clinic=" + (rep.clinic_name || "none") +
+        " lab=" + (rep.lab_id || "none"));
+    }
+    var text = lines.join("\n");
+    var done = function () { btn.textContent = "Copied"; setTimeout(function () { btn.textContent = "Copy details"; }, 1800); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { window.prompt("Copy these details:", text); });
+    } else {
+      window.prompt("Copy these details:", text);
+    }
+  }
+
+  // ---- recovery ------------------------------------------------------------
+
+  // Last resort: the corpus can't be aggregated or rendered at all (a stored
+  // report the payload builder chokes on, a render bug). Instead of a dead
+  // "Failed to start" message, list every stored report straight from IndexedDB
+  // — with the suspect ones marked — so the offender can be deleted.
+  function renderRecovery(err) {
+    document.body.classList.add("is-empty");
+    ["conditions", "reports"].forEach(function (v) { $("#" + v).hidden = true; });
+    $("#trends").hidden = false;
+    var host = $("#trends");
+    host.innerHTML = '<div class="recovery"><h2>PetHUD couldn’t display your reports</h2>' +
+      '<p class="rec-err">' + escapeHtml(err && err.message ? err.message : String(err)) + "</p>" +
+      '<p class="rec-lead">Your PDFs are safe. Below is every report stored in this browser — ' +
+      'the ones marked <b>suspect</b> are the likely cause. Delete a suspect report to get the app back; ' +
+      'the original PDF on your computer is untouched.</p>' +
+      '<div class="rec-list">Loading…</div>' +
+      '<div class="rec-foot"><button class="prob-btn" id="rec-reload" type="button">Reload</button>' +
+      '<button class="prob-btn danger" id="rec-clear" type="button">Delete all local data…</button></div></div>';
+    $("#rec-reload").addEventListener("click", function () { location.reload(); });
+    $("#rec-clear").addEventListener("click", clearAllData);
+
+    db.getAllReports().then(function (records) {
+      var list = $(".rec-list");
+      list.innerHTML = "";
+      if (!records.length) { list.innerHTML = '<div class="empty">No reports are stored.</div>'; return; }
+      records
+        .map(function (rec) { return { rec: rec, verdict: verdictFor(rec.reportDoc) }; })
+        .sort(function (a, b) { return (a.verdict.suspect === b.verdict.suspect) ? 0 : (a.verdict.suspect ? -1 : 1); })
+        .forEach(function (item) {
+          var doc = item.rec.reportDoc || {};
+          var meta = doc.meta || {};
+          var row = el("div", "rec-row" + (item.verdict.suspect ? " suspect" : ""));
+          row.innerHTML =
+            '<span class="rec-badge">' + (item.verdict.suspect ? "suspect" : "ok") + "</span>" +
+            '<span class="rec-file">' + escapeHtml(doc.source_file || item.rec.sha256.slice(0, 12)) + "</span>" +
+            '<span class="rec-meta">' + escapeHtml(meta.pet_name || "no pet name") + " · " +
+              escapeHtml(meta.result_date || meta.collection_date || "no date") + "</span>" +
+            '<span class="rec-why">' + escapeHtml(item.verdict.why) + "</span>";
+          var del = el("button", "prob-btn", "Delete");
+          del.type = "button";
+          del.addEventListener("click", function () {
+            if (!window.confirm("Delete “" + (doc.source_file || item.rec.sha256.slice(0, 12)) + "” from this browser?")) return;
+            db.deleteReport(item.rec.sha256).then(function () { location.reload(); });
+          });
+          row.appendChild(del);
+          list.appendChild(row);
+        });
+    }).catch(function (e) {
+      $(".rec-list").innerHTML = '<div class="empty">Could not read the local database: ' + escapeHtml(e.message) + "</div>";
+    });
+  }
+
+  // Why one stored report might be the one breaking the build.
+  function verdictFor(doc) {
+    var shape = docShapeError(doc);
+    if (shape) return { suspect: true, why: shape };
+    var warnings = reportWarnings(doc);
+    if (warnings.length) return { suspect: true, why: warnings.map(function (w) { return w.message; }).join("; ") };
+    return { suspect: false, why: measurementCount(doc) + " values parsed" };
+  }
+
   // ---- local data management (browser build) ------------------------------
 
   function deleteReport(sha, label) {
     if (!window.confirm("Delete the report “" + label + "” from this browser?")) return;
     db.deleteReport(sha).then(rebuildFromDb).then(function () {
       ensurePatient(); renderAll(); toast("Report deleted.", null, 2500);
+    }).catch(function (err) {
+      console.error("PetHUD: rebuild failed after deleting " + sha, err);
+      renderRecovery(err);
     });
   }
 
@@ -1198,16 +1390,33 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
     return db.getAllPdfs().then(function (pdfs) {
       if (!pdfs.length) { toast("No stored PDFs to reprocess.", null, 2500); return; }
       toast("Reprocessing " + pdfs.length + " report(s)…", null, 60000);
+      var done = 0, failed = 0;
       var chain = Promise.resolve();
       pdfs.forEach(function (rec) {
         chain = chain.then(function () {
+          // Per-file isolation: one PDF that no longer parses must not abandon
+          // the rest of the corpus half-reprocessed and unattributed.
           return rec.blob.arrayBuffer()
             .then(function (buf) { return processPdf(buf, rec.filename); })
-            .then(function (res) { return db.putReport({ sha256: res.sha, reportDoc: res.reportDoc, patientSlug: null }); });
+            .then(function (res) { return db.putReport({ sha256: res.sha, reportDoc: res.reportDoc, patientSlug: null }); })
+            .then(function () { done++; })
+            .catch(function (err) {
+              failed++;
+              console.error("PetHUD reprocess failed for " + rec.filename, err);
+              addIssue({
+                kind: "failed", file: rec.filename || rec.sha256, sha256: rec.sha256,
+                code: err && err.code, message: "reprocessing failed: " + errText(err),
+              });
+            });
         });
       });
       return chain.then(rebuildFromDb).then(function () {
-        ensurePatient(); renderAll(); toast("Reprocessed " + pdfs.length + " report(s).", "ok", 3000);
+        ensurePatient(); renderAll();
+        toast("Reprocessed " + done + " report(s)" + (failed ? " · " + failed + " failed" : "") + ".",
+          failed ? "err" : "ok", failed ? 8000 : 3000);
+      }).catch(function (err) {
+        console.error("PetHUD: rebuild failed after reprocess", err);
+        renderRecovery(err);
       });
     });
   }
@@ -1588,6 +1797,7 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
   }
 
   function renderAll() {
+    renderProblems(); // shown in every view, including the welcome screen
     // No data (fresh, or just cleared) → the welcome screen, not empty panels.
     if (!DATA.patients || !DATA.patients.length) {
       // renderSidebar() assumes a current patient (it reads p.identities), and the
@@ -1739,8 +1949,11 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
   }
 
   // Parse dropped PDFs entirely in the browser, persist them, and rebuild.
+  // Each file is isolated: one bad PDF can't stop the batch, and its name is
+  // recorded in the problems panel (a toast alone is useless here — the next
+  // file's "Importing…" replaces it within milliseconds).
   function importFiles(files) {
-    var imported = 0, i = 0, lastSha = null;
+    var imported = 0, failed = 0, i = 0, lastSha = null;
     function finish() {
       rebuildFromDb().then(function () {
         // Jump to the patient whose report was just imported, so a dropped
@@ -1751,15 +1964,26 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
         }
         ensurePatient();
         renderAll();
-        toast(imported + " report(s) imported.", imported ? "ok" : null, 3500);
+        toast(importSummary(imported, failed), failed ? "err" : (imported ? "ok" : null), failed ? 8000 : 3500);
+      }).catch(function (err) {
+        // The corpus-wide rebuild/render failed. Never leave this silent: the
+        // last-imported file is the prime suspect, and the recovery screen lets
+        // the offending report be identified and deleted.
+        console.error("PetHUD: rebuild failed after import", err);
+        addIssue({
+          kind: "failed",
+          file: files.length === 1 ? files[files.length - 1].name : "the imported batch",
+          sha256: lastSha,
+          message: "imported, but rebuilding the view failed: " + (err && err.message ? err.message : String(err)),
+        });
+        renderRecovery(err);
       });
     }
     function next() {
       if (i >= files.length) return finish();
       var f = files[i++];
-      toast("Importing " + f.name + "…", null, 60000);
+      toast("Importing " + f.name + "… (" + i + " of " + files.length + ")", null, 60000);
       f.arrayBuffer().then(function (buf) {
-        if (!looksLikePdf(buf)) throw new Error("not a PDF");
         // Store the original File directly: pdf.js transfers (detaches) the
         // ArrayBuffer to its worker during processPdf, so a Blob made from `buf`
         // afterward would be empty. The File is independent of that.
@@ -1772,12 +1996,27 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
         });
       }).then(function () { imported++; next(); })
         .catch(function (err) {
+          failed++;
           console.error("PetHUD import failed for " + f.name, err); // full stack in the console
-          toast("Failed: " + f.name + " (" + err.message + ")", "err", 5000);
+          addIssue({ kind: "failed", file: f.name, sha256: null, code: err && err.code, message: errText(err) });
           next();
         });
     }
     next();
+  }
+
+  function importSummary(imported, failed) {
+    var s = imported + " report(s) imported";
+    if (failed) s += " · " + failed + " failed — see the list above for which, and why";
+    return s + ".";
+  }
+
+  // Human text for an import failure. ImportError already carries a cause the
+  // report's owner can act on; anything else falls back to its message.
+  function errText(err) {
+    if (!err) return "unknown error";
+    if (err.name === "ImportError") return err.message;
+    return (err.name ? err.name + ": " : "") + (err.message || String(err));
   }
 
   // Read every stored report doc and rebuild the in-memory payload, applying the
@@ -1900,7 +2139,11 @@ import { ordinalScaleFor, qualRuns, qualKey, qualDisplay } from "./lib/qualitati
         if (state.openAnalyte != null) openDetail(state.openAnalyte);
       })
       .catch(function (err) {
-        $("#trends").innerHTML = '<div class="empty">Failed to start: ' + escapeHtml(err.message) + "</div>";
+        // A stored report the payload builder or the viewer can't handle would
+        // otherwise brick every future load with no way to find it. Show the
+        // per-report recovery list instead of a dead end.
+        console.error("PetHUD: failed to start", err);
+        renderRecovery(err);
       });
   }
 

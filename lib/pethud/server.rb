@@ -100,10 +100,18 @@ module PetHUD
 
       filename = sanitize_filename(headers["x-filename"] || "dropped.pdf")
       unless filename.downcase.end_with?(".pdf") && body[0, 5] == "%PDF-"
-        return respond(client, 415, MIME[".json"], JSON.generate(error: "not a PDF file"))
+        return respond(client, 415, MIME[".json"], JSON.generate(error: "not a PDF file", file: filename))
       end
 
-      result = @import_mutex.synchronize { import_bytes(filename, body) }
+      begin
+        result = @import_mutex.synchronize { import_bytes(filename, body) }
+      rescue StandardError => e
+        # Always name the file that failed: the client uploads one PDF per
+        # request, but the user dropped a pile of them.
+        warn "import failed for #{filename}: #{e.class}: #{e.message}"
+        return respond(client, 422, MIME[".json"],
+                       JSON.generate(ok: false, file: filename, error: "#{e.class}: #{e.message}"))
+      end
       respond(client, 200, MIME[".json"], JSON.generate(result))
     end
 
@@ -193,7 +201,8 @@ module PetHUD
       body = body.dup.force_encoding(Encoding::BINARY)
       reason = { 200 => "OK", 400 => "Bad Request", 403 => "Forbidden",
                  404 => "Not Found", 405 => "Method Not Allowed",
-                 415 => "Unsupported Media Type", 500 => "Internal Server Error" }[status] || "OK"
+                 415 => "Unsupported Media Type", 422 => "Unprocessable Content",
+                 500 => "Internal Server Error" }[status] || "OK"
       headers = [
         "HTTP/1.1 #{status} #{reason}",
         "Content-Type: #{content_type}",

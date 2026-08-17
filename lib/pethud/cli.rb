@@ -67,7 +67,9 @@ module PetHUD
       end
       refresh_web_data(importer.db)
       importer.close
-      puts "\n#{counts[:imported]} imported, #{counts[:replaced]} replaced, #{counts[:skipped]} skipped (use --force to re-import)."
+      puts "\n#{counts[:imported]} imported, #{counts[:replaced]} replaced, " \
+           "#{counts[:skipped]} skipped (use --force to re-import), #{counts[:failed]} failed."
+      exit 1 if counts[:failed].positive?
     end
 
     def cmd_reimport(argv)
@@ -218,11 +220,35 @@ module PetHUD
     end
 
     def report_result(res)
+      return report_failure(res) if res.status == :failed
+
       icon = { imported: "+", replaced: "~", skipped: "=" }[res.status]
-      name = res.parsed[:meta][:pet_name]
       date = res.parsed[:meta][:result_date]
       nmeas = res.parsed[:sections].sum { |s| s[:measurements].size }
-      puts format("  %s %-42s -> %-8s %s  (%d values)", icon, File.basename(res.source), res.patient.slug, date, nmeas)
+      line = format("  %s %-42s -> %-8s %s  (%d values)", icon, File.basename(res.source), res.patient.slug, date, nmeas)
+      puts line
+      warn_thin_report(res, nmeas)
+    end
+
+    # Name the file, the error class and the message — a backtrace alone doesn't
+    # say which PDF of a batch was the offender.
+    def report_failure(res)
+      puts format("  ! %-42s -> FAILED  %s: %s", File.basename(res.source),
+                  res.error.class, res.error.message.to_s.lines.first.to_s.strip)
+      puts format("      %s", res.source)
+    end
+
+    # Parsed, but thin: still worth naming, since it usually means the layout
+    # wasn't fully understood rather than that the visit had no results.
+    def warn_thin_report(res, nmeas)
+      meta = res.parsed[:meta]
+      issues = []
+      issues << "no values parsed" if nmeas.zero?
+      issues << "no result date" if meta[:result_date].nil?
+      issues << "no pet name" if meta[:pet_name].nil?
+      return if issues.empty?
+
+      puts format("      ? %s: %s", File.basename(res.source), issues.join(", "))
     end
 
     def ensure_pdftotext!

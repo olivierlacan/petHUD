@@ -5,7 +5,7 @@ module PetHUD
   # then writes that report's structured JSON export. Holds open one Database
   # and PatientResolver so batch imports reuse them.
   class Importer
-    Result = Struct.new(:status, :report_id, :patient, :parsed, :source, keyword_init: true)
+    Result = Struct.new(:status, :report_id, :patient, :parsed, :source, :error, keyword_init: true)
 
     def initialize(db: nil, resolver: nil, exporter: nil)
       @db = db || Database.new(PetHUD.db_path)
@@ -35,10 +35,18 @@ module PetHUD
       Result.new(status: status, report_id: report_id, patient: patient, parsed: parsed, source: path)
     end
 
-    # Import many paths; yields each Result for progress reporting.
+    # Import many paths; yields each Result for progress reporting. A file that
+    # fails to parse yields a :failed Result naming that file instead of raising
+    # — one bad PDF in a batch must not abort the rest, and must never leave the
+    # caller guessing which one it was.
     def import_all(paths, force: false)
       paths.map do |p|
-        result = import(p, force: force)
+        result =
+          begin
+            import(p, force: force)
+          rescue StandardError => e
+            Result.new(status: :failed, source: p.to_s, error: e)
+          end
         yield result if block_given?
         result
       end

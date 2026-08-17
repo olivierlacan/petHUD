@@ -581,6 +581,82 @@ main { display: flex; align-items: stretch; min-height: calc(100vh - 64px); }
 .staging .note { color: var(--text-mute); font-size: 11px; font-style: italic; line-height: 1.5; margin-top: 6px; }
 .staging .latest { font-family: var(--mono); color: var(--text); }
 
+/* ---- problem reports (per-file import/parse failures) ---- */
+/* Persistent, unlike a toast: in a multi-file import the failing file has to
+   stay named on screen long enough to act on. */
+.problems {
+  border: 1px solid var(--high); border-left-width: 3px; border-radius: var(--radius);
+  background: var(--bg-2); margin-bottom: 14px; overflow: hidden;
+}
+.prob-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 8px 12px; background: var(--bg-3); border-bottom: 1px solid var(--line);
+}
+.prob-title { font-size: 12px; font-weight: 700; color: var(--text); }
+.prob-title::before { content: "⚠ "; color: var(--high); }
+.prob-dismiss {
+  background: none; border: 0; color: var(--text-mute); font: inherit; font-size: 11px;
+  cursor: pointer; padding: 2px 4px;
+}
+.prob-dismiss:hover { color: var(--text); text-decoration: underline; }
+.prob-row {
+  display: grid; grid-template-columns: 132px minmax(120px, 1fr) 3fr auto;
+  gap: 10px; align-items: baseline; padding: 8px 12px; font-size: 12px;
+  border-top: 1px solid var(--line);
+}
+.prob-row:first-of-type { border-top: 0; }
+.prob-kind {
+  font-size: 10px; text-transform: uppercase; letter-spacing: .04em; font-weight: 700;
+  color: var(--high);
+}
+.prob-row.degraded .prob-kind { color: var(--low); }
+.prob-file { font-family: var(--mono); color: var(--text); overflow-wrap: anywhere; }
+.prob-msg { color: var(--text-dim); }
+.prob-acts { display: flex; gap: 6px; }
+.prob-btn {
+  background: var(--bg-3); border: 1px solid var(--line-2); color: var(--text);
+  border-radius: 6px; font: inherit; font-size: 11px; padding: 3px 8px; cursor: pointer; white-space: nowrap;
+}
+.prob-btn:hover { border-color: var(--accent); color: var(--accent); }
+.prob-btn.danger:hover { border-color: var(--high); color: var(--high); }
+
+/* Warning strip on a report card that imported but didn't parse cleanly. */
+.report-warn {
+  border-left: 3px solid var(--low); background: var(--bg-3); color: var(--text-dim);
+  border-radius: 4px; padding: 5px 8px; margin: 6px 0; font-size: 11px; line-height: 1.4;
+}
+.rc-file { font-family: var(--mono); font-size: 10px; font-weight: 400; color: var(--text-mute); }
+
+/* ---- recovery screen (the app can't aggregate/render the corpus) ---- */
+.recovery { max-width: 860px; margin: 24px auto; }
+.recovery h2 { font-size: 18px; margin-bottom: 8px; }
+.rec-err {
+  font-family: var(--mono); font-size: 12px; color: var(--high);
+  background: var(--bg-3); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px;
+}
+.rec-lead { color: var(--text-dim); font-size: 13px; line-height: 1.6; margin: 10px 0 16px; }
+.rec-list { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.rec-row {
+  display: grid; grid-template-columns: 70px minmax(120px, 1.2fr) 1.2fr 2fr auto;
+  gap: 10px; align-items: baseline; padding: 8px 12px; font-size: 12px;
+  border-top: 1px solid var(--line); background: var(--bg-2);
+}
+.rec-row:first-child { border-top: 0; }
+.rec-row.suspect { background: var(--bg-3); }
+.rec-badge {
+  font-size: 10px; text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: var(--normal);
+}
+.rec-row.suspect .rec-badge { color: var(--high); }
+.rec-file { font-family: var(--mono); color: var(--text); overflow-wrap: anywhere; }
+.rec-meta { color: var(--text-dim); }
+.rec-why { color: var(--text-mute); }
+.rec-foot { display: flex; gap: 8px; margin-top: 14px; }
+
+@media (max-width: 900px) {
+  .prob-row, .rec-row { grid-template-columns: 1fr; gap: 3px; }
+  .prob-acts, .rec-foot { margin-top: 4px; }
+}
+
 /* ---- dropzone + toast ---- */
 .dropzone { position: fixed; inset: 0; background: rgba(74,168,255,0.10); backdrop-filter: blur(2px); z-index: 60; display: flex; align-items: center; justify-content: center; }
 .drop-inner { border: 2px dashed var(--accent); border-radius: 14px; padding: 50px 70px; text-align: center; background: var(--drop-bg); }

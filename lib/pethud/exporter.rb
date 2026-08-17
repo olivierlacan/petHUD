@@ -118,13 +118,14 @@ module PetHUD
           p["id"]
         ).map { |i| { pet_name: i["pet_name"], owner: i["owner"], external_id: i["external_id"] } }
         range = @db.get_first_row(
-          "SELECT MIN(result_date) lo, MAX(result_date) hi, COUNT(*) n FROM reports WHERE patient_id = ?",
+          "SELECT MIN(COALESCE(result_date, collection_date)) lo, MAX(COALESCE(result_date, collection_date)) hi, " \
+          "COUNT(*) n FROM reports WHERE patient_id = ?",
           p["id"]
         )
         # Age from the most recent report that recorded one (for life-stage).
         age = @db.get_first_row(
           "SELECT age_years, age_text FROM reports WHERE patient_id = ? AND age_years IS NOT NULL " \
-          "ORDER BY result_date DESC, id DESC LIMIT 1", p["id"]
+          "ORDER BY COALESCE(result_date, collection_date) DESC, id DESC LIMIT 1", p["id"]
         ) || {}
         {
           id: p["id"], slug: p["slug"], name: p["name"], species: p["species"],
@@ -135,10 +136,14 @@ module PetHUD
       end
     end
 
+    # A report whose result date didn't parse falls back to its collection date,
+    # so a half-read header still places the visit on the timeline instead of
+    # emitting a null date the viewer has to defend against. Mirrored by
+    # docDate() in web/lib/aggregate.js so both builds emit the same payload.
     def reports_payload
-      @db.execute("SELECT * FROM reports ORDER BY result_date, id").map do |r|
+      @db.execute("SELECT * FROM reports ORDER BY COALESCE(result_date, collection_date), id").map do |r|
         {
-          id: r["id"], patient_id: r["patient_id"], date: r["result_date"],
+          id: r["id"], patient_id: r["patient_id"], date: r["result_date"] || r["collection_date"],
           collection_date: r["collection_date"], source_file: r["source_file"],
           lab_id: r["lab_id"], clinic_name: r["clinic_name"],
           attending_vet: r["attending_vet"], idexx_services: r["idexx_services"],
@@ -173,12 +178,12 @@ module PetHUD
     # series[patient_id][analyte_id] = [ {date, value, ...} ] ordered by date.
     def series_payload
       rows = @db.execute(<<~SQL)
-        SELECT m.patient_id, m.analyte_id, r.result_date AS date, r.id AS report_id,
+        SELECT m.patient_id, m.analyte_id, COALESCE(r.result_date, r.collection_date) AS date, r.id AS report_id,
                m.value, m.unit, m.ref_low, m.ref_high, m.flag, m.qualifier,
                m.result_text, m.is_numeric
         FROM measurements m
         JOIN reports r ON r.id = m.report_id
-        ORDER BY m.patient_id, m.analyte_id, r.result_date, r.id
+        ORDER BY m.patient_id, m.analyte_id, COALESCE(r.result_date, r.collection_date), r.id
       SQL
       series = Hash.new { |h, k| h[k] = Hash.new { |h2, k2| h2[k2] = [] } }
       rows.each do |m|

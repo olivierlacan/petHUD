@@ -21,3 +21,5 @@ jobs:
       - run: git diff --exit-code web/vendor
         # if this fails: run `npm run vendor-pdfjs` and commit the result
       - run: npm run parity
+      # unit tests: analyte aliasing, qualitative series, import-failure handling
+      - run: npm test
